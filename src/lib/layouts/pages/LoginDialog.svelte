@@ -46,14 +46,14 @@
 				<Field {form} name="employeeId">
 					<Control let:attrs>
 						<Label>Employee ID</Label>
-						<Input class="bg-white" {...attrs} bind:value={$formData.employeeId} type="text" placeholder="Your Employee ID" />
+						<Input class="" {...attrs} bind:value={$formData.employeeId} type="text" placeholder="Your Employee ID" />
 					</Control>
 					<FieldErrors class="text-xs italic" />
 				</Field>
 				<Field {form} name="password">
 					<Control let:attrs>
 						<Label>Password</Label>
-						<Input class="bg-white" {...attrs} bind:value={$formData.password} type="password" autocomplete="false" placeholder="Your Password" />
+						<Input class="" {...attrs} bind:value={$formData.password} type="password" autocomplete="false" placeholder="Your Password" />
 					</Control>
 					<FieldErrors class="text-xs italic" />
 				</Field>

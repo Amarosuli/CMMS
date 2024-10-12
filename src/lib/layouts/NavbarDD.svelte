@@ -19,7 +19,7 @@
 					</Avatar.Root>
 					<div class="flex flex-1 flex-col items-start justify-center max-lg:hidden">
 						<span>{user.name}</span>
-						<span>{user.username}</span>
+						<span class="font-light">{user.username}</span>
 					</div>
 				</div>
 			</Button>
