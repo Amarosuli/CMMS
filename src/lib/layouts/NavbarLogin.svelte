@@ -6,7 +6,7 @@
 </script>
 
 <span class="relative">
-	<Button variant="ghost" on:click={() => (openLoginDialog = !openLoginDialog)} class="flex h-12 w-full items-center justify-start hover:bg-slate-200/70">
+	<Button variant="outline" on:click={() => (openLoginDialog = !openLoginDialog)} class="flex  w-full items-center justify-start ">
 		<LogIn class="mr-2 h-4 w-4 max-lg:hidden" />
 		<span class="truncate font-bold">Login</span>
 	</Button>
