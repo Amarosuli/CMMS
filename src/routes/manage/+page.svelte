@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { MaterialMasterPreview, MaterialUnitPreview } from '$lib/layouts/pages';
+	import { MaterialMasterPreview, MaterialUnitPreview, TransactionType } from '$lib/layouts/pages';
 	import { Render, createRender } from 'svelte-headless-table';
 	import { page } from '$app/stores';
 
@@ -22,7 +22,7 @@
 		{
 			hash: '#transaction-type',
 			title: 'Transaction Type',
-			render: createRender(MaterialUnitPreview, { user, basePath, tableName: 'Material Unit' })
+			render: createRender(TransactionType, { user, basePath, tableName: 'Transaction Type' })
 		}
 	];
 
