@@ -46,6 +46,10 @@
 				{
 					title: 'Material Unit',
 					hash: '#material-unit'
+				},
+				{
+					title: 'Transaction Type',
+					hash: '#transaction-type'
 				}
 			]
 		}
