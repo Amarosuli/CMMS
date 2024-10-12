@@ -21,11 +21,10 @@ export interface MaterialUnit extends RecordModel {
 }
 
 export interface User extends RecordModel {
-	username: string;
+	username: string; // as employee_id
 	email: string;
 	name: string;
 	avatar: string;
-	employee_id: string;
 	role: string;
 	unit: string;
 }
