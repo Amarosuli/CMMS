@@ -9,6 +9,7 @@
 	import House from 'lucide-svelte/icons/house';
 
 	import '../app.css';
+	import { ModeWatcher } from 'mode-watcher';
 
 	export let data;
 	const { user } = data;
@@ -28,9 +29,9 @@
 			url: '/'
 		},
 		{
-			title: 'Inventory',
+			title: 'Stock',
 			icon: createRender(Archive, { class: 'mr-2 h-4 w-4' }),
-			url: '/inventory'
+			url: '/stock'
 		},
 		{
 			title: 'Master',
@@ -52,14 +53,16 @@
 
 	$: currentHash = $page.url.hash;
 	$: currentPath = $page.url.pathname;
+	$: isDark = false;
 </script>
 
-<div class="relative isolate flex min-h-svh w-full bg-secondary max-lg:flex-col">
+<ModeWatcher />
+<div class="relative isolate flex min-h-svh w-full bg-primary/5 max-lg:flex-col">
 	<Navbar bind:currentHash bind:currentPath {sidebarMenu} {user} bind:openLoginDialog {logOut} />
 	<NavbarSmall bind:currentHash bind:currentPath {sidebarMenu} {user} bind:openLoginDialog {logOut} />
 	<main class="flex flex-1 flex-col pb-2 lg:min-w-0 lg:pl-64 lg:pr-2 lg:pt-2">
 		<LoginDialog bind:open={openLoginDialog} />
-		<div class="grow bg-white p-6 lg:rounded-lg lg:p-10 lg:shadow-sm lg:ring-1 lg:ring-zinc-950/5 dark:lg:bg-zinc-900 dark:lg:ring-white/10">
+		<div class="grow bg-background p-6 text-foreground lg:rounded-lg lg:p-10 lg:shadow-sm lg:ring-1 lg:ring-secondary-foreground/10">
 			<div class="mx-auto max-w-6xl">
 				<slot></slot>
 			</div>
