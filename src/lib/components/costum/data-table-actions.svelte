@@ -33,7 +33,7 @@
 		</DropdownMenu.Group>
 		{#if user}
 			<DropdownMenu.Separator />
-			<DropdownMenu.Item href="{basePath}/edit?id={id}">Edit</DropdownMenu.Item>
+			<DropdownMenu.Item href="{basePath}/{id}">Edit</DropdownMenu.Item>
 			<DropdownMenu.Item href="{basePath}/delete?id={id}">Delete</DropdownMenu.Item>
 		{/if}
 	</DropdownMenu.Content>
