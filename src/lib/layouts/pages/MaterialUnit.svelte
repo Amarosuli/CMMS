@@ -10,6 +10,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { fade } from 'svelte/transition';
 	import { cn } from '$lib/utils.js';
+	import { goto } from '$app/navigation';
 
 	export let user;
 	export let basePath: string;
@@ -73,7 +74,7 @@
 	const hideableCols = ['code', 'description'];
 </script>
 
-<div class="flex w-full items-center justify-between">
+<div class="flex items-end justify-between gap-4">
 	<h1 class="flex text-2xl/8 font-semibold sm:text-xl/8">
 		{tableName}
 		{#if $isLoading}
@@ -83,13 +84,13 @@
 		{/if}
 	</h1>
 	{#if user}
-		<Button size="sm" href="{basePath}/create">
+		<Button size="sm" href="{basePath}/add">
 			<div class="flex items-center gap-2">
 				Add <PlusCircle class="h-4 w-4" />
 			</div>
 		</Button>
 	{:else}
-		<p class="block w-full text-ellipsis text-right text-xs">Login to manage data</p>
+		<p class="block w-fit text-ellipsis text-right text-xs">Login to manage data</p>
 	{/if}
 </div>
 <div class="flex items-center gap-2 py-2">
