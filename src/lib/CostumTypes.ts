@@ -65,6 +65,7 @@ export interface TypedPocketBase extends PocketBase {
 	collection(idOrName: 'material_unit'): RecordService<MaterialUnit>;
 	collection(idOrName: 'material_master'): RecordService<MaterialMaster>;
 	collection(idOrName: 'stock_master'): RecordService<StockMaster>;
+	collection(idOrName: 'stock_movement'): RecordService<StockMovement>;
 }
 
 export type FileUrlOption = {
