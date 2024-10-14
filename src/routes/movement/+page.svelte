@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { StockAvailable } from '$lib/layouts/pages';
+	import { Movement } from '$lib/layouts/pages';
 	import { page } from '$app/stores';
 
 	export let data;
@@ -9,7 +9,7 @@
 </script>
 
 <svelte:head>
-	<title>CMMS - Stock Available</title>
+	<title>CMMS - Movement</title>
 </svelte:head>
 
-<StockAvailable {user} {basePath} tableName="Stock Available" />
+<Movement {user} {basePath} tableName="Stock Movement" />
