@@ -2,19 +2,34 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Table from '$lib/components/ui/table';
 	import { addHiddenColumns, addSelectedRows, addSortBy, addTableFilter } from 'svelte-headless-table/plugins';
-	import { ArrowDown, ArrowUp, ChevronDown, LoaderCircle } from 'lucide-svelte';
-	import { Render, Subscribe, createTable } from 'svelte-headless-table';
+	import { ArrowDown, ArrowUp, ChevronDown, LoaderCircle, PlusCircle } from 'lucide-svelte';
+	import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
+	import { DataTableActions } from '$lib/components/costum';
 	import { createPageFile } from '$lib/helpers';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { fade } from 'svelte/transition';
 	import { cn } from '$lib/utils.js';
 
+	export let user;
+	export let basePath: string;
 	export let tableName: string;
 
-	const { getState } = createPageFile().init('transaction_type');
+	const { nextPage, prevPage, getState, setPerPage, addModifier } = createPageFile().init('stock_movement', { expand: 'material_id,material_id.unit_id,transaction_type_id,user_id' });
 
-	const { items, isLoading } = getState();
+	setPerPage(10);
+	addModifier((items: any[]) => {
+		return items.map((val) => {
+			return {
+				...val,
+				materialData: val.expand ? val.expand.material_id : 'N/A',
+				by: val.expand ? val.expand.user_id : 'N/A',
+				type: val.expand ? val.expand.transaction_type_id : 'N/A'
+			};
+		});
+	});
+
+	const { currentPage, items, totalPages, isLoading, hasPrevPage, hasNextPage } = getState();
 	const table = createTable(items, {
 		sort: addSortBy({ disableMultiSort: true }),
 		filter: addTableFilter({
@@ -26,8 +41,43 @@
 
 	const columns = table.createColumns([
 		table.column({
-			header: 'Code',
-			accessor: 'code',
+			header: 'Type',
+			accessor: (item) => item.type,
+			cell: ({ value }) => {
+				return value.code;
+			}
+		}),
+		table.column({
+			header: 'Order Number',
+			accessor: (item) => item,
+			cell: ({ value }) => {
+				return value.order_number || '-';
+			},
+			plugins: {
+				filter: {
+					getFilterValue(value) {
+						return value.order_number.toLowerCase();
+					}
+				}
+			}
+		}),
+		table.column({
+			header: 'ESN',
+			accessor: (item) => item,
+			cell: ({ value }) => {
+				return value.engine_serial_number || '-';
+			},
+			plugins: {
+				filter: {
+					getFilterValue(value) {
+						return value.engine_serial_number.toLowerCase();
+					}
+				}
+			}
+		}),
+		table.column({
+			header: 'Batch Number',
+			accessor: 'batch_number',
 			plugins: {
 				filter: {
 					getFilterValue(value) {
@@ -37,8 +87,49 @@
 			}
 		}),
 		table.column({
+			header: 'Quantity',
+			accessor: (item) => item,
+			cell: ({ value }) => {
+				let materialUnit = value.materialData?.expand?.unit_id?.code || '';
+				return value.quantity + ' ' + materialUnit;
+			}
+		}),
+		table.column({
+			header: 'Material Code',
+			accessor: (item) => item.materialData,
+			cell: ({ value }) => {
+				return value.code;
+			}
+		}),
+		table.column({
 			header: 'Description',
-			accessor: 'description'
+			accessor: (item) => item.materialData,
+			cell: ({ value }) => {
+				return value.description;
+			}
+		}),
+		table.column({
+			header: 'By',
+			accessor: (item) => item.by,
+			cell: ({ value }) => {
+				return value.username;
+			}
+		}),
+		table.column({
+			header: 'Remark',
+			accessor: 'remark'
+		}),
+		table.column({
+			header: '',
+			accessor: ({ id }) => id,
+			cell: (item) => {
+				return createRender(DataTableActions, { id: item.value, user, basePath });
+			},
+			plugins: {
+				sort: {
+					disable: true
+				}
+			}
 		})
 	]);
 
@@ -55,7 +146,7 @@
 		.filter(([, hide]) => !hide)
 		.map(([id]) => id);
 
-	const hideableCols = ['code', 'description'];
+	const hideableCols = ['Type', 'batch_number', 'quantity', 'Material Code', 'Description', 'By'];
 </script>
 
 <div class="flex items-end justify-between gap-4">
@@ -67,6 +158,15 @@
 			</span>
 		{/if}
 	</h1>
+	{#if user}
+		<Button size="sm" href="{basePath}/create">
+			<div class="flex items-center gap-2">
+				Add <PlusCircle class="h-4 w-4" />
+			</div>
+		</Button>
+	{:else}
+		<p class="block w-fit text-ellipsis text-right text-xs">Login to manage data</p>
+	{/if}
 </div>
 <div class="flex items-center gap-2 py-2">
 	<Input class="max-w-sm" placeholder="Filter name..." type="text" bind:value={$filterValue} />
