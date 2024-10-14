@@ -1,15 +1,17 @@
 <script lang="ts">
+	import '../app.css';
+
 	import { Navbar, NavbarSmall } from '$lib/layouts';
 	import { createRender } from 'svelte-headless-table';
 	import { LoginDialog } from '$lib/layouts/pages';
+	import { ModeWatcher } from 'mode-watcher';
+	import { Toaster } from '$lib/components/ui/sonner';
 	import { page } from '$app/stores';
 	// icons
 	import SquareKanban from 'lucide-svelte/icons/square-kanban';
+	import SendToBack from 'lucide-svelte/icons/send-to-back';
 	import Archive from 'lucide-svelte/icons/archive';
 	import House from 'lucide-svelte/icons/house';
-
-	import '../app.css';
-	import { ModeWatcher } from 'mode-watcher';
 
 	export let data;
 	const { user } = data;
@@ -34,6 +36,11 @@
 			url: '/stock'
 		},
 		{
+			title: 'Movement',
+			icon: createRender(SendToBack, { class: 'mr-2 h-4 w-4' }),
+			url: '/movement'
+		},
+		{
 			title: 'Master',
 			icon: createRender(SquareKanban, { class: 'mr-2 h-4 w-4' }),
 			url: '/manage',
@@ -41,15 +48,15 @@
 			sub: [
 				{
 					title: 'Material Master',
-					hash: '#material-master'
+					hash: '/material-master'
 				},
 				{
 					title: 'Material Unit',
-					hash: '#material-unit'
+					hash: '/material-unit'
 				},
 				{
 					title: 'Transaction Type',
-					hash: '#transaction-type'
+					hash: '/transaction-type'
 				}
 			]
 		}
@@ -57,9 +64,9 @@
 
 	$: currentHash = $page.url.hash;
 	$: currentPath = $page.url.pathname;
-	$: isDark = false;
 </script>
 
+<Toaster />
 <ModeWatcher />
 <div class="relative isolate flex min-h-svh w-full bg-primary/5 max-lg:flex-col">
 	<Navbar bind:currentHash bind:currentPath {sidebarMenu} {user} bind:openLoginDialog {logOut} />
