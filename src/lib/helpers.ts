@@ -39,6 +39,7 @@ class PageFile<T> {
 		hasNextPage: Readable<boolean>;
 		isLoading: Readable<boolean>;
 	};
+	reload: () => void;
 	nextPage: () => void;
 	prevPage: () => void;
 	setPerPage: (number: number) => void;
@@ -73,6 +74,10 @@ class PageFile<T> {
 
 		this.addModifier = (f) => {
 			this.modifier.push(f);
+		};
+
+		this.reload = () => {
+			this.loadData();
 		};
 
 		this.nextPage = () => {
