@@ -15,7 +15,7 @@
 	export let basePath: string;
 	export let tableName: string;
 
-	const { nextPage, prevPage, getState, setPerPage, addModifier } = createPageFile().init('material_master', { expand: 'unit_id' });
+	const { getState, setPerPage, addModifier, reload } = createPageFile().init('material_master', { expand: 'unit_id' });
 
 	setPerPage(100);
 	addModifier((items: any[]) => {
@@ -24,7 +24,7 @@
 		});
 	});
 
-	const { currentPage, items, totalPages, isLoading, hasPrevPage, hasNextPage } = getState();
+	const { items, isLoading } = getState();
 	const table = createTable(items, {
 		sort: addSortBy({ disableMultiSort: true }),
 		filter: addTableFilter({
@@ -120,7 +120,7 @@
 			header: '',
 			accessor: ({ id }) => id,
 			cell: (item) => {
-				return createRender(DataTableActions, { id: item.value, user, basePath });
+				return createRender(DataTableActions, { id: item.value, user, basePath, reload });
 			},
 			plugins: {
 				sort: {
