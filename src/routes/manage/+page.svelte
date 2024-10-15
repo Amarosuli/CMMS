@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { MaterialMaster, MaterialUnit, TransactionType } from '$lib/layouts/pages';
+	import { MaterialMaster, MaterialUnit, TransactionType } from '$lib/components/page';
 	import { Render, createRender } from 'svelte-headless-table';
 	import { page } from '$app/stores';
 
