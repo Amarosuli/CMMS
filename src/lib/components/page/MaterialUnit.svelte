@@ -10,15 +10,14 @@
 	import { Input } from '$lib/components/ui/input';
 	import { fade } from 'svelte/transition';
 	import { cn } from '$lib/utils.js';
-	import { goto } from '$app/navigation';
 
 	export let user;
 	export let basePath: string;
 	export let tableName: string;
 
-	const { nextPage, prevPage, getState, setPerPage, addModifier } = createPageFile().init('material_unit');
+	const { getState, reload } = createPageFile().init('material_unit');
 
-	const { currentPage, items, totalPages, isLoading, hasPrevPage, hasNextPage } = getState();
+	const { items, isLoading } = getState();
 	const table = createTable(items, {
 		sort: addSortBy({ disableMultiSort: true }),
 		filter: addTableFilter({
@@ -48,7 +47,7 @@
 			header: '',
 			accessor: ({ id }) => id,
 			cell: (item) => {
-				return createRender(DataTableActions, { id: item.value, user, basePath });
+				return createRender(DataTableActions, { id: item.value, user, basePath, reload });
 			},
 			plugins: {
 				sort: {
