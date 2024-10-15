@@ -1,9 +1,9 @@
 <script lang="ts">
 	import '../app.css';
 
-	import { Navbar, NavbarSmall } from '$lib/layouts';
+	import { Navbar, NavbarSmall, LoginDialog } from '$lib/components/layout';
 	import { createRender } from 'svelte-headless-table';
-	import { LoginDialog } from '$lib/layouts/pages';
+
 	import { ModeWatcher } from 'mode-watcher';
 	import { Toaster } from '$lib/components/ui/sonner';
 	import { page } from '$app/stores';
@@ -68,7 +68,7 @@
 
 <Toaster />
 <ModeWatcher />
-<div class="relative isolate flex min-h-svh w-full bg-primary/5 max-lg:flex-col">
+<div class="relative isolate flex min-h-svh w-full bg-secondary-foreground/5 max-lg:flex-col">
 	<Navbar bind:currentHash bind:currentPath {sidebarMenu} {user} bind:openLoginDialog {logOut} />
 	<NavbarSmall bind:currentHash bind:currentPath {sidebarMenu} {user} bind:openLoginDialog {logOut} />
 	<main class="flex flex-1 flex-col pb-2 lg:min-w-0 lg:pl-64 lg:pr-2 lg:pt-2">
