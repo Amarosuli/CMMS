@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { ChevronLeft, CalendarPlus } from 'lucide-svelte';
-	import { MaterialUnitForm } from '$lib/layouts/pages';
+	import { MaterialUnitForm } from '$lib/components/page';
 	import { Button } from '$lib/components/ui/button';
+	import { time } from '$lib/helpers.js';
 	import { page } from '$app/stores';
 
 	export let data;
@@ -32,7 +33,7 @@
 		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
 			<span class="flex items-center gap-3 text-base/6 sm:text-sm/6">
 				<CalendarPlus class="h-4 w-4" />
-				<span>{data.unit?.created}</span></span>
+				<span>{time(data.unit?.created)}</span></span>
 		</div>
 		<div class="flex gap-4">
 			<Button

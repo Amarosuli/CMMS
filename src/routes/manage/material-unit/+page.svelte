@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { MaterialUnit } from '$lib/layouts/pages';
+	import { MaterialUnit } from '$lib/components/page';
 
 	export let data;
 	const { user } = data;

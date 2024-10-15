@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { StockAvailable } from '$lib/layouts/pages';
+	import { StockAvailable } from '$lib/components/page';
 	import { page } from '$app/stores';
 
 	export let data;

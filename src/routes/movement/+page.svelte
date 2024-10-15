@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Movement } from '$lib/layouts/pages';
+	import { Movement } from '$lib/components/page';
 	import { page } from '$app/stores';
 
 	export let data;
