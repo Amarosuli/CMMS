@@ -52,24 +52,10 @@
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
-		<Field {form} name="part_number_1">
+		<Field {form} name="part_number">
 			<Control let:attrs>
-				<Label>Part Number 1</Label>
-				<Input {...attrs} bind:value={$formData.part_number_1} type="text" placeholder="Part Number" />
-			</Control>
-			<FieldErrors class="text-xs italic" />
-		</Field>
-		<Field {form} name="part_number_2">
-			<Control let:attrs>
-				<Label>Part Number 2</Label>
-				<Input {...attrs} bind:value={$formData.part_number_2} type="text" placeholder="Part Number" />
-			</Control>
-			<FieldErrors class="text-xs italic" />
-		</Field>
-		<Field {form} name="part_number_3">
-			<Control let:attrs>
-				<Label>Part Number 3</Label>
-				<Input {...attrs} bind:value={$formData.part_number_3} type="text" placeholder="Part Number" />
+				<Label>Part Number</Label>
+				<Input {...attrs} bind:value={$formData.part_number} type="text" placeholder="Part Number" />
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>

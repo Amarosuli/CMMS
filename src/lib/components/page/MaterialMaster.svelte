@@ -52,29 +52,7 @@
 		}),
 		table.column({
 			header: 'Part Number',
-			accessor: 'part_number_1',
-			plugins: {
-				filter: {
-					getFilterValue(value) {
-						return value.toLowerCase();
-					}
-				}
-			}
-		}),
-		table.column({
-			header: 'Alt Part Number',
-			accessor: 'part_number_2',
-			plugins: {
-				filter: {
-					getFilterValue(value) {
-						return value.toLowerCase();
-					}
-				}
-			}
-		}),
-		table.column({
-			header: 'Alt Part Number',
-			accessor: 'part_number_3',
+			accessor: 'part_number',
 			plugins: {
 				filter: {
 					getFilterValue(value) {
