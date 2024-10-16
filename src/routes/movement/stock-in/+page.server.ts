@@ -54,20 +54,5 @@ export const actions = {
 		}
 
 		return JSON.stringify({ message: 'Save to Stock Master Successfully' });
-	},
-	delete: async ({ locals, request }) => {
-		const form = await request.formData();
-		const id = form.get('id') as string;
-
-		if (!id) return fail(401, { message: 'No id provided' });
-
-		try {
-			await locals.pb.collection('stock_in').delete(id);
-		} catch (er: any) {
-			const errorMessage = `${er?.response.message} | PocketBase error.`;
-			return fail(er?.status, { message: errorMessage });
-		}
-
-		return { message: 'Delete success' };
 	}
 };
