@@ -38,7 +38,30 @@
 		{
 			title: 'Movement',
 			icon: createRender(SendToBack, { class: 'mr-2 h-4 w-4' }),
-			url: '/movement'
+			url: '/movement',
+			sub: [
+				{
+					title: 'Stock In',
+					hash: '/stock-in'
+				},
+				{
+					title: 'Stock Out',
+					hash: '/stock-out'
+				},
+				{
+					title: 'Borrow In',
+					hash: '/borrow-in'
+				},
+				{
+					title: 'Borrow Out',
+					hash: '/borrow-out'
+				}
+			]
+		},
+		{
+			title: 'Active Borrowing',
+			icon: createRender(Archive, { class: 'mr-2 h-4 w-4' }),
+			url: '/active-borrowing'
 		},
 		{
 			title: 'Master',
