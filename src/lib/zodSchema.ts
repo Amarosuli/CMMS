@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { BorrowStatus } from './CostumTypes';
 
 export const loginSchema = z.object({
 	employeeId: z.string().trim().min(6, 'Employee Id is required, Minimal 6 Characters'),
@@ -19,12 +20,6 @@ export const materialMasterSchema = z.object({
 	unit_id: z.string().trim().min(1, 'You have to choose the unit of material')
 });
 
-export enum borrowMovementStatus {
-	OPEN = 'OPEN',
-	PENDING = 'PENDING',
-	CLOSED = 'CLOSED'
-}
-
 export const stockInSchema = z.object({
 	transaction_type: z.string().trim().min(1, 'Transaction Type is required'),
 	material_id: z.string().trim().min(1, 'Material is required'),
@@ -43,4 +38,20 @@ export const stockOutSchema = z.object({
 	user_id: z.string().trim().min(1, 'User is required'),
 	remark: z.string().trim().optional(),
 	refference_id: z.string().trim().optional()
+});
+
+export const BorrowingSchema = z.object({
+	user_id: z.string().trim().min(1, 'User is required'),
+	order_number: z.string().trim().optional(),
+	esn: z.string().trim().optional(),
+	status: z.nativeEnum(BorrowStatus)
+});
+
+export const ReturningSchema = z.object({
+	borrow_id: z.string().trim().min(1, 'Borrow id is required'),
+	stock_id: z.string().trim().min(1, 'Stock Master is required'),
+	quantity_out: z.number().min(1, 'Out quantity is required, at least 1').default(1),
+	quantity_return: z.number().min(1, 'Return quantity is required, at least 1'),
+	date_out: z.string({ message: 'Date out is required' }).transform((str: string) => new Date(str).toUTCString()),
+	date_return: z.string({ message: 'Date return is required' }).transform((str: string) => new Date(str).toUTCString())
 });

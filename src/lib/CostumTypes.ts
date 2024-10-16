@@ -80,6 +80,28 @@ export interface StockOut extends RecordModel {
 	};
 }
 
+export interface BorrowItem extends RecordModel {
+	borrow_id: BorrowMovement['id'];
+	stock_id: StockMaster['id'];
+	quantity_out: number;
+	quantity_return: number;
+	date_out: string;
+	date_return: string;
+}
+
+enum BorrowStatus {
+	OPEN = 'OPEN',
+	PENDING = 'PENDING',
+	CLOSED = 'CLOSED'
+}
+
+export interface BorrowMovement extends RecordModel {
+	user_id: User['id'];
+	order_number: string;
+	esn: string;
+	status: BorrowStatus;
+}
+
 export interface TypedPocketBase extends PocketBase {
 	collection(idOrName: string): RecordService;
 	collection(idOrName: 'users'): RecordService<User>;
@@ -88,6 +110,8 @@ export interface TypedPocketBase extends PocketBase {
 	collection(idOrName: 'stock_master'): RecordService<StockMaster>;
 	collection(idOrName: 'stock_in'): RecordService<StockIn>;
 	collection(idOrName: 'stock_out'): RecordService<StockOut>;
+	collection(idOrName: 'borrow_item'): RecordService<BorrowItem>;
+	collection(idOrName: 'borrow_movement'): RecordService<BorrowMovement>;
 }
 
 export type FileUrlOption = {
