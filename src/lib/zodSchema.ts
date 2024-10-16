@@ -35,3 +35,12 @@ export const stockInSchema = z.object({
 	user_id: z.string().trim().min(1, 'User is required'),
 	remark: z.string().trim().optional()
 });
+
+export const stockOutSchema = z.object({
+	transaction_type: z.string().trim().min(1, 'Transaction Type is required'),
+	stock_id: z.string().trim().min(1, 'Stock Master is required'),
+	quantity: z.number().min(1, 'Quantity is required, at least 1'),
+	user_id: z.string().trim().min(1, 'User is required'),
+	remark: z.string().trim().optional(),
+	refference_id: z.string().trim().optional()
+});

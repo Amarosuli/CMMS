@@ -74,6 +74,10 @@ export interface StockOut extends RecordModel {
 	user_id: User['id'];
 	remark: string;
 	refference_id: string;
+	expand?: {
+		stock_id: StockMaster;
+		user_id: User;
+	};
 }
 
 export interface TypedPocketBase extends PocketBase {
