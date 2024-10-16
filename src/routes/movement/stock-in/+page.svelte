@@ -1,0 +1,225 @@
+<script lang="ts">
+	import * as Select from '$lib/components/ui/select';
+	import * as Popover from '$lib/components/ui/popover/index.js';
+	import * as Command from '$lib/components/ui/command/index.js';
+
+	import { LoaderCircle, ChevronLeft, CalendarPlus, CalendarIcon, ChevronsUpDown, Check } from 'lucide-svelte';
+	import { DateFormatter, parseDate, getLocalTimeZone, type DateValue } from '@internationalized/date';
+	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { deserialize } from '$app/forms';
+	import { superForm } from 'sveltekit-superforms';
+	import { Calendar } from '$lib/components/ui/calendar';
+	import { Input } from '$lib/components/ui/input';
+	import { toast } from 'svelte-sonner';
+	import { goto } from '$app/navigation';
+	import { time } from '$lib/helpers.js';
+	import { tick } from 'svelte';
+	import { cn } from '$lib/utils.js';
+	import { borrowMovementStatus } from '$lib/zodSchema.js';
+
+	export let data;
+
+	const { user, transactionType, materialMaster } = data;
+
+	const createStockMaster = async (data: Record<string, any>) => {
+		let formData = new FormData();
+		for (let key in data) {
+			formData.append(key, data[key]);
+		}
+
+		const response = await fetch('?/saveToStockMaster', {
+			method: 'POST',
+			body: formData
+		});
+
+		return deserialize(await response.text());
+	};
+
+	const form = superForm(data.form, {
+		onUpdate({ form, result }) {
+			if (form.valid) {
+				toast.success(form.message.text);
+
+				if (result.type === 'success') {
+					let data = form.message.result;
+
+					createStockMaster({
+						batch_number: data.batch_number,
+						purchase_order: data.purchase_order,
+						quantity_available: data.quantity,
+						expired_date: data.expired_date,
+						material_id: data.material_id,
+						status: 'ACTIVE',
+						stock_in_id: data.id
+					})
+						.then((res: Record<string, any>) => {
+							toast.success(JSON.parse(res.data).message);
+						})
+						.catch((er) => {
+							toast.error(er);
+						})
+						.finally(() => {
+							goto('/movement');
+						});
+				}
+
+				goto('/stock');
+			}
+		}
+	});
+	const { form: formData, delayed, message, enhance } = form;
+	const df = new DateFormatter('en-US', {
+		dateStyle: 'long'
+	});
+	let expiredAt: DateValue | undefined;
+
+	let open = false;
+	$: $formData.user_id = user ? user.id : '';
+	$: $formData.transaction_type = transactionType.find(({ label }: { label: string }) => label == 'SIN')?.label as string;
+	$: expiredAt = $formData.expired_date && $formData.expired_date !== 'undefined' ? parseDate($formData.expired_date) : undefined;
+
+	function closeAndFocusTrigger(triggerId: string) {
+		open = false;
+		tick().then(() => {
+			document.getElementById(triggerId)?.focus();
+		});
+	}
+</script>
+
+<svelte:head>
+	<title>CMMS - Stock In</title>
+</svelte:head>
+
+<div>
+	<Button href="/movement" variant="outline" class="inline-flex items-center gap-2 text-sm/6">
+		<ChevronLeft class="h-4 w-4" />
+		<span>Movement</span>
+	</Button>
+</div>
+
+<div class="mt-4 lg:mt-8">
+	<div class="flex items-center gap-4">
+		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Create <span class="text-foreground/50">Stock In</span></h1>
+	</div>
+	<div class="isolate mt-2.5 flex flex-wrap justify-between gap-x-6 gap-y-4">
+		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
+			<span class="flex items-center gap-3 text-base/6 sm:text-sm/6">
+				<CalendarPlus class="h-4 w-4" />
+				<span>{time(new Date())}</span></span>
+		</div>
+	</div>
+</div>
+
+<div class="mt-12">
+	<h2 class="text-base/7 font-semibold text-foreground sm:text-sm/6">Stock In Form Field</h2>
+	<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
+	<form class="mt-3 flex w-full max-w-80 flex-col text-base/6 sm:text-sm/6" action="?/save" method="post" use:enhance>
+		<Field {form} name="material_id" class="flex flex-col">
+			<Popover.Root bind:open let:ids>
+				<Control let:attrs>
+					<Label>Material</Label>
+					<Popover.Trigger class={cn(buttonVariants({ variant: 'outline' }), ' justify-between', !$formData.material_id && 'text-muted-foreground')} role="combobox" {...attrs}>
+						{materialMaster.find((f) => f.value === $formData.material_id)?.detail ?? 'Select Material'}
+						<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+					</Popover.Trigger>
+					<input hidden value={$formData.material_id} name={attrs.name} />
+				</Control>
+				<Popover.Content class="p-0">
+					<Command.Root>
+						<Command.Input autofocus placeholder="Search Material..." class="h-9" />
+						<Command.Empty>No material found.</Command.Empty>
+						<Command.Group class="max-h-56 overflow-y-auto">
+							{#each materialMaster as material}
+								<Command.Item
+									value={material.detail}
+									onSelect={() => {
+										$formData.material_id = material.value;
+										closeAndFocusTrigger(ids.trigger);
+									}}>
+									{material.label}
+									<Check class={cn('ml-auto h-4 w-4', material.value !== $formData.material_id && 'text-transparent')} />
+								</Command.Item>
+							{/each}
+						</Command.Group>
+					</Command.Root>
+				</Popover.Content>
+			</Popover.Root>
+			<FieldErrors class="text-xs italic" />
+		</Field>
+		<Field {form} name="purchase_order">
+			<Control let:attrs>
+				<Label>Purchase Order</Label>
+				<Input {...attrs} bind:value={$formData.purchase_order} type="text" placeholder="Purchase Order" />
+			</Control>
+			<FieldErrors class="text-xs italic" />
+		</Field>
+		<Field {form} name="batch_number">
+			<Control let:attrs>
+				<Label>Batch Number</Label>
+				<Input {...attrs} bind:value={$formData.batch_number} type="text" placeholder="Batch Number" />
+			</Control>
+			<FieldErrors class="text-xs italic" />
+		</Field>
+		<Field {form} name="expired_date">
+			<Control let:attrs>
+				<Label>Expired at</Label>
+				<Popover.Root>
+					<Popover.Trigger asChild let:builder>
+						<Button variant="outline" class={cn('w-[280px] justify-start text-left font-normal', !expiredAt && 'text-muted-foreground')} builders={[builder]}>
+							<CalendarIcon class="mr-2 h-4 w-4" />
+							{expiredAt ? df.format(expiredAt.toDate(getLocalTimeZone())) : 'Pick a date'}
+						</Button>
+					</Popover.Trigger>
+					<Popover.Content class="w-auto p-0">
+						<Calendar
+							onValueChange={(v) => {
+								$formData.expired_date = v ? v.toString() : '';
+							}}
+							initialFocus />
+					</Popover.Content>
+				</Popover.Root>
+				<input type="text" hidden value={$formData.expired_date} {...attrs} />
+			</Control>
+			<FieldErrors class="text-xs italic" />
+		</Field>
+		<Field {form} name="transaction_type" class="hidden">
+			<Control let:attrs>
+				<Label>Transaction Type</Label>
+				<Input {...attrs} bind:value={$formData.transaction_type} type="text" placeholder="Status" />
+			</Control>
+			<FieldErrors class="text-xs italic" />
+		</Field>
+		<Field {form} name="quantity">
+			<Control let:attrs>
+				<Label>Quantity</Label>
+				<Input {...attrs} bind:value={$formData.quantity} type="number" placeholder="Quantity" />
+			</Control>
+			<FieldErrors class="text-xs italic" />
+		</Field>
+		<Field {form} name="remark">
+			<Control let:attrs>
+				<Label>Remark</Label>
+				<Input {...attrs} bind:value={$formData.remark} type="text" placeholder="Remark" />
+			</Control>
+			<FieldErrors class="text-xs italic" />
+		</Field>
+		<Field {form} name="user_id" class="hidden">
+			<Control let:attrs>
+				<Label>User</Label>
+				<Input {...attrs} bind:value={$formData.user_id} type="text" placeholder="Material Description" />
+			</Control>
+			<FieldErrors class="text-xs italic" />
+		</Field>
+		<Button class="mt-4" type="submit" disabled={$delayed ? true : false}>
+			{#if $delayed}
+				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" /> Saving...
+			{:else}
+				Save
+			{/if}
+		</Button>
+		{#if $message}
+			<p class="mt-2 bg-destructive p-2 text-center text-xs font-semibold text-destructive-foreground">{$message}</p>
+		{/if}
+	</form>
+</div>
