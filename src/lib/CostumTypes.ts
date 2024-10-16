@@ -3,9 +3,7 @@ import PocketBase, { RecordService, type RecordModel } from 'pocketbase';
 export interface MaterialMaster extends RecordModel {
 	code: string;
 	description: string;
-	part_number_1: string;
-	part_number_2: string;
-	part_number_3: string;
+	part_number: string;
 	minimum_quantity: string;
 	remark: string;
 	unit_id: MaterialUnit['id'];
@@ -30,33 +28,52 @@ export interface User extends RecordModel {
 	email: string;
 	name: string;
 	avatar: string;
-	role: string;
+	role: 'Admin' | 'General' | 'Super';
 	unit: string;
 }
 
+enum StockMasterStatus {
+	ACTIVE = 'ACTIVE',
+	INACTIVE = 'INACTIVE'
+}
+
 export interface StockMaster extends RecordModel {
-	material_id: MaterialMaster['id'];
-	quantity_available: number;
 	batch_number: string;
+	purchase_order: string;
+	quantity_available: number;
+	expired_date: string;
+	material_id: MaterialMaster['id'];
+	storage_id: string;
+	status: StockMasterStatus;
+	stock_in_id: StockIn['id'];
 	expand?: {
 		material_id: MaterialMaster;
+		stock_in_id: StockIn;
 	};
 }
 
-export interface StockMovement extends RecordModel {
+export interface StockIn extends RecordModel {
+	transaction_type: TransactionType['code'];
 	material_id: MaterialMaster['id'];
-	transaction_type_id: TransactionType['id'];
-	order_number: string;
-	engine_serial_number: string;
+	purchase_order: string;
 	batch_number: string;
 	quantity: number;
+	expired_date: string;
 	user_id: User['id'];
 	remark: string;
 	expand?: {
 		material_id: MaterialMaster;
-		transaction_type_id: TransactionType;
 		user_id: User;
 	};
+}
+
+export interface StockOut extends RecordModel {
+	transaction_type: TransactionType['code'];
+	stock_id: StockMaster['id'];
+	quantity: number;
+	user_id: User['id'];
+	remark: string;
+	refference_id: string;
 }
 
 export interface TypedPocketBase extends PocketBase {
@@ -65,7 +82,8 @@ export interface TypedPocketBase extends PocketBase {
 	collection(idOrName: 'material_unit'): RecordService<MaterialUnit>;
 	collection(idOrName: 'material_master'): RecordService<MaterialMaster>;
 	collection(idOrName: 'stock_master'): RecordService<StockMaster>;
-	collection(idOrName: 'stock_movement'): RecordService<StockMovement>;
+	collection(idOrName: 'stock_in'): RecordService<StockIn>;
+	collection(idOrName: 'stock_out'): RecordService<StockOut>;
 }
 
 export type FileUrlOption = {
