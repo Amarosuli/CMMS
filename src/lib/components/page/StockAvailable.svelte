@@ -108,7 +108,7 @@
 		{/if}
 	</h1>
 	{#if user}
-		<Button size="sm" href="{basePath}/create">
+		<Button size="sm" href="/movement/stock-in">
 			<div class="flex items-center gap-2">
 				Add <PlusCircle class="h-4 w-4" />
 			</div>
