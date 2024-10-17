@@ -15,7 +15,6 @@
 	import { time } from '$lib/helpers.js';
 	import { tick } from 'svelte';
 	import { cn } from '$lib/utils.js';
-	import { borrowMovementStatus } from '$lib/zodSchema.js';
 
 	export let data;
 
