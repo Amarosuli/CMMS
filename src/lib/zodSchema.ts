@@ -40,18 +40,41 @@ export const stockOutSchema = z.object({
 	refference_id: z.string().trim().optional()
 });
 
-export const BorrowingSchema = z.object({
+export const borrowingSchema = z.object({
 	user_id: z.string().trim().min(1, 'User is required'),
 	order_number: z.string().trim().optional(),
 	esn: z.string().trim().optional(),
 	status: z.nativeEnum(BorrowStatus)
 });
 
-export const ReturningSchema = z.object({
-	borrow_id: z.string().trim().min(1, 'Borrow id is required'),
-	stock_id: z.string().trim().min(1, 'Stock Master is required'),
-	quantity_out: z.number().min(1, 'Out quantity is required, at least 1').default(1),
-	quantity_return: z.number().min(1, 'Return quantity is required, at least 1'),
-	date_out: z.string({ message: 'Date out is required' }).transform((str: string) => new Date(str).toUTCString()),
-	date_return: z.string({ message: 'Date return is required' }).transform((str: string) => new Date(str).toUTCString())
+export const borrowItemSchema = z.object({
+	items: z
+		.object({
+			borrow_id: z.string().trim().min(1, 'Borrow id is required'),
+			stock_id: z.string().trim().min(1, 'Stock Master is required'),
+			quantity_out: z.number().min(1, 'Out quantity is required, at least 1'),
+			quantity_return: z.number().optional(),
+			date_out: z
+				.string({ message: 'Date out is required' })
+				.transform((str: string) => new Date(str).toUTCString())
+				.optional(),
+			date_return: z
+				.string({ message: 'Date return is required' })
+				.transform((str: string) => new Date(str).toUTCString())
+				.optional()
+		})
+		.array()
+		.default([{ borrow_id: '', stock_id: '', quantity_out: 1, quantity_return: 0, date_out: new Date().toUTCString() }])
+});
+
+export const borrowItemOutSchema = z.object({
+	items: z
+		.object({
+			borrow_id: z.string().trim().min(1, 'Borrow id is required'),
+			stock_id: z.string().trim().min(1, 'Stock Master is required'),
+			quantity_out: z.number().min(1, 'Out quantity is required, at least 1'),
+			date_out: z.string({ message: 'Date out is required' }).transform((str: string) => new Date(str).toUTCString())
+		})
+		.array()
+		.default([{ borrow_id: '', stock_id: '', quantity_out: 1, date_out: new Date().toUTCString() }])
 });

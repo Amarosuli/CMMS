@@ -89,7 +89,7 @@ export interface BorrowItem extends RecordModel {
 	date_return: string;
 }
 
-enum BorrowStatus {
+export enum BorrowStatus {
 	OPEN = 'OPEN',
 	PENDING = 'PENDING',
 	CLOSED = 'CLOSED'
