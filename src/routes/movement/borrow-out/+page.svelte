@@ -11,7 +11,6 @@
 	import { time } from '$lib/helpers.js';
 	import { tick } from 'svelte';
 	import { cn } from '$lib/utils.js';
-	import SuperDebug from 'sveltekit-superforms/client/SuperDebug.svelte';
 	import { BorrowStatus } from '$lib/CostumTypes.js';
 	export let data;
 
@@ -80,7 +79,7 @@
 <svelte:head>
 	<title>CMMS - Stock Out</title>
 </svelte:head>
-<SuperDebug data={FormItem} />
+
 <div>
 	<Button href="/movement" variant="outline" class="inline-flex items-center gap-2 text-sm/6">
 		<ChevronLeft class="h-4 w-4" />
