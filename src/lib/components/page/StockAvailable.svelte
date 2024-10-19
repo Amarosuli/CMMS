@@ -55,6 +55,14 @@
 			}
 		}),
 		table.column({
+			header: 'Quantity Borrowed',
+			accessor: (item) => item,
+			cell: ({ value }) => {
+				let materialUnit = value.materialData?.expand?.unit_id?.code || '';
+				return value.quantity_borrowed + ' ' + materialUnit;
+			}
+		}),
+		table.column({
 			header: 'Code',
 			accessor: (item) => item.materialData,
 			cell: ({ value }) => {
@@ -95,7 +103,7 @@
 		.filter(([, hide]) => !hide)
 		.map(([id]) => id);
 
-	const hideableCols = ['code', 'description', 'part_number_1', 'part_number_2', 'part_number_3', 'unitCode', 'minimum_quantity'];
+	const hideableCols = ['batch_number', 'Quantity Available', 'Quantity Borrowed', 'Code', 'Description'];
 </script>
 
 <div class="flex items-end justify-between gap-4">
