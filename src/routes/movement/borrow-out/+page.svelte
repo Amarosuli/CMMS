@@ -1,20 +1,18 @@
 <script lang="ts">
+	import { FieldErrors, Control, Field, Label, Legend, ElementField } from '$lib/components/ui/form';
+	import { LoaderCircle, ChevronLeft, CalendarPlus, Plus, X } from 'lucide-svelte';
 	import { BorrowItemInput } from '$lib/components/costum';
-	import { LoaderCircle, ChevronLeft, CalendarPlus, ChevronsUpDown, Check, Plus, X } from 'lucide-svelte';
-	import { FieldErrors, Control, Field, Label, Legend, ElementField, Description } from '$lib/components/ui/form';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
-	import { deserialize } from '$app/forms';
+	import { BorrowStatus } from '$lib/CostumTypes.js';
 	import { superForm } from 'sveltekit-superforms';
-	import { Input, type FormInputEvent } from '$lib/components/ui/input';
+	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
 	import { time } from '$lib/helpers.js';
-	import { tick } from 'svelte';
-	import { cn } from '$lib/utils.js';
-	import { BorrowStatus } from '$lib/CostumTypes.js';
-	export let data;
 
-	const { user, stock } = data;
+	export let data;
+	const { user } = data;
+
 	$: borrowingId = '';
 
 	const FBorrowing = superForm(data.formBorrowing, {
@@ -36,6 +34,9 @@
 
 	$: $FormBorrowing.user_id = user?.id;
 	$: $FormBorrowing.status = BorrowStatus.OPEN;
+	$: stockSkip = $FormItem.items.map((item) => {
+		return { id: item.stock_id };
+	});
 
 	const FItem = superForm(data.formItem, {
 		dataType: 'json',
@@ -155,7 +156,7 @@
 				<div class="flex w-full flex-row items-center gap-2"></div>
 				{#each $FormItem.items as _, i}
 					<div class="flex w-full flex-row gap-2">
-						<BorrowItemInput {FItem} {FormItem} {stock} index={i} />
+						<BorrowItemInput {FItem} {FormItem} {stockSkip} index={i} />
 						<Field form={FItem} name="items[{i}].quantity_out">
 							<Control let:attrs>
 								<Label>Quantity Out</Label>

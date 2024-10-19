@@ -1,5 +1,5 @@
-import { fail, message, superValidate } from 'sveltekit-superforms';
 import { borrowingSchema, borrowItemOutSchema } from '$lib/zodSchema';
+import { fail, message, superValidate } from 'sveltekit-superforms';
 import { redirect } from '@sveltejs/kit';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { RecordModel } from 'pocketbase';
@@ -7,21 +7,7 @@ import type { RecordModel } from 'pocketbase';
 export const load = async ({ locals }) => {
 	if (!locals.user) throw redirect(302, '/'); // Prevent guest users from accessing this page directly.
 
-	const getStock = async () => {
-		const result = await locals.pb.collection('stock_master').getFullList({ expand: 'material_id,material_id.unit_id,stock_in_id' });
-		return result.map(({ id, batch_number, expand, quantity_available }) => {
-			return {
-				value: id,
-				quantity_available,
-				label: batch_number + ' - ' + expand?.material_id.code,
-				detail: expand?.material_id.code + ' - ' + expand?.material_id.part_number,
-				unit: expand?.material_id.expand?.unit_id.code || ''
-			};
-		});
-	};
-
 	return {
-		stock: await getStock(),
 		formBorrowing: await superValidate(zod(borrowingSchema)),
 		formItem: await superValidate(zod(borrowItemOutSchema))
 	};
