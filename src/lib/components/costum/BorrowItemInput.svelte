@@ -5,23 +5,48 @@
 	import { FieldErrors, Control, Label, ElementField } from '$lib/components/ui/form';
 	import { ChevronsUpDown, Check } from 'lucide-svelte';
 	import { buttonVariants } from '$lib/components/ui/button';
-	import { tick } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { cn } from '$lib/utils.js';
+	import { pb } from '$lib/pocketbaseClient';
 
-	export let stock: {
+	export let stockSkip: { id: string | undefined }[];
+	export let FItem;
+	export let FormItem;
+	export let index;
+
+	let stock: {
 		value: string;
 		quantity_available: number;
 		label: string;
 		detail: string;
 		unit: string;
-	}[];
-	export let FItem;
-	export let FormItem;
-	export let index;
+	}[] = [];
 	let open = false;
+
+	onMount(async () => {
+		const result = await pb.collection('stock_master').getFullList({ expand: 'material_id.unit_id' });
+		result.forEach(({ id, batch_number, expand, quantity_available, quantity_borrowed }) => {
+			if (stockSkip) {
+				if (stockSkip.find(({ id }) => id === id))
+					stock = [
+						...stock,
+						{
+							value: id,
+							quantity_available: quantity_available - quantity_borrowed,
+							label: batch_number + ' - ' + expand?.material_id.code,
+							detail: expand?.material_id.code + ' - ' + expand?.material_id.part_number,
+							unit: expand?.material_id.expand?.unit_id.code || ''
+						}
+					];
+			}
+		});
+	});
 
 	$: stockUnit = stock.find((f) => f.value === $FormItem.items[index].stock_id)?.unit || '';
 	$: selectedStock = (stock.find((f) => f.value === $FormItem.items[index].stock_id)?.quantity_available || 0) - $FormItem.items[index].quantity_out;
+	$: stockAvailable = stock.filter((v) => {
+		return !stockSkip.find((t) => t.id === v.value);
+	});
 
 	function closeAndFocusTrigger(triggerId: string) {
 		open = false;
@@ -47,7 +72,7 @@
 				<Command.Input autofocus placeholder="Search Stock..." class="h-9" />
 				<Command.Empty>No stock found.</Command.Empty>
 				<Command.Group class="max-h-56 overflow-y-auto">
-					{#each stock as stock}
+					{#each stockAvailable as stock}
 						<Command.Item
 							value={stock.detail}
 							onSelect={() => {
