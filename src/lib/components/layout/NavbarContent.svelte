@@ -45,7 +45,7 @@
 		{/each}
 	</div>
 </div>
-<div class="flex flex-1 flex-col justify-end overflow-y-auto p-4 [&>[data-slot=section]+[data-slot=section]]:mt-8">
+<div class="flex flex-col justify-end overflow-y-auto border-t p-4 [&>[data-slot=section]+[data-slot=section]]:mt-8">
 	<span class="relative flex items-center justify-between">
 		<span class="inline-flex items-center gap-4 text-xs"
 			>Switch Theme
