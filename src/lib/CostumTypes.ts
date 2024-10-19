@@ -41,6 +41,7 @@ export interface StockMaster extends RecordModel {
 	batch_number: string;
 	purchase_order: string;
 	quantity_available: number;
+	quantity_borrowed: number;
 	expired_date: string;
 	material_id: MaterialMaster['id'];
 	storage_id: string;
@@ -100,6 +101,9 @@ export interface BorrowMovement extends RecordModel {
 	order_number: string;
 	esn: string;
 	status: BorrowStatus;
+	expand: {
+		user_id: User;
+	};
 }
 
 export interface TypedPocketBase extends PocketBase {
