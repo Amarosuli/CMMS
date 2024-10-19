@@ -49,7 +49,7 @@
 					hash: '/stock-out'
 				},
 				{
-					title: 'Borrow In',
+					title: 'Borrow Return',
 					hash: '/borrow-in'
 				},
 				{

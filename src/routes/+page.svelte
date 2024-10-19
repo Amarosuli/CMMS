@@ -38,6 +38,22 @@
 				value: '-1K',
 				description: 'from last week'
 			}
+		},
+		{
+			title: 'Stock Under Minimum',
+			value: '4 Material',
+			sub: {
+				value: '-1K',
+				description: 'from last week'
+			}
+		},
+		{
+			title: 'Active Borrowing',
+			value: '8 Transaction',
+			sub: {
+				value: '-1K',
+				description: 'from currnet shift'
+			}
 		}
 	];
 </script>
