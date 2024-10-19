@@ -149,6 +149,10 @@ export const createPageFile = () => {
 	return new Client() as TypedClient;
 };
 
-export const time = (date: any) => {
+type TimeOption = {
+	format: string;
+};
+export const time = (date: any, options?: TimeOption) => {
+	if (options) return dayjs(date).locale(ID).format(options.format);
 	return dayjs(date).locale(ID).format('dddd, DD MMMM YYYY - h:mm A');
 };
