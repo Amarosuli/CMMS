@@ -52,6 +52,8 @@ export const actions = {
 			const item = form.data.items[index];
 
 			try {
+				const stock = await locals.pb.collection('stock_master').getOne(item.stock_id);
+				await locals.pb.collection('stock_master').update(item.stock_id, { ...stock, quantity_borrowed: stock.quantity_borrowed + item.quantity_out });
 				result[index] = await locals.pb.collection('borrow_item').create(item);
 			} catch (er: any) {
 				const errorMessage = `${er?.response.message} | PocketBase error.`;
