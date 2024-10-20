@@ -1,8 +1,9 @@
 <script>
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Avatar from '$lib/components/ui/avatar';
-	import { Lightbulb, LogOut } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
+	// icons
+	import { Lightbulb, LogOut } from 'lucide-svelte';
 
 	export let user;
 	export let logOut;

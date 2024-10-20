@@ -1,11 +1,13 @@
 <script>
 	import * as Sheet from '$lib/components/ui/sheet';
 	import { NavbarDD, NavbarContent, NavbarLogin } from '.';
-	import { AlignLeft } from 'lucide-svelte';
-	import { Button } from '$lib/components/ui/button';
 	import { afterNavigate } from '$app/navigation';
+	import { Button } from '$lib/components/ui/button';
+	// icons
+	import { AlignLeft } from 'lucide-svelte';
 
 	export let sidebarMenu;
+	export let currentRole;
 	export let currentPath;
 	export let currentHash;
 	export let user;
@@ -29,7 +31,7 @@
 				</Sheet.Trigger>
 
 				<Sheet.Content side="left">
-					<NavbarContent {sidebarMenu} {currentHash} {currentPath} />
+					<NavbarContent {sidebarMenu} {currentHash} {currentPath} {currentRole} />
 				</Sheet.Content>
 			</Sheet.Root>
 		</span>

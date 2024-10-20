@@ -1,14 +1,14 @@
-<script>
-	import { ChevronRight, MoveRight } from 'lucide-svelte';
+<script lang="ts">
+	import { toggleMode } from 'mode-watcher';
 	import { Button } from '$lib/components/ui/button';
 	import { Render } from 'svelte-headless-table';
-	import { toggleMode } from 'mode-watcher';
-	import Sun from 'lucide-svelte/icons/sun';
-	import Moon from 'lucide-svelte/icons/moon';
+	// icons
+	import { ChevronRight, MoveRight, Moon, Sun } from 'lucide-svelte';
 
 	export let sidebarMenu;
-	export let currentHash;
-	export let currentPath;
+	export let currentHash: string;
+	export let currentPath: string;
+	export let currentRole: string;
 </script>
 
 <div class="flex flex-col border-b p-4 [&>[data-slot=section]+[data-slot=section]]:mt-2.5">
@@ -25,7 +25,7 @@
 <div class="flex flex-1 flex-col overflow-y-auto p-4 [&>[data-slot=section]+[data-slot=section]]:mt-8">
 	<div class="flex flex-col">
 		{#each sidebarMenu as menu}
-			<span class="relative">
+			<span class="relative" class:hidden={currentRole === undefined ? menu.role !== undefined : currentRole === 'super' ? false : currentRole === 'admin' ? menu.role === 'super' : currentRole === 'general' ? menu.role === 'super' || menu.role === 'admin' : false}>
 				<span class="absolute inset-y-2 -left-4 w-0.5 rounded-full bg-primary {currentPath === menu.url ? '' : 'hidden'}"></span>
 				<Button variant="ghost" class="flex w-full justify-start font-semibold text-secondary-foreground" href={`${menu.url}${menu.defaultHash ? menu.defaultHash : ''}`}>
 					<Render of={menu.icon} />
@@ -34,7 +34,7 @@
 			</span>
 			{#if menu.sub}
 				{#each menu.sub as sub}
-					<span class="relative">
+					<span class="relative" class:hidden={currentRole === undefined ? menu.role !== undefined : currentRole === 'super' ? false : currentRole === 'admin' ? menu.role === 'super' : currentRole === 'general' ? menu.role === 'super' || menu.role === 'admin' : false}>
 						<Button variant="ghost" class="flex w-full justify-start pl-6 font-semibold text-secondary-foreground " href={menu.url + sub.hash}>
 							<ChevronRight class="mr-2 h-4 w-4 {currentHash === sub.hash ? 'text-primary' : ''}" />
 							<span class="truncate">{sub.title}</span>
