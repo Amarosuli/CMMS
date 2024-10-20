@@ -2,11 +2,12 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
 	import { defaults, superForm } from 'sveltekit-superforms';
-	import { LoaderCircle } from 'lucide-svelte';
 	import { loginSchema } from '$lib/zodSchema';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input';
 	import { zod } from 'sveltekit-superforms/adapters';
+	// icons
+	import { LoaderCircle } from 'lucide-svelte';
 
 	export let open: boolean = false;
 
