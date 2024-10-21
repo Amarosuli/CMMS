@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { time } from '$lib/helpers.js';
-	import { Button } from '$lib/components/ui/button/index.js';
 	import { CalendarPlus, ChevronLeft, LoaderCircle } from 'lucide-svelte';
+	import { Button } from '$lib/components/ui/button/index.js';
 	import { fade } from 'svelte/transition';
+	import { time } from '$lib/helpers.js';
 
 	export let data;
 	const { allStockIn, allStockOut } = data;
