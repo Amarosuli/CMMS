@@ -146,7 +146,7 @@
 	{/if}
 </div>
 <div class="flex items-center gap-2 py-2">
-	<Input class="max-w-sm" placeholder="Filter name..." type="text" bind:value={searchInput} />
+	<Input class="max-w-sm" placeholder="Filter..." type="text" bind:value={searchInput} />
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger asChild let:builder>
 			<Button variant="outline" class="ml-auto" builders={[builder]}>
