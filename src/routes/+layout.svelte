@@ -2,6 +2,7 @@
 	import '../app.css';
 
 	import { Navbar, NavbarSmall, LoginDialog } from '$lib/components/layout';
+	import { afterNavigate, beforeNavigate } from '$app/navigation';
 	import { createRender } from 'svelte-headless-table';
 	import { ModeWatcher } from 'mode-watcher';
 	import { Toaster } from '$lib/components/ui/sonner';
@@ -13,8 +14,9 @@
 	export let data;
 	const { user } = data;
 
-	let openLoginDialog = false;
-	let isLogOut = false;
+	let openLoginDialog: boolean = false;
+	let isLogOut: boolean = false;
+	let loadingPage: boolean = false;
 
 	async function logOut() {
 		isLogOut = true;
@@ -107,13 +109,16 @@
 		}
 	];
 
+	beforeNavigate(() => (loadingPage = true));
+	afterNavigate(() => (loadingPage = false));
+
 	$: currentRole = user ? user.role.toLowerCase() : undefined;
 	$: currentHash = $page.url.hash;
 	$: currentPath = $page.url.pathname;
 </script>
 
-{#if isLogOut}
-	<div transition:fade class="fixed inset-0 z-50 flex h-screen w-screen items-center justify-center bg-secondary/80">
+{#if isLogOut || loadingPage}
+	<div transition:fade class="fixed inset-0 z-[1000] flex h-screen w-screen items-center justify-center bg-secondary/80">
 		<LoaderCircle class="h-4 w-4 animate-spin text-primary" />
 		<p class="ml-2 text-xs">Loading...</p>
 	</div>
