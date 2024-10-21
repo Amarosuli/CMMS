@@ -135,9 +135,9 @@
 		</Field>
 		<Button class="mt-4 {borrowingId ? 'hidden' : ''}" type="submit" disabled={$DelayedBorrowing ? true : false}>
 			{#if $DelayedBorrowing}
-				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" /> Saving...
+				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" /> Creating...
 			{:else}
-				Save
+				Create
 			{/if}
 		</Button>
 		{#if $MessageBorrowing}
