@@ -8,7 +8,7 @@
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/stores';
 	// icons
-	import { SquareKanban, SendToBack, Archive, House, LoaderCircle } from 'lucide-svelte';
+	import { SquareKanban, SendToBack, Archive, House, ListOrdered, LoaderCircle } from 'lucide-svelte';
 
 	export let data;
 	const { user } = data;
@@ -37,7 +37,7 @@
 		},
 		{
 			title: 'Borrow',
-			icon: createRender(House, { class: 'mr-2 h-4 w-4' }),
+			icon: createRender(ListOrdered, { class: 'mr-2 h-4 w-4' }),
 			url: '/production/borrow',
 			role: Role.GENERAL
 		},
