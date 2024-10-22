@@ -1,8 +1,9 @@
 <script lang="ts">
 	import * as Drawer from '$lib/components/ui/drawer';
-	import { CalendarPlus, ChevronLeft, Eye, Pencil } from 'lucide-svelte';
+	import { CalendarPlus, ChevronLeft, Eye, Pencil, LoaderCircle } from 'lucide-svelte';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import { Button } from '$lib/components/ui/button';
+	import { fade } from 'svelte/transition';
 	import { time } from '$lib/helpers.js';
 	import { goto } from '$app/navigation';
 	import { pb } from '$lib/pocketbaseClient';
@@ -15,22 +16,24 @@
 
 	let borrowedItems: RecordModel[] = [];
 	let open: boolean = false;
+	let isDrawerOpen: boolean = false;
 
 	async function getBorrowedItems(borrowId: string) {
 		let result = await pb.collection('borrow_item').getFullList({ filter: 'borrow_id="' + borrowId + '"', expand: 'stock_id.material_id.unit_id' });
 		borrowedItems = result.map((item) => {
 			return { ...item, stock: item.expand?.stock_id, material: item.expand?.stock_id.expand.material_id, unit: item.expand?.stock_id.expand?.material_id.expand?.unit_id.code };
 		});
+		isDrawerOpen = false;
 	}
 
 	async function drawerOpenHandler(borrowId: string) {
+		isDrawerOpen = true;
 		getBorrowedItems(borrowId);
 		open = !open;
 	}
 </script>
 
 <Drawer.Root bind:open>
-	<!-- <Drawer.Trigger>Open</Drawer.Trigger> -->
 	<Drawer.Content class="flex w-full  sm:justify-start lg:justify-center">
 		<Drawer.Header>
 			<Drawer.Title>Borrowed Items</Drawer.Title>
@@ -39,17 +42,24 @@
 		<div class="h-ful w-full p-4 pb-6">
 			<ScrollArea class="h-96 max-h-96">
 				<div class="flex w-full flex-col gap-2">
-					{#each borrowedItems as item}
-						<div class="flex w-full flex-col border-t p-2 pt-4 text-xs md:flex-row md:items-center md:gap-3 lg:w-full">
-							<p class="w-full flex-1">Mat. Code : {item.material.code}</p>
-							<p class="w-full flex-1 truncate">Mat. Description : {item.material.description}</p>
-							<p class="w-full flex-1 max-sm:hidden">Batch : {item.stock.batch_number}</p>
-							<p class="w-full flex-1">Purchase Order : {item.stock.purchase_order}</p>
-							<p class="w-full max-w-32 truncate">Out Quantity : {item.quantity_out} {item.unit || 'EA'}</p>
-							<p class="mb-3 w-full max-w-32 truncate md:mb-0">Return Quantity : {item.quantity_return}</p>
-							<Button size="default" variant="outline" class="mr-auto">Save</Button>
+					{#if isDrawerOpen}
+						<div transition:fade class="absolute inset-0 flex w-full items-center justify-center gap-2 border-t bg-secondary/50 p-2 pt-4 text-xs md:flex-row md:items-center md:gap-3 lg:w-full">
+							<LoaderCircle class="h-4 w-4 animate-spin" />
+							<p>Loading...</p>
 						</div>
-					{/each}
+					{:else}
+						{#each borrowedItems as item}
+							<div class="flex w-full flex-col border-t p-2 pt-4 text-xs md:flex-row md:items-center md:gap-3 lg:w-full">
+								<p class="w-full flex-1">Mat. Code : {item.material.code}</p>
+								<p class="w-full flex-1 truncate">Mat. Description : {item.material.description}</p>
+								<p class="w-full flex-1 max-sm:hidden">Batch : {item.stock.batch_number}</p>
+								<p class="w-full flex-1">Purchase Order : {item.stock.purchase_order}</p>
+								<p class="w-full max-w-32 truncate">Out Quantity : {item.quantity_out} {item.unit || 'EA'}</p>
+								<p class="mb-3 w-full max-w-32 truncate md:mb-0">Return Quantity : {item.quantity_return}</p>
+								<Button size="default" variant="outline" class="mr-auto">Save</Button>
+							</div>
+						{/each}
+					{/if}
 				</div>
 			</ScrollArea>
 		</div>
@@ -109,12 +119,12 @@
 </div>
 
 <div class="flex flex-col gap-3">
-	<p class="mt-20">admin bisa menghapus item maupun transaksi itu sendiri, menghapus transaksi akan menghapus item data peminjaman item secara otomatis.</p>
+	<p class="mt-20 line-through">admin bisa menghapus item maupun transaksi itu sendiri, menghapus transaksi akan menghapus item data peminjaman item secara otomatis.</p>
 	<p>admin bisa edit manual item peminjaman (menambah item, mengurangi item, mengubah qty out) atau data peminjaman itu sendiri (order number , esn).</p>
 	<p>(ui yg lain)produksi juga bisa mengedit data peminjaman dan item yang mereka pinjam</p>
 	<p>ketika produksi return borrowing, status akan jadi pending.</p>
 	<p>admin bisa cross check actual material yang kembali.</p>
 	<p>admin bisa closing transaction, closing transaction akan memproses : check qty return lebih kecil dari qty out. jika yes, sistem akan create stock out dengan referensi id transaksi. kemudian, akan merubah status borrowing movement menjadi closed</p>
-	<p>transaksi yang sudah selesai, tidak akan muncul di halaman active borrowing.</p>
+	<p class="line-through">transaksi yang sudah selesai, tidak akan muncul di halaman active borrowing.</p>
 	<p>untuk selanjutnya, mungkin perlu menampilkan foto dari masing2 requester</p>
 </div>
