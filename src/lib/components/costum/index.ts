@@ -6,3 +6,4 @@ export { default as BorrowItemView } from './BorrowItemView.svelte';
 export { default as BorrowItemEdit } from './BorrowItemEdit.svelte';
 export { default as BorrowItemDelete } from './BorrowItemDelete.svelte';
 export { default as BorrowDataDelete } from './BorrowDataDelete.svelte';
+export { default as BorrowDataEdit } from './BorrowDataEdit.svelte';
