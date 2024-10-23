@@ -43,7 +43,7 @@
 			<Dialog.Title>Edit Data</Dialog.Title>
 			<Dialog.Description>Correction make perfection!</Dialog.Description>
 		</Dialog.Header>
-		<div class="mt-6 flex w-full flex-col gap-4">
+		<div class="mt-2 flex w-full flex-col items-center gap-4">
 			<form class="mt-3 flex w-full max-w-80 flex-col text-base/6 sm:text-sm/6" method="post" on:submit|preventDefault>
 				<div class="mb-2 flex flex-col gap-2">
 					<Label for="order_number">Order Number</Label>
