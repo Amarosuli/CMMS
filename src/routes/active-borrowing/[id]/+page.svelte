@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { BorrowDataView, BorrowItemView, BorrowDataDelete, BorrowDataEdit } from '$lib/components/costum';
+	import { BorrowDataView, BorrowItemView, BorrowDataDelete, BorrowDataEdit, BorrowItemAdd } from '$lib/components/costum';
 	import { ChevronLeft, CalendarPlus, Plus, Pencil, Trash } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { time } from '$lib/helpers.js';
@@ -8,6 +8,11 @@
 
 	let isDeleteDataOpen: boolean = false;
 	let isEditDataOpen: boolean = false;
+	let isAddItemOpen: boolean = false;
+
+	let stockIds = data.borrowItems.map((item) => {
+		return { stock_id: item.stock_id };
+	});
 </script>
 
 <svelte:head>
@@ -37,6 +42,7 @@
 
 <BorrowDataDelete bind:open={isDeleteDataOpen} borrowItems={data.borrowItems} borrowData={data.borrowData} />
 <BorrowDataEdit bind:open={isEditDataOpen} borrowData={data.borrowData} />
+<BorrowItemAdd bind:open={isAddItemOpen} borrowData={data.borrowData} {stockIds} />
 
 <div class="relative mt-12">
 	<h2 class="flex-1 text-base/7 font-semibold text-foreground sm:text-sm/6">Borrowing Data</h2>
@@ -57,10 +63,10 @@
 	<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
 	<div class="overflow-x-auto">
 		{#each data.borrowItems as item}
-			<BorrowItemView {item} />
+			<BorrowItemView {item} bind:stockIds />
 		{/each}
 	</div>
-	<Button variant="outline" class="mt-4 flex w-fit gap-2">
+	<Button variant="outline" class="mt-4 flex w-fit gap-2" on:click={() => (isAddItemOpen = !isAddItemOpen)}>
 		<Plus class="h-4 w-4" />
 		Add Item
 	</Button>
