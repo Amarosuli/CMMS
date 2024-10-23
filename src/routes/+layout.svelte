@@ -40,7 +40,7 @@
 		{
 			title: 'Borrow',
 			icon: createRender(ListOrdered, { class: 'mr-2 h-4 w-4' }),
-			url: '/production/borrow',
+			url: '/borrow',
 			role: Role.GENERAL
 		},
 		{
