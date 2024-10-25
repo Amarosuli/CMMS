@@ -8,3 +8,4 @@ export { default as BorrowItemDelete } from './BorrowItemDelete.svelte';
 export { default as BorrowDataDelete } from './BorrowDataDelete.svelte';
 export { default as BorrowDataEdit } from './BorrowDataEdit.svelte';
 export { default as BorrowItemAdd } from './BorrowItemAdd.svelte';
+export { default as QRScanner } from './QRScanner.svelte';

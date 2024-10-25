@@ -1,0 +1,64 @@
+<script lang="ts">
+	import { beforeNavigate } from '$app/navigation';
+	import { Html5Qrcode, type Html5QrcodeResult } from 'html5-qrcode';
+	import { onMount } from 'svelte';
+	import { Button } from '$lib/components/ui/button';
+	import { toast } from 'svelte-sonner';
+	import { X, LoaderCircle } from 'lucide-svelte';
+
+	export let scanning = false;
+	let html5Qrcode: Html5Qrcode;
+	let isLoading: boolean = false;
+
+	onMount(init);
+
+	function init() {
+		html5Qrcode = new Html5Qrcode('reader');
+	}
+
+	function start() {
+		isLoading = true;
+		html5Qrcode
+			.start(
+				{ facingMode: 'environment' },
+				{
+					fps: 15,
+					qrbox: { width: 250, height: 250 }
+				},
+				onScanSuccess,
+				onScanFailure
+			)
+			.then(() => {
+				isLoading = false;
+			});
+		// scanning = true;
+	}
+
+	async function stop() {
+		await html5Qrcode.stop();
+		scanning = false;
+	}
+
+	function onScanSuccess(decodeText: string, decodeResult: Html5QrcodeResult) {
+		toast.info(decodeText);
+		// console.log(decodeResult);
+	}
+
+	function onScanFailure(error: string) {
+		// console.log('Error ', error);
+	}
+
+	beforeNavigate(() => {
+		stop();
+	});
+
+	$: if (scanning) start();
+</script>
+
+<div class:hidden={!scanning} class="absolute inset-0 isolate z-50 flex w-full flex-col items-center justify-center bg-background/90">
+	{#if isLoading}
+		<LoaderCircle class="h-8 w-8 animate-spin" />
+	{/if}
+	<reader id="reader" class="relative flex w-full max-w-[500px] items-center justify-center" />
+	<Button variant="ghost" size="icon" on:click={stop} class="fixed bottom-32 rounded-full"><X class="h-8 w-8" /></Button>
+</div>

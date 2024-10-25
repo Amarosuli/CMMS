@@ -56,3 +56,17 @@
 		@apply bg-background text-foreground;
 	}
 }
+
+/* style below for overide html5-qrcode styles */
+#reader {
+	video {
+		@apply !aspect-square !w-full object-cover;
+	}
+}
+#qr-shaded-region {
+	inset: unset !important;
+	@apply !box-border !h-full !w-full !border-[50px];
+}
+#qr-canvas {
+	@apply !hidden !h-1/2 !w-1/2;
+}
