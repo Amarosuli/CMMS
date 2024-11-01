@@ -10,6 +10,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { fade } from 'svelte/transition';
 	import { cn } from '$lib/utils.js';
+	import ViewQr from '../costum/ViewQR.svelte';
 
 	export let user;
 	export let basePath: string;
@@ -52,6 +53,13 @@
 			cell: ({ value }) => {
 				let materialUnit = value.materialData?.expand?.unit_id?.code || '';
 				return value.quantity_available + ' ' + materialUnit;
+			}
+		}),
+		table.column({
+			header: 'QR',
+			accessor: (item) => item,
+			cell: ({ value }) => {
+				return createRender(ViewQr, { data: value });
 			}
 		}),
 		table.column({
@@ -103,7 +111,7 @@
 		.filter(([, hide]) => !hide)
 		.map(([id]) => id);
 
-	const hideableCols = ['batch_number', 'Quantity Available', 'Quantity Borrowed', 'Code', 'Description'];
+	const hideableCols = ['batch_number', 'Quantity Available', 'Quantity Borrowed', 'Code', 'QR', 'Description'];
 </script>
 
 <div class="flex items-end justify-between gap-4">
