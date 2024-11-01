@@ -1,14 +1,16 @@
 <script lang="ts">
-	import { beforeNavigate } from '$app/navigation';
 	import { Html5Qrcode, type Html5QrcodeResult } from 'html5-qrcode';
+	import { createEventDispatcher } from 'svelte';
+	import { X, LoaderCircle } from 'lucide-svelte';
+	import { beforeNavigate } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { toast } from 'svelte-sonner';
-	import { X, LoaderCircle } from 'lucide-svelte';
 
 	export let scanning = false;
 	let html5Qrcode: Html5Qrcode;
 	let isLoading: boolean = false;
+	const dispatch = createEventDispatcher();
 
 	onMount(init);
 
@@ -23,7 +25,7 @@
 				{ facingMode: 'environment' },
 				{
 					fps: 15,
-					qrbox: { width: 250, height: 250 }
+					qrbox: { width: 300, height: 300 }
 				},
 				onScanSuccess,
 				onScanFailure
@@ -41,7 +43,10 @@
 
 	function onScanSuccess(decodeText: string, decodeResult: Html5QrcodeResult) {
 		toast.info(decodeText);
-		// console.log(decodeResult);
+		dispatch('captured', {
+			data: JSON.parse(decodeText)
+		});
+		stop();
 	}
 
 	function onScanFailure(error: string) {
