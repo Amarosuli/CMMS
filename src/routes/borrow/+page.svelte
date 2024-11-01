@@ -72,8 +72,19 @@
 					return { ...item, quantity_out: item.quantity_out + 1 };
 				});
 				$FormItem.items = bucket;
-				return;
+			} else {
+				let bucket = [
+					...$FormItem.items,
+					{
+						borrow_id: '',
+						stock_id: stock_id,
+						quantity_out: 1,
+						date_out: new Date().toUTCString()
+					}
+				];
+				$FormItem.items = bucket;
 			}
+			return;
 		}
 		let bucket = [
 			...$FormItem.items,
@@ -149,14 +160,14 @@
 		<Field form={FBorrowing} name="order_number">
 			<Control let:attrs>
 				<Label>Order Number</Label>
-				<Input {...attrs} bind:value={$FormBorrowing.order_number} type="text" placeholder="Order Number" disabled={borrowingId} />
+				<Input {...attrs} bind:value={$FormBorrowing.order_number} type="text" placeholder="Order Number" disabled={borrowingId ? true : false} />
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field form={FBorrowing} name="esn">
 			<Control let:attrs>
 				<Label>ESN</Label>
-				<Input {...attrs} bind:value={$FormBorrowing.esn} type="text" placeholder="ESN" disabled={borrowingId} />
+				<Input {...attrs} bind:value={$FormBorrowing.esn} type="text" placeholder="ESN" disabled={borrowingId ? true : false} />
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
@@ -223,7 +234,12 @@
 					</div>
 				{/each}
 				<div class="gap-auto z-20 mt-4 flex w-full items-center justify-start gap-2">
-					<Button variant="outline" class="w-full min-w-32 max-w-40 sm:w-fit" on:click={addItem}><Plus class="mr-2 h-4 w-4 " />Add Item</Button>
+					<Button
+						variant="outline"
+						class="w-full min-w-32 max-w-40 sm:w-fit"
+						on:click={() => {
+							addItem();
+						}}><Plus class="mr-2 h-4 w-4 " />Add Item</Button>
 					<Button disabled={!borrowingId} variant="outline" class="w-full min-w-32 max-w-40 sm:w-fit md:mx-0" on:click={() => (scanning = !scanning)}>
 						<ScanQrCode class="mr-2 h-4 w-4" />
 						Scan QR</Button>
