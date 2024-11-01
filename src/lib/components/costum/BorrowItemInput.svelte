@@ -60,7 +60,7 @@
 	<Popover.Root bind:open let:ids>
 		<Control let:attrs>
 			<Label class="mb-[0.15rem] mt-[0.2rem] py-[0.15rem]">Stock {selectedStock ? `- Available Qty : ${selectedStock} ${stockUnit}` : ''}</Label>
-			<Popover.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'justify-between truncate', !$FormItem.items[index].stock_id && 'text-muted-foreground')} role="combobox" {...attrs}>
+			<Popover.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'justify-between truncate max-sm:max-w-64', !$FormItem.items[index].stock_id && 'text-muted-foreground')} role="combobox" {...attrs}>
 				{stock.find((f) => f.value === $FormItem.items[index].stock_id)?.detail ?? 'Select Material'}
 				<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
 			</Popover.Trigger>
