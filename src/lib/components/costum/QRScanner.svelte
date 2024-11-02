@@ -36,9 +36,10 @@
 		// scanning = true;
 	}
 
-	async function stop() {
-		await html5Qrcode.stop();
-		scanning = false;
+	function stop() {
+		html5Qrcode.stop().then(() => {
+			scanning = false;
+		});
 	}
 
 	function onScanSuccess(decodeText: string, decodeResult: Html5QrcodeResult) {
@@ -60,7 +61,7 @@
 	$: if (scanning) start();
 </script>
 
-<div class:hidden={!scanning} class="absolute inset-0 isolate z-50 flex w-full flex-col items-center justify-center bg-background/90">
+<div class:hidden={!scanning} class="fixed inset-0 isolate z-50 flex w-full flex-col items-center justify-center bg-background/90">
 	{#if isLoading}
 		<LoaderCircle class="h-8 w-8 animate-spin" />
 	{/if}
