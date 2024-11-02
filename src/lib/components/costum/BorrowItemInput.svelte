@@ -8,10 +8,18 @@
 	import { onMount, tick } from 'svelte';
 	import { cn } from '$lib/utils.js';
 	import { pb } from '$lib/pocketbaseClient';
+	import type { SuperFormData } from 'sveltekit-superforms/client';
 
 	export let stockSkip: { id: string | undefined }[];
 	export let FItem;
-	export let FormItem;
+	export let FormItem: SuperFormData<{
+		items: {
+			stock_id: string;
+			quantity_out: number;
+			borrow_id: string;
+			date_out: string;
+		}[];
+	}>;
 	export let index;
 
 	let stock: {
