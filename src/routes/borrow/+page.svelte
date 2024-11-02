@@ -63,39 +63,20 @@
 	}
 
 	function addItem(stock_id?: string) {
+		let bucket = {
+			borrow_id: borrowingId,
+			stock_id: '',
+			quantity_out: 1,
+			date_out: new Date().toUTCString()
+		};
+
 		if (stock_id) {
-			// check dulu di items, apakah udah ada stock_id sama, jika ada hanya tambahkan quantity saja.
-			let res = $FormItem.items.find((item) => item.stock_id === stock_id);
-			if (res) {
-				let bucket = $FormItem.items.map((item) => {
-					if (item.stock_id !== stock_id) return item;
-					return { ...item, quantity_out: item.quantity_out + 1 };
-				});
-				$FormItem.items = bucket;
-			} else {
-				let bucket = [
-					...$FormItem.items,
-					{
-						borrow_id: '',
-						stock_id: stock_id,
-						quantity_out: 1,
-						date_out: new Date().toUTCString()
-					}
-				];
-				$FormItem.items = bucket;
-			}
-			return;
+			bucket.stock_id = stock_id;
+			$FormItem.items = [...$FormItem.items, bucket];
+			scanning = false;
+		} else {
+			$FormItem.items = [...$FormItem.items, bucket];
 		}
-		let bucket = [
-			...$FormItem.items,
-			{
-				borrow_id: '',
-				stock_id: '',
-				quantity_out: 1,
-				date_out: new Date().toUTCString()
-			}
-		];
-		$FormItem.items = bucket;
 	}
 
 	function setItemQtyOut(e: Event, index: number) {
@@ -103,15 +84,31 @@
 		$FormItem.items[index].quantity_out = parseInt(target.value);
 	}
 
+	function findEqualThenAddQuantity(stock_id: string) {
+		let res = $FormItem.items.find((item) => item.stock_id === stock_id);
+		if (res) {
+			let bucket = $FormItem.items.map((item) => {
+				if (item.stock_id !== stock_id) return item;
+				return { ...item, quantity_out: item.quantity_out + 1 };
+			});
+			$FormItem.items = bucket;
+			scanning = false;
+
+			return true;
+		}
+		return false;
+	}
+
 	function handleCaptured(e: CustomEvent<{ data: { stock_id: string; material_id: string } }>) {
 		const data = e.detail.data;
-		if ($FormItem.items.length === 1) {
-			if (!$FormItem.items[0].stock_id) {
-				$FormItem.items[0].stock_id = data.stock_id;
-			}
+		if (!$FormItem.items[0].stock_id) {
+			$FormItem.items[0].stock_id = data.stock_id;
+			return;
 		} else {
-			addItem(data.stock_id);
+			const result = findEqualThenAddQuantity(data.stock_id);
+			if (result) return;
 		}
+		addItem(data.stock_id);
 	}
 
 	let scanning: boolean = false;
@@ -216,7 +213,7 @@
 						<BorrowItemInput {FItem} {FormItem} {stockSkip} index={i} />
 						<Field form={FItem} name="items[{i}].quantity_out" class="flex-grow-0">
 							<Control let:attrs>
-								<Label>Quantity Out</Label>
+								<Label>Quantity</Label>
 								<Input {...attrs} value={$FormItem.items[i].quantity_out} on:change={(e) => setItemQtyOut(e, i)} min="0" type="number" placeholder="Quantity Out" />
 							</Control>
 							<FieldErrors class="text-xs italic" />
