@@ -2,7 +2,6 @@
 	import { Html5Qrcode, type Html5QrcodeResult } from 'html5-qrcode';
 	import { createEventDispatcher } from 'svelte';
 	import { X, LoaderCircle } from 'lucide-svelte';
-	import { beforeNavigate } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { toast } from 'svelte-sonner';
@@ -53,10 +52,6 @@
 	function onScanFailure(error: string) {
 		// console.log('Error ', error);
 	}
-
-	beforeNavigate(() => {
-		stop();
-	});
 
 	$: if (scanning) start();
 </script>
