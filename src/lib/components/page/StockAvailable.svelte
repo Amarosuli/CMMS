@@ -4,13 +4,12 @@
 	import { addHiddenColumns, addSelectedRows, addSortBy, addTableFilter } from 'svelte-headless-table/plugins';
 	import { ArrowDown, ArrowUp, ChevronDown, LoaderCircle, PlusCircle } from 'lucide-svelte';
 	import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
-	import { DataTableActions } from '$lib/components/costum';
+	import { DataTableActions, ViewQr } from '$lib/components/costum';
 	import { createPageFile } from '$lib/helpers';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { fade } from 'svelte/transition';
 	import { cn } from '$lib/utils.js';
-	import ViewQr from '../costum/ViewQR.svelte';
 
 	export let user;
 	export let basePath: string;
@@ -89,7 +88,7 @@
 			header: '',
 			accessor: ({ id }) => id,
 			cell: (item) => {
-				return createRender(DataTableActions, { id: item.value, user, basePath });
+				return createRender(DataTableActions, { id: item.value, user, basePath, disableDelete: true });
 			},
 			plugins: {
 				sort: {
