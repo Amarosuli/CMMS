@@ -11,6 +11,7 @@
 	import { cn } from '$lib/utils.js';
 
 	export let tableName: string;
+	let searchInput = '';
 
 	const { getState } = createPageFile().init('transaction_type');
 
@@ -56,6 +57,7 @@
 		.map(([id]) => id);
 
 	const hideableCols = ['code', 'description'];
+	$: searchInput, ($filterValue = searchInput.toLowerCase());
 </script>
 
 <div class="flex items-end justify-between gap-4">
@@ -69,7 +71,7 @@
 	</h1>
 </div>
 <div class="flex items-center gap-2 py-2">
-	<Input class="max-w-sm" placeholder="Filter name..." type="text" bind:value={$filterValue} />
+	<Input class="max-w-sm" placeholder="Filter..." type="text" bind:value={searchInput} />
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger asChild let:builder>
 			<Button variant="outline" class="ml-auto" builders={[builder]}>
