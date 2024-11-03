@@ -30,7 +30,7 @@
 					</Button>
 				</Sheet.Trigger>
 
-				<Sheet.Content side="left">
+				<Sheet.Content side="left" class="p-0">
 					<NavbarContent {sidebarMenu} {currentHash} {currentPath} {currentRole} />
 				</Sheet.Content>
 			</Sheet.Root>
