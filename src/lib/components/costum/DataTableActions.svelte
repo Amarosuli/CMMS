@@ -13,6 +13,7 @@
 	export let user: AuthModel | undefined;
 	export let basePath: string;
 	export let reload: Function = () => {};
+	export let disableDelete: boolean = false;
 
 	let open = false;
 
@@ -65,7 +66,9 @@
 			<DropdownMenu.Separator />
 			<DropdownMenu.Item href="{basePath}/{id}">Detail</DropdownMenu.Item>
 			<DropdownMenu.Item href="{basePath}/{id}#edit">Edit</DropdownMenu.Item>
-			<DropdownMenu.Item on:click={() => (open = true)}>Delete</DropdownMenu.Item>
+			{#if !disableDelete}
+				<DropdownMenu.Item on:click={() => (open = true)}>Delete</DropdownMenu.Item>
+			{/if}
 		{/if}
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
