@@ -15,6 +15,7 @@
 	export let user;
 	export let basePath: string;
 	export let tableName: string;
+	let searchInput: string = '';
 
 	const { nextPage, prevPage, getState, setPerPage, addModifier } = createPageFile().init('stock_master', { expand: 'material_id,material_id.unit_id' });
 
@@ -112,6 +113,7 @@
 		.map(([id]) => id);
 
 	const hideableCols = ['batch_number', 'Quantity Available', 'Quantity Borrowed', 'Code', 'QR', 'Description'];
+	$: searchInput, ($filterValue = searchInput.toLowerCase());
 </script>
 
 <div class="flex items-end justify-between gap-4">
@@ -134,7 +136,7 @@
 	{/if}
 </div>
 <div class="flex items-center gap-2 py-2">
-	<Input class="max-w-sm" placeholder="Filter name..." type="text" bind:value={$filterValue} />
+	<Input class="max-w-sm" placeholder="Filter..." type="text" bind:value={searchInput} />
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger asChild let:builder>
 			<Button variant="outline" class="ml-auto" builders={[builder]}>
