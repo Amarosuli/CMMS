@@ -122,7 +122,7 @@
 		.filter(([, hide]) => !hide)
 		.map(([id]) => id);
 
-	const hideableCols = ['code', 'description', 'part_number_1', 'part_number_2', 'part_number_3', 'unitCode', 'minimum_quantity'];
+	const hideableCols = ['code', 'description', 'part_number', 'unitCode', 'minimum_quantity', 'remark'];
 	$: searchInput, ($filterValue = searchInput.toLowerCase());
 </script>
 
