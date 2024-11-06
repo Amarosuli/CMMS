@@ -6,3 +6,5 @@ export { default as MaterialUnitForm } from './MaterialUnitForm.svelte';
 
 export { default as TransactionType } from './TransactionType.svelte';
 export { default as StockAvailable } from './StockAvailable.svelte';
+
+export { default as RecentTransaction } from './RecentTransaction.svelte';
