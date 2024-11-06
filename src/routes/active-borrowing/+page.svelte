@@ -1,21 +1,19 @@
 <script lang="ts">
 	import * as Drawer from '$lib/components/ui/drawer';
 	import { CalendarPlus, ChevronLeft, Eye, Pencil, LoaderCircle, SquareUser } from 'lucide-svelte';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import { deserialize } from '$app/forms';
 	import { Button } from '$lib/components/ui/button';
 	import { toast } from 'svelte-sonner';
 	import { fade } from 'svelte/transition';
 	import { time } from '$lib/helpers.js';
-	import { goto } from '$app/navigation';
 	import { pb } from '$lib/pocketbaseClient';
 
 	import type { RecordModel } from 'pocketbase';
 	import type { StockMaster } from '$lib/CostumTypes.js';
 
 	export let data;
-
-	const { openBorrowing } = data;
 
 	let borrowedItems: RecordModel[] = [];
 	let open: boolean = false;
@@ -53,7 +51,7 @@
 		pb.collection('stock_master')
 			.update(id, { quantity_borrowed: quantity_borrowed - quantity_return }) // quantity_borrowed back to before borrowed
 			.then(() => {
-				toast.success('Checkout successfully');
+				toast.success('Stock successfully updated');
 			})
 			.catch((error) => {
 				toast.error(error.message);
@@ -70,7 +68,7 @@
 								quantity_borrowed: stock.quantity_borrowed - quantity_out // quantity_borrowed back to before borrowed
 							})
 							.then(() => {
-								toast.success('Check out successfully');
+								toast.success('Stock out successfully created');
 							})
 							.catch((error) => {
 								toast.error(error.message);
@@ -86,37 +84,42 @@
 	}
 
 	async function updateBorrowMovement(borrowId: string) {
-		pb.collection('borrow_movement')
+		await pb
+			.collection('borrow_movement')
 			.update(borrowId, { status: 'CLOSED' })
 			.then(() => {
 				toast.success('Checkout successfully');
 			})
 			.catch((error) => {
 				toast.error(error.message);
+			})
+			.finally(() => {
+				invalidateAll();
 			});
 	}
 
 	async function process(borrowId: string) {
-		let chainedPromise = Promise.resolve();
-		const promiseArr = borrowedItems.map((item) => {
-			return (chainedPromise = chainedPromise.then(() => {
-				if (item.quantity_out === item.quantity_return) {
-					return updateStockQuantity(item.stock.id, item.stock.quantity_borrowed, item.quantity_return);
-				} else {
-					return createStockOut(item.stock.id, item.stock, item.quantity_out, item.quantity_return);
-				}
-			}));
+		data.openBorrowing = data.openBorrowing.map((item) => {
+			if (item.id === borrowId) {
+				return { ...item, isCheckOut: true };
+			}
+			return item;
 		});
 
-		const result = await Promise.all(promiseArr);
-		Promise.resolve(result)
-			.then(() => updateBorrowMovement(borrowId))
-			.catch((error) => toast.error(error.message))
-			.finally(() => goto('/active-borrowing'));
+		const promiseArr = borrowedItems.map(async (item) => {
+			if (item.quantity_out === item.quantity_return) {
+				return await updateStockQuantity(item.stock.id, item.stock.quantity_borrowed, item.quantity_return);
+			} else {
+				return await createStockOut(item.stock.id, item.stock, item.quantity_out, item.quantity_return);
+			}
+		});
+
+		const result = Promise.all(promiseArr);
+		updateBorrowMovement(borrowId);
 	}
 
 	async function closeTransaction(borrowId: string) {
-		getBorrowedItems(borrowId).then(() => {
+		Promise.resolve(getBorrowedItems(borrowId)).then(() => {
 			process(borrowId);
 		});
 	}
@@ -181,10 +184,10 @@
 </div>
 
 <div class="mt-4 grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
-	{#if openBorrowing.length === 0}
+	{#if data.openBorrowing.length === 0}
 		<p class="inline-flex w-fit items-center rounded-md bg-lime-400/20 p-2 text-sm/5 font-bold text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 sm:text-xs/5 forced-colors:outline">Currently no active borrowing</p>
 	{/if}
-	{#each openBorrowing as borrow}
+	{#each data.openBorrowing as borrow}
 		<div class="relative">
 			<hr role="presentation" class="w-full border-t" />
 			<div class="mt-6 font-mono text-sm/3 font-light text-lime-500 sm:text-xs/3">{time(borrow.created, { format: 'ddd, DD MMM YYYY - h:mm A' })}</div>
@@ -204,7 +207,11 @@
 						Detail
 					</Button>
 				</div>
-				<Button variant="outline" on:click={() => closeTransaction(borrow.id)}>Close Transaction</Button>
+				<Button variant="outline" disabled={borrow.isCheckOut} on:click={() => closeTransaction(borrow.id)}>
+					{#if borrow.isCheckOut}
+						<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+					{/if}
+					Close Transaction</Button>
 			</div>
 		</div>
 	{/each}
