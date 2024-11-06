@@ -1,14 +1,17 @@
 <script lang="ts">
 	import * as Drawer from '$lib/components/ui/drawer';
-	import { CalendarPlus, ChevronLeft, Eye, Pencil, LoaderCircle } from 'lucide-svelte';
+	import { CalendarPlus, ChevronLeft, Eye, Pencil, LoaderCircle, SquareUser } from 'lucide-svelte';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
+	import { deserialize } from '$app/forms';
 	import { Button } from '$lib/components/ui/button';
+	import { toast } from 'svelte-sonner';
 	import { fade } from 'svelte/transition';
 	import { time } from '$lib/helpers.js';
 	import { goto } from '$app/navigation';
 	import { pb } from '$lib/pocketbaseClient';
 
 	import type { RecordModel } from 'pocketbase';
+	import type { StockMaster } from '$lib/CostumTypes.js';
 
 	export let data;
 
@@ -30,6 +33,92 @@
 		isDrawerOpen = true;
 		getBorrowedItems(borrowId);
 		open = !open;
+	}
+
+	async function stockOut(data: Record<string, any>) {
+		let formData = new FormData();
+		for (let key in data) {
+			formData.append(key, data[key]);
+		}
+
+		const response = await fetch('/movement/stock-out?/updateToStockMaster', {
+			method: 'POST',
+			body: formData
+		});
+
+		return deserialize(await response.text());
+	}
+
+	async function updateStockQuantity(id: string, quantity_borrowed: number, quantity_return: number) {
+		pb.collection('stock_master')
+			.update(id, { quantity_borrowed: quantity_borrowed - quantity_return }) // quantity_borrowed back to before borrowed
+			.then(() => {
+				toast.success('Checkout successfully');
+			})
+			.catch((error) => {
+				toast.error(error.message);
+			});
+	}
+	async function createStockOut(id: string, stock: StockMaster, quantity_out: number, quantity_return: number) {
+		pb.collection('stock_out')
+			.create({ transaction_type: 'SOUT', stock_id: stock.id, quantity: quantity_out - quantity_return, user_id: data.user?.id, remark: 'Stock out by production', refference_id: id })
+			.then(() => {
+				stockOut({ stock_id: stock.id, quantity: stock.quantity_borrowed - quantity_return })
+					.then(() => {
+						pb.collection('stock_master')
+							.update(id, {
+								quantity_borrowed: stock.quantity_borrowed - quantity_out // quantity_borrowed back to before borrowed
+							})
+							.then(() => {
+								toast.success('Check out successfully');
+							})
+							.catch((error) => {
+								toast.error(error.message);
+							});
+					})
+					.catch((error) => {
+						toast.error(error.message);
+					});
+			})
+			.catch((error) => {
+				toast.error(error.message);
+			});
+	}
+
+	async function updateBorrowMovement(borrowId: string) {
+		pb.collection('borrow_movement')
+			.update(borrowId, { status: 'CLOSED' })
+			.then(() => {
+				toast.success('Checkout successfully');
+			})
+			.catch((error) => {
+				toast.error(error.message);
+			});
+	}
+
+	async function process(borrowId: string) {
+		let chainedPromise = Promise.resolve();
+		const promiseArr = borrowedItems.map((item) => {
+			return (chainedPromise = chainedPromise.then(() => {
+				if (item.quantity_out === item.quantity_return) {
+					return updateStockQuantity(item.stock.id, item.stock.quantity_borrowed, item.quantity_return);
+				} else {
+					return createStockOut(item.stock.id, item.stock, item.quantity_out, item.quantity_return);
+				}
+			}));
+		});
+
+		const result = await Promise.all(promiseArr);
+		Promise.resolve(result)
+			.then(() => updateBorrowMovement(borrowId))
+			.catch((error) => toast.error(error.message))
+			.finally(() => goto('/active-borrowing'));
+	}
+
+	async function closeTransaction(borrowId: string) {
+		getBorrowedItems(borrowId).then(() => {
+			process(borrowId);
+		});
 	}
 </script>
 
@@ -97,34 +186,26 @@
 	{/if}
 	{#each openBorrowing as borrow}
 		<div class="relative">
-			<div class="absolute bottom-8 right-0 flex gap-2">
-				<Button variant="outline" on:click={() => goto('/active-borrowing/' + borrow.id)}>
-					<Pencil class="mr-2 h-4 w-4" />
-					Edit
-				</Button>
-				<Button variant="outline" on:click={() => drawerOpenHandler(borrow.id)}>
-					<Eye class="mr-2 h-4 w-4" />
-					Detail
-				</Button>
-			</div>
 			<hr role="presentation" class="w-full border-t" />
 			<div class="mt-6 font-mono text-sm/3 font-light text-lime-500 sm:text-xs/3">{time(borrow.created, { format: 'ddd, DD MMM YYYY - h:mm A' })}</div>
-			<div class=" text-lg font-medium sm:text-sm/6">{borrow.user.username} - {borrow.user.name}</div>
-			<div class="mt-3 text-2xl/8 font-extrabold text-foreground/80 sm:text-xl/8">{borrow.status}</div>
+			<div class=" flex items-center text-lg font-medium sm:text-sm/6"><SquareUser class="mr-2 h-4 w-4" /> {borrow.user.username} - {borrow.user.name}</div>
+			<div class="mt-3 text-2xl/8 font-extrabold text-foreground/80 sm:text-xl/8" class:text-lime-500={borrow.status === 'OPEN'} class:text-yellow-500={borrow.status === 'PENDING'}>{borrow.status}</div>
 			<div class="mt-3 text-sm/6 sm:text-xs/6">
 				<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 sm:text-xs/5 forced-colors:outline">{borrow.esn || 'No ESN'}</span> <span class="text-zinc-500">{borrow.order_number || 'No Order Number'}</span>
 			</div>
+			<div class="mt-3 flex flex-col gap-2">
+				<div class="flex gap-2">
+					<Button variant="outline" class="flex-1" on:click={() => goto('/active-borrowing/' + borrow.id)}>
+						<Pencil class="mr-2 h-4 w-4" />
+						Edit
+					</Button>
+					<Button variant="outline" class="flex-1" on:click={() => drawerOpenHandler(borrow.id)}>
+						<Eye class="mr-2 h-4 w-4" />
+						Detail
+					</Button>
+				</div>
+				<Button variant="outline" on:click={() => closeTransaction(borrow.id)}>Close Transaction</Button>
+			</div>
 		</div>
 	{/each}
-</div>
-
-<div class="flex flex-col gap-3">
-	<p class="mt-20 line-through">admin bisa menghapus item maupun transaksi itu sendiri, menghapus transaksi akan menghapus item data peminjaman item secara otomatis.</p>
-	<p>admin bisa edit manual item peminjaman (menambah item, mengurangi item, mengubah qty out) atau data peminjaman itu sendiri (order number , esn).</p>
-	<p>(ui yg lain)produksi juga bisa mengedit data peminjaman dan item yang mereka pinjam</p>
-	<p>ketika produksi return borrowing, status akan jadi pending.</p>
-	<p>admin bisa cross check actual material yang kembali.</p>
-	<p>admin bisa closing transaction, closing transaction akan memproses : check qty return lebih kecil dari qty out. jika yes, sistem akan create stock out dengan referensi id transaksi. kemudian, akan merubah status borrowing movement menjadi closed</p>
-	<p class="line-through">transaksi yang sudah selesai, tidak akan muncul di halaman active borrowing.</p>
-	<p>untuk selanjutnya, mungkin perlu menampilkan foto dari masing2 requester</p>
 </div>
