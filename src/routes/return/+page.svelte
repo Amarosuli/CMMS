@@ -25,6 +25,9 @@
 </div>
 
 <div class="mt-4 grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
+	{#if data.activeBorrow.length === 0}
+		<p class="inline-flex w-fit items-center rounded-md bg-lime-400/20 p-2 text-sm/5 font-bold text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 sm:text-xs/5 forced-colors:outline">Currently no active borrowing</p>
+	{/if}
 	{#each data.activeBorrow as item}
 		<Button href="/return/{item.id}" variant="secondary" class="flex h-full flex-col items-start justify-start border p-4">
 			<div class="mt-2 text-lg font-medium sm:text-sm/6">ESN - {item.esn}</div>
