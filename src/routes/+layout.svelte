@@ -9,7 +9,7 @@
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/stores';
 	// icons
-	import { SquareKanban, SendToBack, Archive, House, ListOrdered, LoaderCircle } from 'lucide-svelte';
+	import { SquareKanban, SendToBack, Archive, FolderInput, FolderOutput, House, ListOrdered, LoaderCircle } from 'lucide-svelte';
 
 	export let data;
 	const { user } = data;
@@ -39,13 +39,13 @@
 		},
 		{
 			title: 'Borrow',
-			icon: createRender(ListOrdered, { class: 'mr-2 h-4 w-4' }),
+			icon: createRender(FolderOutput, { class: 'mr-2 h-4 w-4' }),
 			url: '/borrow',
 			role: Role.GENERAL
 		},
 		{
 			title: 'Return',
-			icon: createRender(ListOrdered, { class: 'mr-2 h-4 w-4' }),
+			icon: createRender(FolderInput, { class: 'mr-2 h-4 w-4' }),
 			url: '/return',
 			role: Role.GENERAL
 		},
