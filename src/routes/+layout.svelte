@@ -44,6 +44,12 @@
 			role: Role.GENERAL
 		},
 		{
+			title: 'Return',
+			icon: createRender(ListOrdered, { class: 'mr-2 h-4 w-4' }),
+			url: '/return',
+			role: Role.GENERAL
+		},
+		{
 			title: 'Stock',
 			icon: createRender(Archive, { class: 'mr-2 h-4 w-4' }),
 			url: '/stock',
@@ -63,11 +69,6 @@
 				{
 					title: 'Stock Out',
 					hash: '/stock-out',
-					role: Role.ADMIN
-				},
-				{
-					title: 'Borrow Return',
-					hash: '/borrow-in',
 					role: Role.ADMIN
 				},
 				{
