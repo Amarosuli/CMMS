@@ -1,0 +1,114 @@
+<script lang="ts">
+	import { Button } from '$lib/components/ui/button/index.js';
+	import { CalendarPlus, ChevronLeft, Eye, Plus, Minus, LoaderCircle } from 'lucide-svelte';
+
+	import { time } from '$lib/helpers';
+	import { writable } from 'svelte/store';
+	import { string } from 'zod';
+	import { pb } from '$lib/pocketbaseClient.js';
+	import { toast } from 'svelte-sonner';
+	import { goto } from '$app/navigation';
+	import type { StockMaster } from '$lib/CostumTypes.js';
+
+	export let data;
+
+	let arrayQuantityOut = writable(data.detail);
+
+	async function updateQtyReturn(id: string, stock: StockMaster, quantity_out: number, quantity_return: number) {
+		pb.collection('borrow_item')
+			.update(id, { quantity_return: quantity_return, date_return: new Date().toUTCString() })
+			.then(() => {})
+			.catch((error) => {
+				toast.error(error.message);
+			});
+	}
+	async function updateBorrowMovement() {
+		pb.collection('borrow_movement')
+			.update(data.borrowId, { status: 'PENDING' })
+			.then(() => {
+				toast.success('Checkout successfully');
+			})
+			.catch((error) => {
+				toast.error(error.message);
+			});
+	}
+
+	// checkOut will update quantity_return as production input and status of borrow_movement to PENDING
+	async function checkOut() {
+		let chainedPromise = Promise.resolve();
+		const promiseArr = $arrayQuantityOut.map((item) => {
+			return (chainedPromise = chainedPromise.then(() => {
+				return updateQtyReturn(item.id, item.stock, item.quantity_out, item.quantity_return);
+			}));
+		});
+
+		const result = await Promise.all(promiseArr);
+		Promise.resolve(result)
+			.then(() => updateBorrowMovement())
+			.finally(() => goto('/return'));
+	}
+</script>
+
+<div>
+	<Button href="/return" variant="outline" class="inline-flex items-center gap-2 text-sm/6">
+		<ChevronLeft class="h-4 w-4" />
+		<span>Return</span>
+	</Button>
+</div>
+
+<div class="mt-4 lg:mt-8">
+	<div class="flex items-center gap-4">
+		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Crosscheck <span class="text-foreground/50">Before Checkout</span></h1>
+		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 sm:text-xs/5 forced-colors:outline"></span>
+	</div>
+	<div class="isolate mt-2.5 flex flex-wrap justify-between gap-x-6 gap-y-4">
+		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
+			<span class="flex items-center gap-3 text-base/6 sm:text-sm/6">
+				<CalendarPlus class="h-4 w-4" />
+				<span>{time(new Date())}</span></span>
+		</div>
+	</div>
+</div>
+
+<div class="mt-12 flex flex-col gap-4">
+	<div>
+		<p>Check return quantity. If material habis checklist pada habis. Jika hanya beberapa yang habis maka sesuaikan quantity yang kembali.</p>
+	</div>
+	{#each $arrayQuantityOut as item}
+		<div class="flex items-center rounded border p-4 text-sm">
+			<div class="flex flex-1 flex-col">
+				<p class="">Purchase Order : {item.stock.purchase_order}</p>
+				<p class="">Batch Number : {item.stock.batch_number}</p>
+			</div>
+			<div class="flex flex-1 flex-col">
+				<p class="">Part Number : {item.material.part_number}</p>
+				<p class="">Part Code : {item.material.code}</p>
+			</div>
+			<div class="flex items-center justify-center gap-2">
+				<p class="p-4">Out : {item.quantity_out} {item.unit.code || ''}</p>
+				<Button
+					variant="outline"
+					size="icon"
+					on:click={() => {
+						if (item.quantity_return != 0) item.quantity_return--;
+					}}><Minus class="h-4 w-4" /></Button>
+				<Button class={item.quantity_out === item.quantity_return ? 'bg-lime-500 dark:bg-lime-800' : 'bg-red-500'}>
+					Return : {item.quantity_return}
+					<span class="w-4">
+						{item.unit.code || ''}
+					</span>
+				</Button>
+				<Button
+					variant="outline"
+					size="icon"
+					on:click={() => {
+						if (item.quantity_return < item.quantity_out) item.quantity_return++;
+					}}><Plus class="h-4 w-4" /></Button>
+			</div>
+		</div>
+	{/each}
+</div>
+
+<div class="mt-4">
+	<Button variant="outline" on:click={checkOut}>Check Out</Button>
+</div>
