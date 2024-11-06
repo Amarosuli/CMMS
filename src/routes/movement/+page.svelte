@@ -56,7 +56,7 @@
 	<ul role="list" class="">
 		{#each stockMovement as stock (stock.id)}
 			<li class="flex justify-between gap-x-6 border px-4 py-2 hover:bg-secondary">
-				<div class="flex min-w-0 gap-4">
+				<div class="flex min-w-0 flex-col md:flex-row md:gap-4">
 					<div class="flex w-20 min-w-20 flex-auto items-center divide-y">
 						<p class=" truncate text-xl font-bold text-foreground">{stock.transactionType}</p>
 					</div>
@@ -66,7 +66,7 @@
 					</div>
 					<div class="min-w-0 flex-auto">
 						<p class="mt-1 truncate text-xs leading-5 text-foreground/50">Quantity : <span class="text-xs font-semibold leading-6 text-foreground">{stock.quantity} EA</span></p>
-						<p class="mt-1 truncate text-xs leading-5 text-foreground/50">Remark : <span class="text-xs font-semibold leading-6 text-foreground">{stock.remark}</span></p>
+						<p class="mt-1 truncate text-xs leading-5 text-foreground/50">Remark : <span class="text-xs font-semibold leading-6 text-foreground">{stock.remark || '-'}</span></p>
 					</div>
 				</div>
 				<div class="hidden shrink-0 sm:flex sm:flex-col sm:items-end">

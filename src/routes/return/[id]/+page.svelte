@@ -72,10 +72,10 @@
 
 <div class="mt-12 flex flex-col gap-4">
 	<div>
-		<p>Check return quantity. If material habis checklist pada habis. Jika hanya beberapa yang habis maka sesuaikan quantity yang kembali.</p>
+		<p>Make sure the return quantity of each material is correct before Check Out.</p>
 	</div>
 	{#each $arrayQuantityOut as item}
-		<div class="flex items-center rounded border p-4 text-sm">
+		<div class="flex flex-col rounded border p-4 text-sm md:flex-row md:items-center">
 			<div class="flex flex-1 flex-col">
 				<p class="">Purchase Order : {item.stock.purchase_order}</p>
 				<p class="">Batch Number : {item.stock.batch_number}</p>
@@ -84,7 +84,7 @@
 				<p class="">Part Number : {item.material.part_number}</p>
 				<p class="">Part Code : {item.material.code}</p>
 			</div>
-			<div class="flex items-center justify-center gap-2">
+			<div class="mt-2 flex items-center gap-2 md:justify-center">
 				<p class="p-4">Out : {item.quantity_out} {item.unit.code || ''}</p>
 				<Button
 					variant="outline"
@@ -110,5 +110,5 @@
 </div>
 
 <div class="mt-4">
-	<Button variant="outline" on:click={checkOut}>Check Out</Button>
+	<Button variant="outline" class="outline-primary" on:click={checkOut}>Check Out</Button>
 </div>
