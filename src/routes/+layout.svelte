@@ -70,11 +70,6 @@
 					title: 'Stock Out',
 					hash: '/stock-out',
 					role: Role.ADMIN
-				},
-				{
-					title: 'Borrow Out',
-					hash: '/borrow-out',
-					role: Role.ADMIN
 				}
 			]
 		},
