@@ -9,7 +9,7 @@
 	let recentItems: BorrowMovement[] = [];
 	onMount(async () => {
 		isLoading = true;
-		recentItems = await pb.collection('borrow_movement').getFullList({ sort: '-updated', batch: 10 });
+		recentItems = await pb.collection('borrow_movement').getFullList({ expand: 'user_id', sort: '-updated', batch: 10 });
 		isLoading = false;
 	});
 </script>
@@ -23,12 +23,22 @@
 		{/if}
 	{:else}
 		{#each recentItems as item}
-			<div class="grid border-x border-b p-2 text-xs first:border-t sm:grid-cols-2 sm:gap-0 md:text-sm xl:grid-cols-5 xl:gap-4">
-				<p>{item.id}</p>
-				<p>{item.esn || 'No ESN'}</p>
-				<p>{item.order_number || 'No Order Number'}</p>
-				<p>{item.status}</p>
-				<p>{time(item.updated)}</p>
+			<div class="grid items-center border-x border-b p-2 text-xs first:border-t sm:grid-cols-2 sm:gap-0 md:text-sm xl:grid-cols-4 xl:gap-4">
+				<p>{time(item.updated, { format: 'dddd, DD MMM YYYY - h:mm A' })}</p>
+				<div class="flex gap-2 md:flex-col">
+					<p>ESN {item.esn || '-'}</p>
+					<p class="md:hidden">/</p>
+					<p>Order Number {item.order_number || '-'}</p>
+				</div>
+				<div class="flex gap-2 md:flex-col">
+					<p class="text-xs">{item.expand?.user_id.username}</p>
+					<p class="md:hidden">/</p>
+					<p class="text-xs">{item.expand?.user_id.name}</p>
+				</div>
+				<div>
+					<p class="hidden text-xs md:block">Status</p>
+					<p class="text-xs">{item.status}</p>
+				</div>
 			</div>
 		{/each}
 	{/if}
