@@ -12,6 +12,7 @@
 
 	import type { RecordModel } from 'pocketbase';
 	import type { StockMaster } from '$lib/CostumTypes.js';
+	import { ConfirmDialog } from '$lib/components/costum';
 
 	export let data;
 
@@ -123,6 +124,7 @@
 			process(borrowId);
 		});
 	}
+	let confirmDialog: boolean[] = [];
 </script>
 
 <Drawer.Root bind:open>
@@ -187,7 +189,9 @@
 	{#if data.openBorrowing.length === 0}
 		<p class="inline-flex w-fit items-center rounded-md bg-lime-400/20 p-2 text-sm/5 font-bold text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 sm:text-xs/5 forced-colors:outline">Currently no active borrowing</p>
 	{/if}
-	{#each data.openBorrowing as borrow}
+	{#each data.openBorrowing as borrow, index}
+		<ConfirmDialog title="This action will complete the transaction" bind:open={confirmDialog[index]} on:confirm={() => closeTransaction(borrow.id)} />
+
 		<div class="relative">
 			<hr role="presentation" class="w-full border-t" />
 			<div class="mt-6 font-mono text-sm/3 font-light text-lime-500 sm:text-xs/3">{time(borrow.created, { format: 'ddd, DD MMM YYYY - h:mm A' })}</div>
@@ -207,7 +211,7 @@
 						Detail
 					</Button>
 				</div>
-				<Button variant="outline" disabled={borrow.isCheckOut} on:click={() => closeTransaction(borrow.id)}>
+				<Button variant="outline" disabled={!(borrow.status === 'PENDING')} on:click={() => (confirmDialog[index] = !confirmDialog[index])}>
 					{#if borrow.isCheckOut}
 						<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
 					{/if}

@@ -9,8 +9,10 @@
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
 	import type { StockMaster } from '$lib/CostumTypes.js';
+	import { ConfirmDialog } from '$lib/components/costum';
 
 	export let data;
+	let open: boolean = false;
 
 	let arrayQuantityOut = writable(data.detail);
 
@@ -48,6 +50,8 @@
 			.finally(() => goto('/return'));
 	}
 </script>
+
+<ConfirmDialog title="This action means the material returned is in accordance to the actual" bind:open on:confirm={checkOut} />
 
 <div>
 	<Button href="/return" variant="outline" class="inline-flex items-center gap-2 text-sm/6">
@@ -110,5 +114,5 @@
 </div>
 
 <div class="mt-4">
-	<Button variant="outline" class="outline-primary" on:click={checkOut}>Check Out</Button>
+	<Button variant="outline" class="outline-primary" on:click={() => (open = !open)}>Check Out</Button>
 </div>
