@@ -1,5 +1,6 @@
 export { default as DataTableActions } from './DataTableActions.svelte';
 export { default as DeleteDialog } from './DeleteDialog.svelte';
+export { default as ConfirmDialog } from './ConfirmDialog.svelte';
 export { default as BorrowItemInput } from './BorrowItemInput.svelte';
 export { default as BorrowDataView } from './BorrowDataView.svelte';
 export { default as BorrowItemView } from './BorrowItemView.svelte';
