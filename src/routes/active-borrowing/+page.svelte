@@ -150,7 +150,6 @@
 								<p class="w-full flex-1">Purchase Order : {item.stock.purchase_order}</p>
 								<p class="w-full max-w-32 truncate">Out Quantity : {item.quantity_out} {item.unit || 'EA'}</p>
 								<p class="mb-3 w-full max-w-32 truncate md:mb-0">Return Quantity : {item.quantity_return}</p>
-								<Button size="default" variant="outline" class="mr-auto">Save</Button>
 							</div>
 						{/each}
 					{/if}
@@ -158,8 +157,7 @@
 			</ScrollArea>
 		</div>
 		<Drawer.Footer class="flex w-full items-center justify-center space-y-2">
-			<Button size="default" class="w-80 bg-lime-500 text-background">Close Transaction</Button>
-			<Drawer.Close>Cancel</Drawer.Close>
+			<Drawer.Close>Close</Drawer.Close>
 		</Drawer.Footer>
 	</Drawer.Content>
 </Drawer.Root>
