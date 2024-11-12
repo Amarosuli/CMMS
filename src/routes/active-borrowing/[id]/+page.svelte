@@ -10,7 +10,7 @@
 	let isEditDataOpen: boolean = false;
 	let isAddItemOpen: boolean = false;
 
-	let stockIds = data.borrowItems.map((item) => {
+	$: stockIds = data.borrowItems.map((item) => {
 		return { stock_id: item.stock_id };
 	});
 </script>
@@ -66,7 +66,7 @@
 			<BorrowItemView {item} bind:stockIds />
 		{/each}
 	</div>
-	<Button variant="outline" class="mt-4 flex w-fit gap-2" on:click={() => (isAddItemOpen = !isAddItemOpen)}>
+	<Button variant="outline" class="mt-4 flex w-fit gap-2 bg-lime-400 hover:bg-lime-300 dark:bg-lime-600 dark:hover:bg-lime-500" on:click={() => (isAddItemOpen = !isAddItemOpen)}>
 		<Plus class="h-4 w-4" />
 		Add Item
 	</Button>
