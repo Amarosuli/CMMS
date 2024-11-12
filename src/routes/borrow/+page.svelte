@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { FieldErrors, Control, Field, Label, Legend, ElementField } from '$lib/components/ui/form';
 	import { LoaderCircle, ScanQrCode, ArrowDown, CalendarPlus, Plus, X } from 'lucide-svelte';
+	import { BorrowItemInput, ConfirmDialog } from '$lib/components/costum';
 	import { goto, onNavigate } from '$app/navigation';
-	import { BorrowItemInput } from '$lib/components/costum';
 	import { BorrowStatus } from '$lib/CostumTypes.js';
 	import { QRScanner } from '$lib/components/costum';
 	import { superForm } from 'sveltekit-superforms';
@@ -14,6 +14,8 @@
 
 	export let data;
 	const { user } = data;
+	let borrowingConfirmDialog: boolean = false;
+	let itemConfirmDialog: boolean = false;
 
 	$: borrowingId = '';
 
@@ -34,7 +36,7 @@
 			}
 		}
 	});
-	const { form: FormBorrowing, delayed: DelayedBorrowing, message: MessageBorrowing, enhance: EnhanceBorrowing } = FBorrowing;
+	const { form: FormBorrowing, delayed: DelayedBorrowing, message: MessageBorrowing, enhance: EnhanceBorrowing, submit: submitBorrowing } = FBorrowing;
 
 	$: $FormBorrowing.user_id = user?.id;
 	$: $FormBorrowing.status = BorrowStatus.OPEN;
@@ -54,7 +56,7 @@
 			}
 		}
 	});
-	const { form: FormItem, delayed: DelayedItem, message: MessageItem, enhance: EnhanceItem } = FItem;
+	const { form: FormItem, delayed: DelayedItem, message: MessageItem, enhance: EnhanceItem, submit: submitItem } = FItem;
 
 	$: $FormItem.items.forEach((item) => (item.borrow_id = borrowingId));
 
@@ -136,6 +138,8 @@
 </script>
 
 <QRScanner bind:scanning on:captured={handleCaptured} />
+<ConfirmDialog title="Confirm the data is correct!" bind:open={borrowingConfirmDialog} on:confirm={submitBorrowing} />
+<ConfirmDialog bind:open={itemConfirmDialog} on:confirm={submitItem} />
 
 <div class="mt-4 lg:mt-8">
 	<div class="flex items-center gap-4">
@@ -182,7 +186,7 @@
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
-		<Button class="mt-4 {borrowingId ? 'hidden' : ''}" type="submit" disabled={$DelayedBorrowing ? true : false}>
+		<Button class="mt-4 {borrowingId ? 'hidden' : ''}" on:click={() => (borrowingConfirmDialog = !borrowingConfirmDialog)} disabled={$DelayedBorrowing ? true : false}>
 			{#if $DelayedBorrowing}
 				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" /> Creating...
 			{:else}
@@ -242,7 +246,7 @@
 						Scan QR</Button>
 				</div>
 			</Field>
-			<Button class="mt-4 max-w-80" type="submit" disabled={$DelayedItem ? true : false}>
+			<Button class="mt-4 max-w-80" on:click={() => (itemConfirmDialog = !itemConfirmDialog)} disabled={$DelayedItem ? true : false}>
 				{#if $DelayedItem}
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin" /> Saving...
 				{:else}
