@@ -1,5 +1,7 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
+
+	import { createEventDispatcher } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { LoaderCircle } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -11,6 +13,7 @@
 	export let open: boolean = false;
 	export let item: BorrowItem;
 
+	const dispatch = createEventDispatcher();
 	let isDeleting: boolean = false;
 
 	async function deleteItem() {
@@ -37,7 +40,14 @@
 				toast.error(error.message);
 			})
 			.finally(() => {
-				invalidateAll();
+				dispatch('state', {
+					value: true
+				});
+				invalidateAll().then(() => {
+					dispatch('state', {
+						value: false
+					});
+				});
 				isDeleting = false;
 				open = false;
 			});
