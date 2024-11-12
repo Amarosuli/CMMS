@@ -3,23 +3,25 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as Command from '$lib/components/ui/command/index.js';
 
+	import { createEventDispatcher, onMount, tick } from 'svelte';
+	import { LoaderCircle, Check, ChevronsUpDown } from 'lucide-svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import { borrowItemOutSchema } from '$lib/zodSchema';
-	import { onMount, tick } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
+	import { writable } from 'svelte/store';
 	import { Label } from '$lib/components/ui/label';
 	import { Input } from '$lib/components/ui/input';
 	import { toast } from 'svelte-sonner';
 	import { cn } from '$lib/utils';
 	import { pb } from '$lib/pocketbaseClient';
-	// icons
-	import { LoaderCircle, Check, ChevronsUpDown } from 'lucide-svelte';
 
 	import type { BorrowItem, BorrowMovement } from '$lib/CostumTypes';
 
 	export let open: boolean = false;
 	export let borrowData: BorrowMovement;
 	export let stockIds: { stock_id: string }[];
+
+	const dispatch = createEventDispatcher();
 
 	let stock: {
 		value: string;
@@ -31,11 +33,7 @@
 
 	let openStock: boolean = false;
 	let isSaving: boolean = false;
-	let formData: BorrowItem = {} as BorrowItem;
-
-	formData.quantity_out = 1;
-	formData.borrow_id = borrowData.id;
-	formData.date_out = new Date().toUTCString();
+	let formData = writable<BorrowItem>({} as BorrowItem);
 
 	onMount(async () => {
 		const result = await pb.collection('stock_master').getFullList({ expand: 'material_id.unit_id' });
@@ -61,19 +59,22 @@
 	}
 
 	function setItemQtyOut(e: Event) {
-		const target = e.target as HTMLInputElement;
-		formData.quantity_out = parseInt(target.value);
+		let target = e.target as HTMLInputElement;
+		$formData.quantity_out = parseInt(target.value);
 	}
 
 	async function saveItem() {
-		let res = borrowItemOutSchema.safeParse({ items: [formData] });
-		if (!res.success) return toast.error('Not valid');
+		let res = borrowItemOutSchema.safeParse({ items: [$formData] });
+		if (!res.success) {
+			return toast.error('Not valid');
+		}
 		isSaving = true;
+		let data = res.data.items[0];
 
-		const stock = await pb.collection('stock_master').getOne(formData.stock_id);
+		const stock = await pb.collection('stock_master').getOne(data.stock_id);
 		if (stock.id) {
 			pb.collection('stock_master')
-				.update(stock.id, { quantity_borrowed: stock.quantity_borrowed + formData.quantity_out })
+				.update(stock.id, { quantity_borrowed: stock.quantity_borrowed + data.quantity_out })
 				.then(() => {
 					toast.success('Balance stock master successfully');
 				})
@@ -83,44 +84,60 @@
 		}
 
 		pb.collection('borrow_item')
-			.create(formData)
+			.create(data)
 			.then(() => {
-				toast.success('Create borrow item successfully');
+				toast.success('Add borrow item successfully');
 			})
 			.catch((error) => {
 				toast.error(error.message);
 			})
 			.finally(() => {
-				location.reload();
+				dispatch('state', {
+					value: true
+				});
+				invalidateAll().then(() => {
+					dispatch('state', {
+						value: false
+					});
+				});
 				open = false;
 				isSaving = false;
 			});
 	}
 
-	$: selectedStock = (stock.find((f) => f.value === formData.stock_id)?.quantity_available || 0) - formData.quantity_out;
-	$: stockUnit = stock.find((f) => f.value === formData.stock_id)?.unit || '';
+	$: selectedStock = (stock.find((f) => f.value === $formData.stock_id)?.quantity_available || 0) - $formData.quantity_out || null;
+	$: stockUnit = stock.find((f) => f.value === $formData.stock_id)?.unit || '';
 	$: stockAvailable = stock.filter((v) => {
 		return !stockIds.find((t) => t.stock_id === v.value);
 	});
-	$: open === false ? (isSaving = false) : (isSaving = isSaving);
+	$: if (!open) {
+		selectedStock = null;
+		isSaving = false;
+		$formData.stock_id = '';
+	} else {
+		isSaving = isSaving;
+		$formData.quantity_out = 1;
+		$formData.borrow_id = borrowData.id;
+		$formData.date_out = new Date().toUTCString();
+	}
 </script>
 
 <Dialog.Root bind:open>
 	<Dialog.Content class="p-10">
 		<Dialog.Header>
 			<Dialog.Title>Add Item</Dialog.Title>
-			<Dialog.Description>...</Dialog.Description>
+			<Dialog.Description>Find by PO, Batch Number or Part Number of material</Dialog.Description>
 		</Dialog.Header>
 		<div class="mt-6 flex w-full flex-col gap-4">
 			<form class="flex w-full flex-col" method="post" on:submit|preventDefault>
 				<div class="flex flex-col gap-2">
 					<Popover.Root bind:open={openStock} let:ids>
 						<Label class="mb-[0.15rem] mt-[0.2rem] py-[0.15rem]">Stock {selectedStock ? `- Available Qty : ${selectedStock} ${stockUnit}` : ''}</Label>
-						<Popover.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'justify-between truncate', !formData.stock_id && 'text-muted-foreground')} role="combobox">
-							{stock.find((f) => f.value === formData.stock_id)?.detail ?? 'Select Material'}
+						<Popover.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'justify-between truncate', !$formData.stock_id && 'text-muted-foreground')} role="combobox">
+							{stock.find((f) => f.value === $formData.stock_id)?.detail ?? 'Select Material'}
 							<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
 						</Popover.Trigger>
-						<input hidden value={formData.stock_id} name="stock_id" />
+						<input hidden value={$formData.stock_id} name="stock_id" />
 
 						<Popover.Content class="p-0">
 							<Command.Root>
@@ -131,11 +148,11 @@
 										<Command.Item
 											value={stock.detail}
 											onSelect={() => {
-												formData.stock_id = stock.value;
+												$formData.stock_id = stock.value;
 												closeAndFocusTrigger(ids.trigger);
 											}}>
 											{stock.label}
-											<Check class={cn('ml-auto h-4 w-4', stock.value !== formData.stock_id && 'text-transparent')} />
+											<Check class={cn('ml-auto h-4 w-4', stock.value !== $formData.stock_id && 'text-transparent')} />
 										</Command.Item>
 									{/each}
 								</Command.Group>
@@ -144,7 +161,7 @@
 					</Popover.Root>
 
 					<Label for="quantity_out">Quantity Out</Label>
-					<Input id="quantity_out" bind:value={formData.quantity_out} min="1" type="number" placeholder="Quantity Out" on:change={(e) => setItemQtyOut(e)} />
+					<Input id="quantity_out" bind:value={$formData.quantity_out} min="1" type="number" placeholder="Quantity Out" on:change={(e) => setItemQtyOut(e)} />
 				</div>
 				<Button class="mt-4" type="submit" on:click={saveItem} disabled={isSaving ? true : false}>
 					{#if isSaving}
