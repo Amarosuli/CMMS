@@ -55,9 +55,14 @@
 
 {#if currentView === 'Edit'}
 	<!-- <MaterialMasterForm {data} bind:currentView /> -->
+	<div class="mt-12">
+		<h2 class="text-base/7 font-semibold text-foreground sm:text-sm/6">Edit of Stock Master</h2>
+		<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
+		<p>This feature under review according to security. Add stock should be covered by stock-in, and stock-out will responsible for alteration quantity.</p>
+	</div>
 {:else if currentView === 'Detail'}
 	<div class="mt-12">
-		<h2 class="text-base/7 font-semibold text-foreground sm:text-sm/6">Detail of Material Master</h2>
+		<h2 class="text-base/7 font-semibold text-foreground sm:text-sm/6">Detail of Stock Master</h2>
 		<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
 		<dl class="grid grid-cols-1 text-base/6 sm:grid-cols-[min(50%,theme(spacing.80))_auto] sm:text-sm/6">
 			<dt class="col-start-1 border-t border-foreground/5 pt-3 text-foreground/50 first:border-none sm:py-3">Batch Number</dt>
