@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { BorrowDataView, BorrowItemView, BorrowDataDelete, BorrowDataEdit, BorrowItemAdd } from '$lib/components/costum';
-	import { ChevronLeft, CalendarPlus, Plus, Pencil, Trash } from 'lucide-svelte';
+	import { ChevronLeft, CalendarPlus, Plus, Pencil, Trash, LoaderCircle } from 'lucide-svelte';
+	import { writable } from 'svelte/store';
 	import { Button } from '$lib/components/ui/button';
 	import { time } from '$lib/helpers.js';
 
@@ -9,6 +10,11 @@
 	let isDeleteDataOpen: boolean = false;
 	let isEditDataOpen: boolean = false;
 	let isAddItemOpen: boolean = false;
+	let state = writable(false);
+
+	function stateHandler(e: CustomEvent<{ value: boolean }>) {
+		$state = e.detail.value;
+	}
 
 	$: stockIds = data.borrowItems.map((item) => {
 		return { stock_id: item.stock_id };
@@ -42,7 +48,7 @@
 
 <BorrowDataDelete bind:open={isDeleteDataOpen} borrowItems={data.borrowItems} borrowData={data.borrowData} />
 <BorrowDataEdit bind:open={isEditDataOpen} borrowData={data.borrowData} />
-<BorrowItemAdd bind:open={isAddItemOpen} borrowData={data.borrowData} {stockIds} />
+<BorrowItemAdd bind:open={isAddItemOpen} borrowData={data.borrowData} {stockIds} on:state={(e) => stateHandler(e)} />
 
 <div class="relative mt-12">
 	<h2 class="flex-1 text-base/7 font-semibold text-foreground sm:text-sm/6">Borrowing Data</h2>
@@ -66,8 +72,12 @@
 			<BorrowItemView {item} bind:stockIds />
 		{/each}
 	</div>
-	<Button variant="outline" class="mt-4 flex w-fit gap-2 bg-lime-400 hover:bg-lime-300 dark:bg-lime-600 dark:hover:bg-lime-500" on:click={() => (isAddItemOpen = !isAddItemOpen)}>
-		<Plus class="h-4 w-4" />
+	<Button variant="outline" disabled={$state} class="mt-4 flex w-fit gap-2 bg-lime-400 hover:bg-lime-300 dark:bg-lime-600 dark:hover:bg-lime-500" on:click={() => (isAddItemOpen = !isAddItemOpen)}>
+		{#if $state}
+			<LoaderCircle class="h-4 w-4 animate-spin" />
+		{:else}
+			<Plus class="h-4 w-4" />
+		{/if}
 		Add Item
 	</Button>
 </div>
