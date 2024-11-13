@@ -1,6 +1,7 @@
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
 import { pb } from './pocketbaseClient';
 import dayjs from 'dayjs';
+import isBetween from 'dayjs/plugin/isBetween';
 import ID from 'dayjs/locale/id';
 
 import type { MaterialMaster, TypedPocketBase, MaterialUnit, User } from './CostumTypes';
@@ -155,4 +156,23 @@ type TimeOption = {
 export const time = (date: any, options?: TimeOption) => {
 	if (options) return dayjs(date).locale(ID).format(options.format);
 	return dayjs(date).locale(ID).format('dddd, DD MMMM YYYY - h:mm A');
+};
+
+export const timeOfDay = () => {
+	dayjs.extend(isBetween);
+
+	let morning = [dayjs().hour(0).minute(0).second(0), dayjs().hour(12).minute(0).second(0)];
+	let afternoon = [dayjs().hour(12).minute(0).second(0), dayjs().hour(17).minute(0).second(0)];
+	let evening = [dayjs().hour(17).minute(0).second(0), dayjs().hour(20).minute(0).second(0)];
+	let night = [dayjs().hour(20).minute(0).second(0), dayjs().hour(23).minute(0).second(0)];
+
+	let isMorning = dayjs().isBetween(morning[0], morning[1]);
+	let isAfternoon = dayjs().isBetween(afternoon[0], afternoon[1]);
+	let isEvening = dayjs().isBetween(evening[0], evening[1]);
+	let isNight = dayjs().isBetween(night[0], night[1]);
+
+	if (isMorning) return 'Morning';
+	if (isAfternoon) return 'Afternoon';
+	if (isEvening) return 'Evening';
+	if (isNight) return 'Night';
 };

@@ -3,7 +3,7 @@
 	import { ChevronDown, Plus, CircleDot } from 'lucide-svelte';
 	import { RecentTransaction } from '$lib/components/page';
 	import { Button } from '$lib/components/ui/button';
-	import { time } from '$lib/helpers';
+	import { time, timeOfDay } from '$lib/helpers';
 
 	export let data;
 	const { user } = data;
@@ -64,7 +64,7 @@
 	<title>CMMS - Dashboard</title>
 </svelte:head>
 
-<h1 class="text-2xl/8 font-semibold">Good Afternoon{user ? ', ' + user.name : ''}</h1>
+<h1 class="text-2xl/8 font-semibold">Good {timeOfDay()}{user ? ', ' + user.name : ''}</h1>
 
 {#if user && user.role === 'General'}
 	<div class="mt-8 flex items-end justify-between">
