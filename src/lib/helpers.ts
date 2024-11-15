@@ -1,4 +1,4 @@
-import { derived, writable, type Readable, type Writable } from 'svelte/store';
+import { derived, readable, writable, type Readable, type Writable } from 'svelte/store';
 import { pb } from './pocketbaseClient';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -175,4 +175,15 @@ export const timeOfDay = () => {
 	if (isAfternoon) return 'Afternoon';
 	if (isEvening) return 'Evening';
 	if (isNight) return 'Night';
+};
+
+export const clock = () => {
+	const initial = new Date();
+
+	return readable(initial, (set) => {
+		const update = () => set(new Date());
+		const interval = setInterval(update, 1000);
+
+		return () => clearInterval(interval);
+	});
 };
