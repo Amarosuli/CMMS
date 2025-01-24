@@ -1,11 +1,134 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { MaterialMaster } from '$lib/components/page';
+	import type { RecordModel } from 'pocketbase';
 
-	export let data;
+	import { type ColumnDef, type VisibilityState, getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
+	import { createSvelteTable, renderComponent, renderSnippet } from '$lib/components/ui/data-table/index.js';
+	import { DataTableActions, DataTableSortColumn, SuperTable } from '$lib/components/costum';
+	import { createRawSnippet, onMount } from 'svelte';
+	import { createPageFile } from '$lib/PageTable.svelte';
+	import { page } from '$app/state';
+
+	let { data } = $props();
 	const { user } = data;
 
-	const basePath = $page.url.pathname;
+	const pageFile = createPageFile({
+		collectionName: 'material_master',
+		perPage: 10,
+		options: { expand: 'unit_id' }
+	});
+	pageFile.addModifier((items: any[]) => {
+		return items.map((val) => {
+			return { ...val, unitCode: val.expand ? val.expand.unit_id.code : 'N/A', part_number: val.part_number ? val.part_number : '-' };
+		});
+	});
+
+	export const columns: ColumnDef<RecordModel>[] = [
+		{
+			accessorKey: 'code',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Code',
+					disabled: pageFile.isLoading,
+					onclick: () => pageFile.sort(column.id)
+				}),
+			cell: ({ row }) => {
+				const Snippet = createRawSnippet<[string]>((getData) => {
+					const code = getData();
+					return {
+						render: () => `<div class="capitalize">${code}</div>`
+					};
+				});
+				return renderSnippet(Snippet, row.getValue('code'));
+			}
+		},
+		{
+			accessorKey: 'description',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Description',
+					disabled: pageFile.isLoading,
+					onclick: () => pageFile.sort(column.id)
+				}),
+			cell: ({ row }) => row.getValue('description')
+		},
+		{
+			accessorKey: 'part_number',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Part Number',
+					disabled: pageFile.isLoading,
+					onclick: () => pageFile.sort(column.id)
+				}),
+			cell: ({ row }) => row.getValue('part_number')
+		},
+		{
+			accessorKey: 'unitCode',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Unit',
+					disabled: pageFile.isLoading,
+					onclick: () => pageFile.sort(column.id)
+				}),
+			cell: ({ row }) => row.getValue('unitCode')
+		},
+		{
+			accessorKey: 'minimum_quantity',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Minimum Quantity',
+					disabled: pageFile.isLoading,
+					onclick: () => pageFile.sort(column.id)
+				}),
+			cell: ({ row }) => row.getValue('minimum_quantity')
+		},
+		{
+			accessorKey: 'remark',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Remark',
+					disabled: pageFile.isLoading,
+					onclick: () => pageFile.sort(column.id)
+				}),
+			cell: ({ row }) => row.getValue('remark')
+		},
+		{
+			id: 'actions',
+			cell: ({ row }) => {
+				return renderComponent(DataTableActions, { id: row.original.id, basePath: page.url.pathname, user, disableDelete: true });
+			}
+		}
+	];
+
+	let columnVisibility = $state<VisibilityState>({});
+
+	const table = createSvelteTable({
+		get data() {
+			return pageFile.items;
+		},
+		columns,
+		state: {
+			get columnVisibility() {
+				return columnVisibility;
+			}
+		},
+		getCoreRowModel: getCoreRowModel(),
+		getSortedRowModel: getSortedRowModel(),
+		onColumnVisibilityChange: (updater) => {
+			if (typeof updater === 'function') {
+				columnVisibility = updater(columnVisibility);
+			} else {
+				columnVisibility = updater;
+			}
+		}
+	});
+
+	onMount(() => {
+		pageFile.load();
+	});
 </script>
 
-<MaterialMaster {user} {basePath} tableName="Material Master" />
+<svelte:head>
+	<title>CMMS - Material Master</title>
+</svelte:head>
+
+<SuperTable tableName="Material Master" {table} {pageFile} {columns} />

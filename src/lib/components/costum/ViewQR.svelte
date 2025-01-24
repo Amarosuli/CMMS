@@ -6,19 +6,19 @@
 	import { Button } from '../ui/button';
 	import { QrCode } from 'lucide-svelte';
 
-	export let data;
-	let open: boolean = false;
+	let { data } = $props();
+	let open: boolean = $state(false);
 
 	const config: QRConfig = { data: JSON.stringify({ stock_id: data.id, material_id: data.material_id }) };
 
-	let src = '';
+	let src = $state('');
 	async function show() {
 		open = true;
 		src = await createQrPngDataUrl({ ...config, width: 500, height: 500, backgroundFill: '#fff' });
 	}
 </script>
 
-<Button variant="outline" size="icon" on:click={show}>
+<Button variant="outline" size="icon" onclick={show}>
 	<QrCode class="h-4 w-4" />
 </Button>
 

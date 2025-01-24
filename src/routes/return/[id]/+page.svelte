@@ -10,10 +10,11 @@
 
 	import type { StockMaster } from '$lib/CostumTypes.js';
 
-	export let data;
-	let open: boolean = false;
+	let { data } = $props();
+	let open: boolean = $state(false);
 
-	let arrayQuantityOut = writable(data.detail);
+	// let arrayQuantityOut = writable(data.detail);
+	let arrayQuantityOut = $state(data.detail);
 
 	async function updateQtyReturn(id: string, stock: StockMaster, quantity_out: number, quantity_return: number) {
 		pb.collection('borrow_item')
@@ -37,7 +38,7 @@
 	// checkOut will update quantity_return as production input and status of borrow_movement to PENDING
 	async function checkOut() {
 		let chainedPromise = Promise.resolve();
-		const promiseArr = $arrayQuantityOut.map((item) => {
+		const promiseArr = arrayQuantityOut.map((item) => {
 			return (chainedPromise = chainedPromise.then(() => {
 				return updateQtyReturn(item.id, item.stock, item.quantity_out, item.quantity_return);
 			}));
@@ -50,7 +51,7 @@
 	}
 </script>
 
-<ConfirmDialog title="This action means the material returned is in accordance to the actual" bind:open on:confirm={checkOut} />
+<ConfirmDialog title="This action means the material returned is in accordance to the actual" bind:open onConfirm={() => checkOut()} />
 
 <div>
 	<Button href="/return" variant="outline" class="inline-flex items-center gap-2 text-sm/6">
@@ -77,7 +78,7 @@
 	<div>
 		<p>Make sure the return quantity of each material is correct before Check Out.</p>
 	</div>
-	{#each $arrayQuantityOut as item}
+	{#each arrayQuantityOut as item}
 		<div class="flex flex-col rounded border p-4 text-sm md:flex-row md:items-center">
 			<div class="flex flex-1 flex-col">
 				<p class="">Purchase Order : {item.stock.purchase_order}</p>
@@ -92,7 +93,7 @@
 				<Button
 					variant="outline"
 					size="icon"
-					on:click={() => {
+					onclick={() => {
 						if (item.quantity_return != 0) item.quantity_return--;
 					}}><Minus class="h-4 w-4" /></Button>
 				<Button class={item.quantity_out === item.quantity_return ? 'bg-lime-500 dark:bg-lime-800' : 'bg-red-500'}>
@@ -104,7 +105,7 @@
 				<Button
 					variant="outline"
 					size="icon"
-					on:click={() => {
+					onclick={() => {
 						if (item.quantity_return < item.quantity_out) item.quantity_return++;
 					}}><Plus class="h-4 w-4" /></Button>
 			</div>
@@ -113,5 +114,5 @@
 </div>
 
 <div class="mt-4">
-	<Button variant="outline" class="outline-primary" on:click={() => (open = !open)}>Check Out</Button>
+	<Button variant="outline" class="outline-primary" onclick={() => (open = !open)}>Check Out</Button>
 </div>

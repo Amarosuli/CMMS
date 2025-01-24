@@ -5,8 +5,8 @@
 	import { LoaderCircle } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 
-	let isLoading = false;
-	let recentItems: BorrowMovement[] = [];
+	let isLoading = $state(false);
+	let recentItems: BorrowMovement[] = $state([]);
 	onMount(async () => {
 		isLoading = true;
 		recentItems = await pb.collection('borrow_movement').getFullList({ expand: 'user_id', sort: '-updated', batch: 10 });

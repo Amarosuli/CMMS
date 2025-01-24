@@ -1,4 +1,7 @@
+export { default as SuperTable } from './SuperTable.svelte';
+export { default as DataTableFilterInput } from './DataTableFilterInput.svelte';
 export { default as DataTableActions } from './DataTableActions.svelte';
+export { default as DataTableSortColumn } from './DataTableSortColumn.svelte';
 export { default as DeleteDialog } from './DeleteDialog.svelte';
 export { default as ConfirmDialog } from './ConfirmDialog.svelte';
 export { default as BorrowItemInput } from './BorrowItemInput.svelte';

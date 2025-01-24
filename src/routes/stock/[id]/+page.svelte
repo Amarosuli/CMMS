@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { ChevronLeft, CalendarPlus } from 'lucide-svelte';
-	import { MaterialMasterForm } from '$lib/components/page';
+	// import { MaterialMasterForm } from '$lib/components/page';
 	import { Button } from '$lib/components/ui/button';
 	import { time } from '$lib/helpers.js';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
-	export let data;
+	let { data } = $props();
 
-	let currentView: 'Edit' | 'Detail' = 'Detail';
-	if ($page.url.hash === '#edit') {
+	let currentView: 'Edit' | 'Detail' = $state('Detail');
+	if (page.url.hash === '#edit') {
 		currentView = 'Edit';
 	}
 	let material = data.stockMaster?.expand?.material_id ? { ...data.stockMaster.expand.material_id } : { code: '-', part_number: '-', description: '-' };
@@ -41,7 +41,7 @@
 		<div class="flex gap-4">
 			<Button
 				variant="outline"
-				on:click={() => {
+				onclick={() => {
 					if (currentView === 'Detail') {
 						currentView = 'Edit';
 					} else {
@@ -72,7 +72,7 @@
 			<dt class="col-start-1 border-t border-foreground/5 pt-3 text-foreground/50 first:border-none sm:py-3">Available Quantity</dt>
 			<dd class="pb-3 pt-1 text-foreground sm:border-t sm:border-foreground/5 sm:py-3 sm:[&:nth-child(2)]:border-none">{data.stockMaster?.quantity_available} {unit?.code} ( Available in store{qtyAvailableInStore} )</dd>
 			<dt class="col-start-1 border-t border-foreground/5 pt-3 text-foreground/50 first:border-none sm:py-3">Borrowed Quantity</dt>
-			<dd class="pb-3 pt-1 text-foreground sm:border-t sm:border-foreground/5 sm:py-3 sm:[&:nth-child(2)]:border-none">-{data.stockMaster?.quantity_borrowed} {unit.code}</dd>
+			<dd class="pb-3 pt-1 text-foreground sm:border-t sm:border-foreground/5 sm:py-3 sm:[&:nth-child(2)]:border-none">{data.stockMaster?.quantity_borrowed} {unit.code}</dd>
 			<dt class="col-start-1 border-t border-foreground/5 pt-3 text-foreground/50 first:border-none sm:py-3">Expired Date</dt>
 			<dd class="pb-3 pt-1 text-foreground sm:border-t sm:border-foreground/5 sm:py-3 sm:[&:nth-child(2)]:border-none">{data.stockMaster?.expired_date}</dd>
 			<dt class="col-start-1 border-t border-foreground/5 pt-3 text-foreground/50 first:border-none sm:py-3">Material Code</dt>

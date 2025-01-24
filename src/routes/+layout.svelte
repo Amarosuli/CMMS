@@ -3,20 +3,25 @@
 
 	import { Navbar, NavbarSmall, LoginDialog } from '$lib/components/layout';
 	import { afterNavigate, beforeNavigate } from '$app/navigation';
-	import { createRender } from 'svelte-headless-table';
+	// import { createRender } from 'svelte-headless-table';
 	import { ModeWatcher } from 'mode-watcher';
-	import { Toaster } from '$lib/components/ui/sonner';
+	import { Toaster } from '$lib/components/ui/sonner/index.js';
 	import { fade } from 'svelte/transition';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	// icons
 	import { SquareKanban, SendToBack, Archive, FolderInput, FolderOutput, House, ListOrdered, LoaderCircle } from 'lucide-svelte';
 
-	export let data;
+	interface Props {
+		data: any;
+		children?: import('svelte').Snippet;
+	}
+
+	let { data, children }: Props = $props();
 	const { user } = data;
 
-	let openLoginDialog: boolean = false;
-	let isLogOut: boolean = false;
-	let loadingPage: boolean = false;
+	let openLoginDialog: boolean = $state(false);
+	let isLogOut: boolean = $state(false);
+	let loadingPage: boolean = $state(false);
 
 	async function logOut() {
 		isLogOut = true;
@@ -25,39 +30,39 @@
 		if (message === 'success') location.reload();
 	}
 
-	enum Role {
-		GENERAL = 'general',
-		ADMIN = 'admin',
-		SUPER = 'super'
-	}
+	const Role = {
+		GENERAL: 'general',
+		ADMIN: 'admin',
+		SUPER: 'super'
+	};
 
 	const sidebarMenu = [
 		{
 			title: 'Home',
-			icon: createRender(House, { class: 'mr-2 h-4 w-4' }),
+			icon: House,
 			url: '/'
 		},
 		{
 			title: 'Borrow',
-			icon: createRender(FolderOutput, { class: 'mr-2 h-4 w-4' }),
+			icon: FolderOutput,
 			url: '/borrow',
 			role: Role.GENERAL
 		},
 		{
 			title: 'Return',
-			icon: createRender(FolderInput, { class: 'mr-2 h-4 w-4' }),
+			icon: FolderInput,
 			url: '/return',
 			role: Role.GENERAL
 		},
 		{
 			title: 'Stock',
-			icon: createRender(Archive, { class: 'mr-2 h-4 w-4' }),
+			icon: Archive,
 			url: '/stock',
 			role: Role.ADMIN
 		},
 		{
 			title: 'Movement',
-			icon: createRender(SendToBack, { class: 'mr-2 h-4 w-4' }),
+			icon: SendToBack,
 			url: '/movement',
 			role: Role.ADMIN,
 			sub: [
@@ -75,15 +80,15 @@
 		},
 		{
 			title: 'Active Borrowing',
-			icon: createRender(Archive, { class: 'mr-2 h-4 w-4' }),
+			icon: Archive,
 			url: '/active-borrowing',
 			role: Role.ADMIN
 		},
 		{
 			title: 'Master',
-			icon: createRender(SquareKanban, { class: 'mr-2 h-4 w-4' }),
+			icon: SquareKanban,
 			url: '/manage',
-			defaultHash: '#material-master',
+			defaultHash: '/material-master',
 			role: Role.SUPER,
 			sub: [
 				{
@@ -108,9 +113,14 @@
 	beforeNavigate(() => (loadingPage = true));
 	afterNavigate(() => (loadingPage = false));
 
-	$: currentRole = user ? user.role.toLowerCase() : undefined;
-	$: currentHash = $page.url.hash;
-	$: currentPath = $page.url.pathname;
+	let currentRole = $derived(user ? user.role.toLowerCase() : undefined);
+	let currentHash: string | undefined = $state();
+	let currentPath: string | undefined = $state();
+
+	$effect(() => {
+		currentHash = page.url.hash;
+		currentPath = page.url.pathname;
+	});
 </script>
 
 {#if isLogOut || loadingPage}
@@ -129,7 +139,7 @@
 		<LoginDialog bind:open={openLoginDialog} />
 		<div class="grow bg-background p-6 text-foreground lg:rounded-lg lg:p-10 lg:shadow-sm lg:ring-1 lg:ring-secondary-foreground/10">
 			<div class="mx-auto max-w-6xl">
-				<slot></slot>
+				{@render children?.()}
 			</div>
 		</div>
 	</main>

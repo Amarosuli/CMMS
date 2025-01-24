@@ -6,9 +6,13 @@
 	import { Button } from '$lib/components/ui/button';
 	import { toast } from 'svelte-sonner';
 
-	export let scanning = false;
+	interface Props {
+		scanning?: boolean;
+	}
+
+	let { scanning = $bindable(false) }: Props = $props();
 	let html5Qrcode: Html5Qrcode;
-	let isLoading: boolean = false;
+	let isLoading: boolean = $state(false);
 	const dispatch = createEventDispatcher();
 
 	onMount(init);
@@ -53,13 +57,15 @@
 		// console.log('Error ', error);
 	}
 
-	$: if (scanning) start();
+	$effect(() => {
+		if (scanning) start();
+	});
 </script>
 
 <div class:hidden={!scanning} class="fixed inset-0 isolate z-50 flex w-full flex-col items-center justify-center bg-background/90">
 	{#if isLoading}
 		<LoaderCircle class="h-8 w-8 animate-spin" />
 	{/if}
-	<reader id="reader" class="relative flex w-full max-w-[500px] items-center justify-center" />
-	<Button variant="ghost" size="icon" on:click={stop} class="fixed bottom-32 rounded-full"><X class="h-8 w-8" /></Button>
+	<reader id="reader" class="relative flex w-full max-w-[500px] items-center justify-center"></reader>
+	<Button variant="ghost" size="icon" onclick={stop} class="fixed bottom-32 rounded-full"><X class="h-8 w-8" /></Button>
 </div>

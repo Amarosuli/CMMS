@@ -7,10 +7,14 @@
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
 
-	export let data;
-	export let currentView: 'Edit' | 'Detail' | undefined = undefined;
-	export let redirectUrl: string | undefined = undefined;
-	export let submitText: string = 'Update';
+	interface Props {
+		data: any;
+		currentView?: 'Edit' | 'Detail' | undefined;
+		redirectUrl?: string | undefined;
+		submitText?: string;
+	}
+
+	let { data, currentView = $bindable(undefined), redirectUrl = undefined, submitText = 'Update' }: Props = $props();
 
 	const form = superForm(data.form, {
 		onUpdated({ form }) {
@@ -22,7 +26,9 @@
 		}
 	});
 	const { form: formData, delayed, message, enhance } = form;
-	$: data.unit && formData.set(data.unit);
+	$effect(() => {
+		data.unit && formData.set(data.unit);
+	});
 </script>
 
 <div class="mt-12">
@@ -30,16 +36,20 @@
 	<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
 	<form class="mt-3 flex w-full max-w-80 flex-col text-base/6 sm:text-sm/6" method="post" use:enhance>
 		<Field {form} name="code">
-			<Control let:attrs>
-				<Label>Code</Label>
-				<Input {...attrs} bind:value={$formData.code} type="text" placeholder="Unit Code" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>Code</Label>
+					<Input {...props} bind:value={$formData.code} type="text" placeholder="Unit Code" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field {form} name="description">
-			<Control let:attrs>
-				<Label>Description</Label>
-				<Input {...attrs} bind:value={$formData.description} type="text" placeholder="Unit Description" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>Description</Label>
+					<Input {...props} bind:value={$formData.description} type="text" placeholder="Unit Description" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>

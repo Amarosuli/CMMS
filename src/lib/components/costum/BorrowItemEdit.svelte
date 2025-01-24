@@ -4,7 +4,7 @@
 	import * as Command from '$lib/components/ui/command/index.js';
 
 	import { LoaderCircle, Check, ChevronsUpDown } from 'lucide-svelte';
-	import { createEventDispatcher, tick } from 'svelte';
+	import { tick } from 'svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import { borrowItemOutSchema } from '$lib/zodSchema';
 	import { invalidateAll } from '$app/navigation';
@@ -17,11 +17,14 @@
 
 	import type { BorrowItem } from '$lib/CostumTypes';
 
-	export let open: boolean = false;
-	export let item: BorrowItem;
-	export let stockIds: { stock_id: string }[];
+	interface Props {
+		open?: boolean;
+		item: BorrowItem;
+		stockIds: { stock_id: string }[];
+		onState: (value: boolean) => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let { open = $bindable(false), item, stockIds, onState = () => {} }: Props = $props();
 
 	let stock: {
 		value: string;
@@ -29,22 +32,11 @@
 		label: string;
 		detail: string;
 		unit: string;
-	}[] = [];
+	}[] = $state([]);
 
 	let openStock: boolean = false;
-	let isSaving: boolean = false;
+	let isSaving: boolean = $state(false);
 	let formData = writable<BorrowItem>({} as BorrowItem);
-
-	$: if (open) {
-		$formData.id = item.id;
-		$formData.borrow_id = item.borrow_id;
-		$formData.quantity_out = item.quantity_out;
-		$formData.stock_id = item.stock_id;
-		$formData.date_out = new Date().toUTCString();
-		getStockToUpdate();
-	} else {
-		stock = [];
-	}
 
 	async function getStockToUpdate() {
 		const result = await pb.collection('stock_master').getFullList({ expand: 'material_id.unit_id' });
@@ -69,8 +61,8 @@
 		});
 	}
 
-	function setItemQtyOut(e: Event) {
-		const target = e.target as HTMLInputElement;
+	function setItemQtyOut(e: Event & { target: HTMLInputElement }) {
+		const target = e.target;
 		$formData.quantity_out = parseInt(target.value);
 	}
 
@@ -127,24 +119,34 @@
 				toast.error(error.message);
 			})
 			.finally(() => {
-				dispatch('state', {
-					value: true
-				});
+				onState(true);
 				invalidateAll().then(() => {
-					dispatch('state', {
-						value: false
-					});
+					onState(false);
 				});
 				isSaving = false;
 				open = false;
 			});
 	}
 
-	$: selectedStock = (stock.find((f) => f.value === $formData.stock_id)?.quantity_available || 0) - ($formData.quantity_out - item.quantity_out);
-	$: stockUnit = stock.find((f) => f.value === $formData.stock_id)?.unit || '';
-	$: stockAvailable = stock.filter((v) => {
-		return !stockIds.find((t) => t.stock_id === v.value);
+	$effect(() => {
+		if (open) {
+			$formData.id = item.id;
+			$formData.borrow_id = item.borrow_id;
+			$formData.quantity_out = item.quantity_out;
+			$formData.stock_id = item.stock_id;
+			$formData.date_out = new Date().toUTCString();
+			getStockToUpdate();
+		} else {
+			stock = [];
+		}
 	});
+	let selectedStock = $derived((stock.find((f) => f.value === $formData.stock_id)?.quantity_available || 0) - ($formData.quantity_out - item.quantity_out));
+	let stockUnit = $derived(stock.find((f) => f.value === $formData.stock_id)?.unit || '');
+	let stockAvailable = $derived(
+		stock.filter((v) => {
+			return !stockIds.find((t) => t.stock_id === v.value);
+		})
+	);
 </script>
 
 <Dialog.Root bind:open>
@@ -154,9 +156,9 @@
 			<Dialog.Description>Please, make sure actual quantity you borrow out</Dialog.Description>
 		</Dialog.Header>
 		<div class="mt-2 flex w-full flex-col gap-4">
-			<form class="flex w-full flex-col" method="post" on:submit|preventDefault>
+			<form class="flex w-full flex-col" method="post" onsubmit={(e) => e.preventDefault()}>
 				<div class="flex flex-col gap-2">
-					<p class="mb-[0.15rem] mt-[0.2rem] flex w-fit items-center gap-2 rounded bg-lime-100 px-2 py-[0.15rem] text-xs">
+					<p class="mb-[0.15rem] mt-[0.2rem] flex w-fit items-center gap-2 rounded bg-lime-100/30 px-2 py-[0.15rem] text-xs">
 						Stock
 						{#if selectedStock}
 							- Available Qty : {selectedStock} {stockUnit}
@@ -194,9 +196,9 @@
 					</Popover.Root> -->
 
 					<Label for="quantity_out">Quantity Out</Label>
-					<Input id="quantity_out" bind:value={$formData.quantity_out} min="1" type="number" placeholder="Quantity Out" on:change={(e) => setItemQtyOut(e)} />
+					<Input id="quantity_out" bind:value={$formData.quantity_out} min="1" type="number" placeholder="Quantity Out" onchange={(e: Event & { target: HTMLInputElement }) => setItemQtyOut(e)} />
 				</div>
-				<Button class="mt-4" type="submit" on:click={saveItem} disabled={isSaving ? true : false}>
+				<Button class="mt-4" type="submit" onclick={saveItem} disabled={isSaving ? true : false}>
 					{#if isSaving}
 						<LoaderCircle class="mr-2 h-4 w-4 animate-spin " />
 						Saving...

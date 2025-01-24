@@ -1,7 +1,11 @@
 <script lang="ts">
 	import type { BorrowMovement } from '$lib/CostumTypes';
 
-	export let borrowData: BorrowMovement;
+	interface Props {
+		borrowData: BorrowMovement;
+	}
+
+	let { borrowData }: Props = $props();
 </script>
 
 <dl class="grid grid-cols-1 text-base/6 sm:grid-cols-[min(50%,theme(spacing.80))_auto] sm:text-sm/6">

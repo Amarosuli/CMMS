@@ -1,7 +1,6 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 
-	import { createEventDispatcher } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { LoaderCircle } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -10,11 +9,15 @@
 
 	import type { BorrowItem } from '$lib/CostumTypes';
 
-	export let open: boolean = false;
-	export let item: BorrowItem;
+	interface Props {
+		open?: boolean;
+		item: BorrowItem;
+		onState: (e: boolean) => void;
+	}
 
-	const dispatch = createEventDispatcher();
-	let isDeleting: boolean = false;
+	let { open = $bindable(false), item, onState = () => {} }: Props = $props();
+
+	let isDeleting: boolean = $state(false);
 
 	async function deleteItem() {
 		isDeleting = true;
@@ -40,13 +43,9 @@
 				toast.error(error.message);
 			})
 			.finally(() => {
-				dispatch('state', {
-					value: true
-				});
+				onState(true);
 				invalidateAll().then(() => {
-					dispatch('state', {
-						value: false
-					});
+					onState(false);
 				});
 				isDeleting = false;
 				open = false;
@@ -61,7 +60,7 @@
 			<Dialog.Description>Are you sure ?</Dialog.Description>
 		</Dialog.Header>
 		<div class="mt-6 flex w-full flex-col gap-4">
-			<Button class="mt-4" on:click={deleteItem}>
+			<Button class="mt-4" onclick={deleteItem}>
 				{#if isDeleting}
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin " />
 					Deleting...

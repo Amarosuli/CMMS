@@ -3,20 +3,21 @@
 	import * as Command from '$lib/components/ui/command/index.js';
 
 	import { LoaderCircle, ChevronLeft, CalendarPlus, CalendarIcon, ChevronsUpDown, Check } from 'lucide-svelte';
-	import { DateFormatter, parseDate, getLocalTimeZone, type DateValue } from '@internationalized/date';
+	import { DateFormatter, parseDate, getLocalTimeZone, type DateValue, today } from '@internationalized/date';
 	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { deserialize } from '$app/forms';
 	import { superForm } from 'sveltekit-superforms';
-	import { Calendar } from '$lib/components/ui/calendar';
+	import { Calendar } from '$lib/components/ui/calendar/index.js';
 	import { Input } from '$lib/components/ui/input';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
 	import { time } from '$lib/helpers.js';
 	import { tick } from 'svelte';
 	import { cn } from '$lib/utils.js';
+	import { useId } from 'bits-ui';
 
-	export let data;
+	let { data } = $props();
 
 	const { user, transactionType, materialMaster } = data;
 
@@ -70,12 +71,16 @@
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long'
 	});
-	let expiredAt: DateValue | undefined;
 
-	let open = false;
-	$: $formData.user_id = user ? user.id : '';
-	$: $formData.transaction_type = transactionType.find(({ label }: { label: string }) => label == 'SIN')?.label as string;
-	$: expiredAt = $formData.expired_date && $formData.expired_date !== 'undefined' ? parseDate($formData.expired_date) : undefined;
+	let open = $state(false);
+	let triggerId = useId();
+	let expiredAt = $derived($formData.expired_date ? parseDate($formData.expired_date) : undefined);
+	let placeholder = $state<DateValue>(today(getLocalTimeZone()));
+
+	$effect(() => {
+		$formData.user_id = user ? user.id : '';
+		$formData.transaction_type = transactionType.find(({ label }: { label: string }) => label == 'SIN')?.label as string;
+	});
 
 	function closeAndFocusTrigger(triggerId: string) {
 		open = false;
@@ -115,14 +120,16 @@
 	<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
 	<form class="mt-3 flex w-full max-w-80 flex-col text-base/6 sm:text-sm/6" action="?/save" method="post" use:enhance>
 		<Field {form} name="material_id" class="flex flex-col">
-			<Popover.Root bind:open let:ids>
-				<Control let:attrs>
-					<Label>Material</Label>
-					<Popover.Trigger class={cn(buttonVariants({ variant: 'outline' }), ' justify-between', !$formData.material_id && 'text-muted-foreground')} role="combobox" {...attrs}>
-						{materialMaster.find((f) => f.value === $formData.material_id)?.detail ?? 'Select Material'}
-						<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
-					</Popover.Trigger>
-					<input hidden value={$formData.material_id} name={attrs.name} />
+			<Popover.Root bind:open>
+				<Control id={triggerId}>
+					{#snippet children({ props })}
+						<Label>Material</Label>
+						<Popover.Trigger class={cn(buttonVariants({ variant: 'outline' }), ' justify-between', !$formData.material_id && 'text-muted-foreground')} role="combobox" {...props}>
+							{materialMaster.find((f) => f.value === $formData.material_id)?.detail ?? 'Select Material'}
+							<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+						</Popover.Trigger>
+						<input hidden value={$formData.material_id} name={props.name} />
+					{/snippet}
 				</Control>
 				<Popover.Content class="p-0">
 					<Command.Root>
@@ -134,7 +141,7 @@
 									value={material.detail}
 									onSelect={() => {
 										$formData.material_id = material.value;
-										closeAndFocusTrigger(ids.trigger);
+										closeAndFocusTrigger(triggerId);
 									}}>
 									{material.label}
 									<Check class={cn('ml-auto h-4 w-4', material.value !== $formData.material_id && 'text-transparent')} />
@@ -147,66 +154,84 @@
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field {form} name="purchase_order">
-			<Control let:attrs>
-				<Label>Purchase Order</Label>
-				<Input {...attrs} bind:value={$formData.purchase_order} type="text" placeholder="Purchase Order" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>Purchase Order</Label>
+					<Input {...props} bind:value={$formData.purchase_order} type="text" placeholder="Purchase Order" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field {form} name="batch_number">
-			<Control let:attrs>
-				<Label>Batch Number</Label>
-				<Input {...attrs} bind:value={$formData.batch_number} type="text" placeholder="Batch Number" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>Batch Number</Label>
+					<Input {...props} bind:value={$formData.batch_number} type="text" placeholder="Batch Number" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field {form} name="expired_date">
-			<Control let:attrs>
-				<Label>Expired at</Label>
-				<Popover.Root>
-					<Popover.Trigger asChild let:builder>
-						<Button variant="outline" class={cn('w-[280px] justify-start text-left font-normal', !expiredAt && 'text-muted-foreground')} builders={[builder]}>
+			<Control>
+				{#snippet children({ props })}
+					<Label>Expired at</Label>
+					<Popover.Root>
+						<Popover.Trigger {...props} class={cn(buttonVariants({ variant: 'outline' }), 'w-full justify-start text-left font-normal', !expiredAt && 'text-muted-foreground')}>
 							<CalendarIcon class="mr-2 h-4 w-4" />
 							{expiredAt ? df.format(expiredAt.toDate(getLocalTimeZone())) : 'Pick a date'}
-						</Button>
-					</Popover.Trigger>
-					<Popover.Content class="w-auto p-0">
-						<Calendar
-							onValueChange={(v) => {
-								$formData.expired_date = v ? v.toString() : '';
-							}}
-							initialFocus />
-					</Popover.Content>
-				</Popover.Root>
-				<input type="text" hidden value={$formData.expired_date} {...attrs} />
+						</Popover.Trigger>
+						<Popover.Content class="w-auto p-0">
+							<Calendar
+								type="single"
+								value={expiredAt as DateValue}
+								bind:placeholder
+								onValueChange={(v) => {
+									if (v) {
+										$formData.expired_date = v.toString();
+									} else {
+										$formData.expired_date = '';
+									}
+								}} />
+						</Popover.Content>
+					</Popover.Root>
+					<input hidden value={$formData.expired_date} name={props.name} />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field {form} name="transaction_type" class="hidden">
-			<Control let:attrs>
-				<Label>Transaction Type</Label>
-				<Input {...attrs} bind:value={$formData.transaction_type} type="text" placeholder="Status" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>Transaction Type</Label>
+					<Input {...props} bind:value={$formData.transaction_type} type="text" placeholder="Status" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field {form} name="quantity">
-			<Control let:attrs>
-				<Label>Quantity</Label>
-				<Input {...attrs} bind:value={$formData.quantity} type="number" placeholder="Quantity" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>Quantity</Label>
+					<Input {...props} bind:value={$formData.quantity} type="number" placeholder="Quantity" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field {form} name="remark">
-			<Control let:attrs>
-				<Label>Remark</Label>
-				<Input {...attrs} bind:value={$formData.remark} type="text" placeholder="Remark" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>Remark</Label>
+					<Input {...props} bind:value={$formData.remark} type="text" placeholder="Remark" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field {form} name="user_id" class="hidden">
-			<Control let:attrs>
-				<Label>User</Label>
-				<Input {...attrs} bind:value={$formData.user_id} type="text" placeholder="Material Description" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>User</Label>
+					<Input {...props} bind:value={$formData.user_id} type="text" placeholder="Material Description" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>

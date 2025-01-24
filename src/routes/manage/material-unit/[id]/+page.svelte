@@ -1,16 +1,18 @@
 <script lang="ts">
 	import { ChevronLeft, CalendarPlus } from 'lucide-svelte';
-	import { MaterialUnitForm } from '$lib/components/page';
+	import MaterialUnitForm from '$lib/components/page/MaterialUnitForm.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { time } from '$lib/helpers.js';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
-	export let data;
+	let { data } = $props();
 
-	let currentView: 'Edit' | 'Detail' = 'Detail';
-	if ($page.url.hash === '#edit') {
-		currentView = 'Edit';
-	}
+	let currentView: 'Edit' | 'Detail' = $state('Detail');
+	$effect(() => {
+		if (page.url.hash === '#edit') {
+			currentView = 'Edit';
+		}
+	});
 </script>
 
 <svelte:head>
@@ -38,7 +40,7 @@
 		<div class="flex gap-4">
 			<Button
 				variant="outline"
-				on:click={() => {
+				onclick={() => {
 					if (currentView === 'Detail') {
 						currentView = 'Edit';
 					} else {

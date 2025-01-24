@@ -1,5 +1,88 @@
 <script lang="ts">
-	import { TransactionType } from '$lib/components/page';
+	import type { RecordModel } from 'pocketbase';
+
+	import { type ColumnDef, type VisibilityState, getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
+	import { createSvelteTable, renderComponent, renderSnippet } from '$lib/components/ui/data-table/index.js';
+	import { DataTableActions, DataTableSortColumn, SuperTable } from '$lib/components/costum';
+	import { createRawSnippet, onMount } from 'svelte';
+	import { createPageFile } from '$lib/PageTable.svelte';
+	import { page } from '$app/state';
+
+	let { data } = $props();
+	const { user } = data;
+
+	const pageFile = createPageFile({
+		collectionName: 'transaction_type',
+		perPage: 10
+	});
+
+	export const columns: ColumnDef<RecordModel>[] = [
+		{
+			accessorKey: 'code',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Code',
+					disabled: pageFile.isLoading,
+					onclick: () => pageFile.sort(column.id)
+				}),
+			cell: ({ row }) => {
+				const Snippet = createRawSnippet<[string]>((getData) => {
+					const code = getData();
+					return {
+						render: () => `<div class="capitalize">${code}</div>`
+					};
+				});
+				return renderSnippet(Snippet, row.getValue('code'));
+			}
+		},
+		{
+			accessorKey: 'description',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Description',
+					disabled: pageFile.isLoading,
+					onclick: () => pageFile.sort(column.id)
+				}),
+			cell: ({ row }) => row.getValue('description')
+		}
+		// {
+		// 	id: 'actions',
+		// 	cell: ({ row }) => {
+		// 		return renderComponent(DataTableActions, { id: row.original.id, basePath: page.url.pathname, user, disableDelete: true });
+		// 	}
+		// }
+	];
+
+	let columnVisibility = $state<VisibilityState>({});
+
+	const table = createSvelteTable({
+		get data() {
+			return pageFile.items;
+		},
+		columns,
+		state: {
+			get columnVisibility() {
+				return columnVisibility;
+			}
+		},
+		getCoreRowModel: getCoreRowModel(),
+		getSortedRowModel: getSortedRowModel(),
+		onColumnVisibilityChange: (updater) => {
+			if (typeof updater === 'function') {
+				columnVisibility = updater(columnVisibility);
+			} else {
+				columnVisibility = updater;
+			}
+		}
+	});
+
+	onMount(() => {
+		pageFile.load();
+	});
 </script>
 
-<TransactionType tableName="Transaction Type" />
+<svelte:head>
+	<title>CMMS - Transaction Type</title>
+</svelte:head>
+
+<SuperTable tableName="Transaction Type" {table} {pageFile} {columns} disableAdd={true} />

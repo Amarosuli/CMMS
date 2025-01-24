@@ -9,10 +9,14 @@
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
 
-	export let data;
-	export let currentView: 'Edit' | 'Detail' | undefined = undefined;
-	export let redirectUrl: string | undefined = undefined;
-	export let submitText: string = 'Update';
+	interface Props {
+		data: any;
+		currentView?: 'Edit' | 'Detail' | undefined;
+		redirectUrl?: string | undefined;
+		submitText?: string;
+	}
+
+	let { data, currentView = $bindable(undefined), redirectUrl = undefined, submitText = 'Update' }: Props = $props();
 
 	const { materialUnit } = data;
 	const form = superForm(data.form, {
@@ -25,13 +29,19 @@
 		}
 	});
 	const { form: formData, delayed, message, enhance } = form;
-	$: data.materialMaster && formData.set(data.materialMaster);
-	$: selectedUnit = $formData.unit_id
-		? {
-				label: materialUnit.find(({ value }: { value: string }) => value == $formData.unit_id)?.label,
-				value: $formData.unit_id
-			}
-		: undefined;
+
+	$effect(() => {
+		data.materialMaster && formData.set(data.materialMaster);
+	});
+
+	let selectedUnit = $derived(
+		$formData.unit_id
+			? {
+					label: materialUnit.find(({ value }: { value: string }) => value == $formData.unit_id)?.label,
+					value: $formData.unit_id
+				}
+			: undefined
+	);
 </script>
 
 <div class="mt-12">
@@ -39,60 +49,67 @@
 	<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
 	<form class="mt-3 flex w-full max-w-80 flex-col text-base/6 sm:text-sm/6" method="post" use:enhance>
 		<Field {form} name="code">
-			<Control let:attrs>
-				<Label>Code</Label>
-				<Input {...attrs} bind:value={$formData.code} type="text" placeholder="Material Code" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>Code</Label>
+					<Input {...props} bind:value={$formData.code} type="text" placeholder="Material Code" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field {form} name="description">
-			<Control let:attrs>
-				<Label>Description</Label>
-				<Input {...attrs} bind:value={$formData.description} type="text" placeholder="Material Description" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>Description</Label>
+					<Input {...props} bind:value={$formData.description} type="text" placeholder="Material Description" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field {form} name="part_number">
-			<Control let:attrs>
-				<Label>Part Number</Label>
-				<Input {...attrs} bind:value={$formData.part_number} type="text" placeholder="Part Number" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>Part Number</Label>
+					<Input {...props} bind:value={$formData.part_number} type="text" placeholder="Part Number" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field {form} name="minimum_quantity">
-			<Control let:attrs>
-				<Label>Minimum Quantity</Label>
-				<Input {...attrs} bind:value={$formData.minimum_quantity} type="text" placeholder="Minimum Quantity" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>Minimum Quantity</Label>
+					<Input {...props} bind:value={$formData.minimum_quantity} type="text" placeholder="Minimum Quantity" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field {form} name="remark">
-			<Control let:attrs>
-				<Label>Remark</Label>
-				<Input {...attrs} bind:value={$formData.remark} type="text" placeholder="Remark" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>Remark</Label>
+					<Input {...props} bind:value={$formData.remark} type="text" placeholder="Remark" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field {form} name="unit_id">
-			<Control let:attrs>
-				<Label>Material Unit</Label>
-				<Select.Root
-					selected={selectedUnit}
-					onSelectedChange={(v) => {
-						v && ($formData.unit_id = v.value);
-					}}>
-					<Select.Trigger>
-						<Select.Value placeholder="Select Unit" />
-					</Select.Trigger>
-					<Select.Content>
-						<Select.Group>
-							{#each materialUnit as unit}
-								<Select.Item value={unit.value} label={unit.label}>{unit.label}</Select.Item>
-							{/each}
-						</Select.Group>
-					</Select.Content>
-					<Select.Input {...attrs} bind:value={$formData.unit_id} />
-				</Select.Root>
+			<Control>
+				{#snippet children({ props })}
+					<Label>Material Unit</Label>
+					<Select.Root type="single" name={props.name} bind:value={$formData.unit_id}>
+						<Select.Trigger {...props}>
+							{selectedUnit?.label || 'Select Unit'}
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Group>
+								{#each materialUnit as unit}
+									<Select.Item value={unit.value} label={unit.label}>{unit.label}</Select.Item>
+								{/each}
+							</Select.Group>
+						</Select.Content>
+					</Select.Root>
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>

@@ -2,19 +2,14 @@
 	import * as Sheet from '$lib/components/ui/sheet';
 	import { NavbarDD, NavbarContent, NavbarLogin } from '.';
 	import { afterNavigate } from '$app/navigation';
-	import { Button } from '$lib/components/ui/button';
+	import { buttonVariants } from '$lib/components/ui/button';
 	// icons
 	import { AlignLeft } from 'lucide-svelte';
 
-	export let sidebarMenu;
-	export let currentRole;
-	export let currentPath;
-	export let currentHash;
-	export let user;
-	export let openLoginDialog = false;
-	export let logOut;
+	/** @type {{sidebarMenu: any, currentRole: any, currentPath: any, currentHash: any, user: any, openLoginDialog?: boolean, logOut: any}} */
+	let { sidebarMenu, currentRole, currentPath = $bindable(), currentHash = $bindable(), user, openLoginDialog = $bindable(false), logOut } = $props();
 
-	let open = false;
+	let open = $state(false);
 	afterNavigate(() => {
 		open = false;
 	});
@@ -24,10 +19,8 @@
 	<div class="py-2.5">
 		<span class="relative">
 			<Sheet.Root bind:open>
-				<Sheet.Trigger asChild let:builder>
-					<Button builders={[builder]} variant="outline">
-						<AlignLeft class="h-4 w-4" />
-					</Button>
+				<Sheet.Trigger class={buttonVariants({ variant: 'outline' })}>
+					<AlignLeft class="h-4 w-4" />
 				</Sheet.Trigger>
 
 				<Sheet.Content side="left" class="p-0">

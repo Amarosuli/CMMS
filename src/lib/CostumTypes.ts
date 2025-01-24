@@ -122,3 +122,5 @@ export type FileUrlOption = {
 	download?: boolean;
 	thumb?: string;
 };
+
+export type CollectionParam = string | 'users' | 'material_unit' | 'material_master' | 'stock_master' | 'stock_in' | 'stock_out' | 'borrow_item' | 'borrow_movement';

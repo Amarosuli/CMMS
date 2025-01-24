@@ -1,15 +1,145 @@
 <script lang="ts">
-	import { StockAvailable } from '$lib/components/page';
-	import { page } from '$app/stores';
+	import type { RecordModel } from 'pocketbase';
 
-	export let data;
+	import { type ColumnDef, type VisibilityState, getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
+	import { createSvelteTable, renderComponent, renderSnippet } from '$lib/components/ui/data-table/index.js';
+	import { DataTableActions, DataTableSortColumn, SuperTable, ViewQr } from '$lib/components/costum';
+	import { createRawSnippet, onMount } from 'svelte';
+	import { createPageFile } from '$lib/PageTable.svelte';
+	import { page } from '$app/state';
+
+	let { data } = $props();
 	const { user } = data;
 
-	const basePath = $page.url.pathname;
+	const pageFile = createPageFile({
+		collectionName: 'stock_master',
+		perPage: 10,
+		options: { expand: 'material_id,material_id.unit_id' }
+	});
+
+	pageFile.addModifier((items: any[]) => {
+		return items.map((val) => {
+			return { ...val, materialData: val.expand ? val.expand.material_id : 'N/A' };
+		});
+	});
+
+	export const columns: ColumnDef<RecordModel>[] = [
+		{
+			accessorKey: 'batch_number',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Batch Number',
+					disabled: pageFile.isLoading,
+					onclick: () => pageFile.sort(column.id)
+				}),
+			cell: ({ row }) => {
+				const Snippet = createRawSnippet<[string]>((getData) => {
+					const data = getData();
+					return {
+						render: () => `<div class="capitalize">${data}</div>`
+					};
+				});
+				return renderSnippet(Snippet, row.getValue('batch_number'));
+			}
+		},
+		{
+			id: 'quantity available',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Available Quantity',
+					disabled: pageFile.isLoading,
+					onclick: () => pageFile.sort(column.id)
+				}),
+			cell: ({ row }) => {
+				let materialUnit = row.original.materialData?.expand?.unit_id?.code || 'EA';
+				return row.original.quantity_available + ' ' + materialUnit;
+			}
+		},
+		{
+			id: 'QR',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Barcode',
+					disabled: pageFile.isLoading,
+					onclick: () => pageFile.sort(column.id)
+				}),
+			cell: ({ row }) => {
+				return renderComponent(ViewQr, { data: row.original });
+			}
+		},
+		{
+			id: 'Quantity Borrowed',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Quantity Borrowed',
+					disabled: pageFile.isLoading,
+					onclick: () => pageFile.sort(column.id)
+				}),
+			cell: ({ row }) => {
+				let materialUnit = row.original.materialData?.expand?.unit_id?.code || 'EA';
+				return row.original.quantity_borrowed + ' ' + materialUnit;
+			}
+		},
+		{
+			accessorKey: 'code',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Code',
+					disabled: pageFile.isLoading,
+					onclick: () => pageFile.sort(column.id)
+				}),
+			cell: ({ row }) => {
+				return row.original.materialData.code;
+			}
+		},
+		{
+			accessorKey: 'description',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Description',
+					disabled: pageFile.isLoading,
+					onclick: () => pageFile.sort(column.id)
+				}),
+			cell: ({ row }) => row.getValue('description')
+		},
+		{
+			id: 'actions',
+			cell: ({ row }) => {
+				return renderComponent(DataTableActions, { id: row.original.id, basePath: page.url.pathname, user, disableDelete: true });
+			}
+		}
+	];
+
+	let columnVisibility = $state<VisibilityState>({});
+
+	const table = createSvelteTable({
+		get data() {
+			return pageFile.items;
+		},
+		columns,
+		state: {
+			get columnVisibility() {
+				return columnVisibility;
+			}
+		},
+		getCoreRowModel: getCoreRowModel(),
+		getSortedRowModel: getSortedRowModel(),
+		onColumnVisibilityChange: (updater) => {
+			if (typeof updater === 'function') {
+				columnVisibility = updater(columnVisibility);
+			} else {
+				columnVisibility = updater;
+			}
+		}
+	});
+
+	onMount(() => {
+		pageFile.load();
+	});
 </script>
 
 <svelte:head>
 	<title>CMMS - Stock Available</title>
 </svelte:head>
 
-<StockAvailable {user} {basePath} tableName="Stock Available" />
+<SuperTable tableName="Stock Available" {table} {pageFile} {columns} />

@@ -10,11 +10,15 @@
 
 	import type { BorrowMovement } from '$lib/CostumTypes';
 
-	export let open: boolean = false;
-	export let borrowData: BorrowMovement;
+	interface Props {
+		open?: boolean;
+		borrowData: BorrowMovement;
+	}
 
-	let isUpdating: boolean = false;
-	let formData: BorrowMovement = {} as BorrowMovement;
+	let { open = $bindable(false), borrowData }: Props = $props();
+
+	let isUpdating: boolean = $state(false);
+	let formData: BorrowMovement = $state({} as BorrowMovement);
 
 	formData.esn = borrowData?.esn;
 	formData.order_number = borrowData?.order_number;
@@ -44,7 +48,7 @@
 			<Dialog.Description>Correction make perfection!</Dialog.Description>
 		</Dialog.Header>
 		<div class="mt-2 flex w-full flex-col items-center gap-4">
-			<form class="mt-3 flex w-full max-w-80 flex-col text-base/6 sm:text-sm/6" method="post" on:submit|preventDefault>
+			<form class="mt-3 flex w-full max-w-80 flex-col text-base/6 sm:text-sm/6" method="post" onsubmit={(e) => e.preventDefault()}>
 				<div class="mb-2 flex flex-col gap-2">
 					<Label for="order_number">Order Number</Label>
 					<Input id="order_number" bind:value={formData.order_number} type="text" placeholder="Order Number" disabled={borrowData.borrowingId} />
@@ -64,7 +68,7 @@
 					<Label for="user">User</Label>
 					<Input id="user" bind:value={formData.user_id} type="text" placeholder="User Id" />
 				</div>
-				<Button type="submit" class="mt-4" on:click={updateBorrowData}>
+				<Button type="submit" class="mt-4" onclick={updateBorrowData}>
 					{#if isUpdating}
 						<LoaderCircle class="mr-2 h-4 w-4 animate-spin " />
 						Updating...

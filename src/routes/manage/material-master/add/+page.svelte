@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { LoaderCircle, ChevronLeft, CalendarPlus } from 'lucide-svelte';
-	import { MaterialMasterForm } from '$lib/components/page';
+	import MaterialMasterForm from '$lib/components/page/MaterialMasterForm.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { time } from '$lib/helpers.js';
 
-	export let data;
+	let { data } = $props();
 </script>
 
 <svelte:head>

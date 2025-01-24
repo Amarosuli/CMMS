@@ -3,7 +3,7 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as Command from '$lib/components/ui/command/index.js';
 
-	import { createEventDispatcher, onMount, tick } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { LoaderCircle, Check, ChevronsUpDown } from 'lucide-svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import { borrowItemOutSchema } from '$lib/zodSchema';
@@ -16,12 +16,16 @@
 	import { pb } from '$lib/pocketbaseClient';
 
 	import type { BorrowItem, BorrowMovement } from '$lib/CostumTypes';
+	import { useId } from 'bits-ui';
 
-	export let open: boolean = false;
-	export let borrowData: BorrowMovement;
-	export let stockIds: { stock_id: string }[];
+	interface Props {
+		open?: boolean;
+		borrowData: BorrowMovement;
+		stockIds: { stock_id: string }[];
+		onState: (e: boolean) => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let { open = $bindable(false), borrowData, stockIds = $bindable(), onState = () => {} }: Props = $props();
 
 	let stock: {
 		value: string;
@@ -29,10 +33,10 @@
 		label: string;
 		detail: string;
 		unit: string;
-	}[] = [];
+	}[] = $state([]);
 
-	let openStock: boolean = false;
-	let isSaving: boolean = false;
+	let openStock: boolean = $state(false);
+	let isSaving: boolean = $state(false);
 	let formData = writable<BorrowItem>({} as BorrowItem);
 
 	onMount(async () => {
@@ -92,34 +96,38 @@
 				toast.error(error.message);
 			})
 			.finally(() => {
-				dispatch('state', {
-					value: true
-				});
+				onState(true);
 				invalidateAll().then(() => {
-					dispatch('state', {
-						value: false
-					});
+					onState(false);
 				});
 				open = false;
 				isSaving = false;
 			});
 	}
 
-	$: selectedStock = (stock.find((f) => f.value === $formData.stock_id)?.quantity_available || 0) - $formData.quantity_out || null;
-	$: stockUnit = stock.find((f) => f.value === $formData.stock_id)?.unit || '';
-	$: stockAvailable = stock.filter((v) => {
-		return !stockIds.find((t) => t.stock_id === v.value);
+	let selectedStock: number | null = $state(null);
+
+	let stockUnit = $derived(stock.find((f) => f.value === $formData.stock_id)?.unit || '');
+	let stockAvailable = $derived(
+		stock.filter((v) => {
+			return !stockIds.find((t) => t.stock_id === v.value);
+		})
+	);
+	$effect(() => {
+		// selectedStock = (stock.find((f) => f.value === $formData.stock_id)?.quantity_available || 0) - $formData.quantity_out || null;
+		if (!open) {
+			selectedStock = null;
+			isSaving = false;
+			$formData.stock_id = '';
+		} else {
+			isSaving = isSaving;
+			$formData.quantity_out = 1;
+			$formData.borrow_id = borrowData.id;
+			$formData.date_out = new Date().toUTCString();
+		}
 	});
-	$: if (!open) {
-		selectedStock = null;
-		isSaving = false;
-		$formData.stock_id = '';
-	} else {
-		isSaving = isSaving;
-		$formData.quantity_out = 1;
-		$formData.borrow_id = borrowData.id;
-		$formData.date_out = new Date().toUTCString();
-	}
+
+	let triggerId = useId();
 </script>
 
 <Dialog.Root bind:open>
@@ -129,11 +137,11 @@
 			<Dialog.Description>Find by PO, Batch Number or Part Number of material</Dialog.Description>
 		</Dialog.Header>
 		<div class="mt-6 flex w-full flex-col gap-4">
-			<form class="flex w-full flex-col" method="post" on:submit|preventDefault>
+			<form class="flex w-full flex-col" method="post" onsubmit={(e) => e.preventDefault()}>
 				<div class="flex flex-col gap-2">
-					<Popover.Root bind:open={openStock} let:ids>
+					<Popover.Root bind:open={openStock}>
 						<Label class="mb-[0.15rem] mt-[0.2rem] py-[0.15rem]">Stock {selectedStock ? `- Available Qty : ${selectedStock} ${stockUnit}` : ''}</Label>
-						<Popover.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'justify-between truncate', !$formData.stock_id && 'text-muted-foreground')} role="combobox">
+						<Popover.Trigger id={triggerId} class={cn(buttonVariants({ variant: 'outline' }), 'justify-between truncate', !$formData.stock_id && 'text-muted-foreground')} role="combobox">
 							{stock.find((f) => f.value === $formData.stock_id)?.detail ?? 'Select Material'}
 							<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
 						</Popover.Trigger>
@@ -149,7 +157,7 @@
 											value={stock.detail}
 											onSelect={() => {
 												$formData.stock_id = stock.value;
-												closeAndFocusTrigger(ids.trigger);
+												closeAndFocusTrigger(triggerId);
 											}}>
 											{stock.label}
 											<Check class={cn('ml-auto h-4 w-4', stock.value !== $formData.stock_id && 'text-transparent')} />
@@ -161,9 +169,9 @@
 					</Popover.Root>
 
 					<Label for="quantity_out">Quantity Out</Label>
-					<Input id="quantity_out" bind:value={$formData.quantity_out} min="1" type="number" placeholder="Quantity Out" on:change={(e) => setItemQtyOut(e)} />
+					<Input id="quantity_out" bind:value={$formData.quantity_out} min="1" type="number" placeholder="Quantity Out" onchange={(e: Event & { target: HTMLInputElement }) => setItemQtyOut(e)} />
 				</div>
-				<Button class="mt-4" type="submit" on:click={saveItem} disabled={isSaving ? true : false}>
+				<Button class="mt-4" type="submit" onclick={saveItem} disabled={isSaving ? true : false}>
 					{#if isSaving}
 						<LoaderCircle class="mr-2 h-4 w-4 animate-spin " />
 						Saving...

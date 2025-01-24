@@ -10,9 +10,13 @@
 	// icons
 	import { LoaderCircle } from 'lucide-svelte';
 
-	export let open: boolean = false;
+	interface Props {
+		open?: boolean;
+	}
 
-	let errorMessage = '';
+	let { open = $bindable(false) }: Props = $props();
+
+	let errorMessage = $state('');
 
 	const form = superForm(defaults(zod(loginSchema)), {
 		SPA: true,
@@ -40,13 +44,15 @@
 	});
 	const { form: formData, delayed, enhance, reset } = form;
 
-	$: if (!open) {
-		reset();
-		errorMessage = '';
-	}
+	$effect(() => {
+		if (open) {
+			reset();
+			errorMessage = '';
+		}
+	});
 </script>
 
-<Dialog.Root bind:open closeOnOutsideClick={false}>
+<Dialog.Root bind:open>
 	<Dialog.Content class="p-10">
 		<Dialog.Header>
 			<Dialog.Title>Login</Dialog.Title>
@@ -55,16 +61,20 @@
 		<div class="mt-6 flex w-full flex-col gap-4">
 			<form class="flex w-full flex-col" method="post" use:enhance>
 				<Field {form} name="employeeId">
-					<Control let:attrs>
-						<Label>Employee ID</Label>
-						<Input class="" {...attrs} bind:value={$formData.employeeId} type="text" placeholder="Your Employee ID" />
+					<Control>
+						{#snippet children({ props })}
+							<Label>Employee ID</Label>
+							<Input class="" {...props} bind:value={$formData.employeeId} type="text" placeholder="Your Employee ID" />
+						{/snippet}
 					</Control>
 					<FieldErrors class="text-xs italic" />
 				</Field>
 				<Field {form} name="password">
-					<Control let:attrs>
-						<Label>Password</Label>
-						<Input class="" {...attrs} bind:value={$formData.password} type="password" autocomplete="false" placeholder="Your Password" />
+					<Control>
+						{#snippet children({ props })}
+							<Label>Password</Label>
+							<Input class="" {...props} bind:value={$formData.password} type="password" autocomplete={null} placeholder="Your Password" />
+						{/snippet}
 					</Control>
 					<FieldErrors class="text-xs italic" />
 				</Field>

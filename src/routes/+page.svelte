@@ -5,7 +5,11 @@
 	import { Button } from '$lib/components/ui/button';
 	import { time, timeOfDay } from '$lib/helpers';
 
-	export let data;
+	interface Props {
+		data: any;
+	}
+
+	let { data }: Props = $props();
 	const { user } = data;
 
 	const ranges = [
@@ -14,7 +18,7 @@
 		{ value: '', label: 'Yearly', isChecked: false }
 	];
 
-	let checkedRange = 'Weekly';
+	let checkedRange = $state('Weekly');
 
 	const overviewItems = [
 		{
@@ -106,11 +110,13 @@
 		<h2 class="text-base/7 font-semibold">Overview</h2>
 		<div>
 			<DropdownMenu.Root>
-				<DropdownMenu.Trigger asChild let:builder>
-					<Button variant="outline" class="ml-auto" builders={[builder]}>
-						{checkedRange}
-						<ChevronDown class="ml-2 h-4 w-4" />
-					</Button>
+				<DropdownMenu.Trigger>
+					{#snippet children()}
+						<Button variant="outline" class="ml-auto">
+							{checkedRange}
+							<ChevronDown class="ml-2 h-4 w-4" />
+						</Button>
+					{/snippet}
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content>
 					<DropdownMenu.RadioGroup bind:value={checkedRange}>

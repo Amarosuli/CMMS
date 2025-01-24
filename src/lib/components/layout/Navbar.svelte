@@ -1,13 +1,8 @@
 <script>
 	import { NavbarDD, NavbarLogin, NavbarContent } from '.';
 
-	export let sidebarMenu;
-	export let currentRole;
-	export let currentPath;
-	export let currentHash;
-	export let user;
-	export let openLoginDialog = false;
-	export let logOut;
+	/** @type {{sidebarMenu: any, currentRole: any, currentPath: any, currentHash: any, user: any, openLoginDialog?: boolean, logOut: any}} */
+	let { sidebarMenu, currentRole, currentPath = $bindable(), currentHash = $bindable(), user, openLoginDialog = $bindable(false), logOut } = $props();
 </script>
 
 <div class="fixed inset-y-0 left-0 w-64 max-lg:hidden">

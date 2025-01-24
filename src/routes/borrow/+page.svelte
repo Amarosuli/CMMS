@@ -12,12 +12,12 @@
 	import { time } from '$lib/helpers';
 	import { pb } from '$lib/pocketbaseClient.js';
 
-	export let data;
+	let { data } = $props();
 	const { user } = data;
-	let borrowingConfirmDialog: boolean = false;
-	let itemConfirmDialog: boolean = false;
+	let borrowingConfirmDialog: boolean = $state(false);
+	let itemConfirmDialog: boolean = $state(false);
 
-	$: borrowingId = '';
+	let borrowingId = $state('');
 
 	const FBorrowing = superForm(data.formBorrowing, {
 		resetForm: false,
@@ -38,12 +38,6 @@
 	});
 	const { form: FormBorrowing, delayed: DelayedBorrowing, message: MessageBorrowing, enhance: EnhanceBorrowing, submit: submitBorrowing } = FBorrowing;
 
-	$: $FormBorrowing.user_id = user?.id;
-	$: $FormBorrowing.status = BorrowStatus.OPEN;
-	$: stockSkip = $FormItem.items.map((item) => {
-		return { id: item.stock_id };
-	});
-
 	const FItem = superForm(data.formItem, {
 		dataType: 'json',
 		onUpdate({ form, result }) {
@@ -58,7 +52,18 @@
 	});
 	const { form: FormItem, delayed: DelayedItem, message: MessageItem, enhance: EnhanceItem, submit: submitItem } = FItem;
 
-	$: $FormItem.items.forEach((item) => (item.borrow_id = borrowingId));
+	$effect(() => {
+		$FormBorrowing.user_id = user?.id;
+		$FormBorrowing.status = BorrowStatus.OPEN;
+		$FormItem.items.forEach((item) => (item.borrow_id = borrowingId));
+	});
+	// let $FormBorrowing.user_id = $derived(user?.id);
+	// let $FormBorrowing.status = $derived(BorrowStatus.OPEN);
+	let stockSkip = $derived.by(() =>
+		$FormItem.items.map((item) => {
+			return { id: item.stock_id };
+		})
+	);
 
 	function removeItemByIndex(index: number) {
 		$FormItem.items = $FormItem.items.filter((_, i) => i !== index);
@@ -81,7 +86,7 @@
 		}
 	}
 
-	function setItemQtyOut(e: Event, index: number) {
+	function setItemQtyOut(e: Event & { target: HTMLInputElement }, index: number) {
 		const target = e.target as HTMLInputElement;
 		$FormItem.items[index].quantity_out = parseInt(target.value);
 	}
@@ -113,7 +118,7 @@
 		addItem(data.stock_id);
 	}
 
-	let scanning: boolean = false;
+	let scanning: boolean = $state(false);
 	let itemSaved: boolean = false;
 	let borrowCreated: boolean = false;
 
@@ -138,8 +143,8 @@
 </script>
 
 <QRScanner bind:scanning on:captured={handleCaptured} />
-<ConfirmDialog title="Confirm the data is correct!" bind:open={borrowingConfirmDialog} on:confirm={submitBorrowing} />
-<ConfirmDialog bind:open={itemConfirmDialog} on:confirm={submitItem} />
+<ConfirmDialog title="Confirm the data is correct!" bind:open={borrowingConfirmDialog} onConfirm={submitBorrowing} />
+<ConfirmDialog bind:open={itemConfirmDialog} onConfirm={submitItem} />
 
 <div class="mt-4 lg:mt-8">
 	<div class="flex items-center gap-4">
@@ -159,34 +164,42 @@
 	<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
 	<form class="mt-3 flex w-full max-w-80 flex-col text-base/6 sm:text-sm/6" action="?/createBorrowing" method="post" use:EnhanceBorrowing>
 		<Field form={FBorrowing} name="order_number">
-			<Control let:attrs>
-				<Label>Order Number</Label>
-				<Input {...attrs} bind:value={$FormBorrowing.order_number} type="text" placeholder="Order Number" disabled={borrowingId ? true : false} />
+			<Control>
+				{#snippet children({ props })}
+					<Label>Order Number</Label>
+					<Input {...props} bind:value={$FormBorrowing.order_number} type="text" placeholder="Order Number" disabled={borrowingId ? true : false} />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field form={FBorrowing} name="esn">
-			<Control let:attrs>
-				<Label>ESN</Label>
-				<Input {...attrs} bind:value={$FormBorrowing.esn} type="text" placeholder="ESN" disabled={borrowingId ? true : false} />
+			<Control>
+				{#snippet children({ props })}
+					<Label>ESN</Label>
+					<Input {...props} bind:value={$FormBorrowing.esn} type="text" placeholder="ESN" disabled={borrowingId ? true : false} />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field form={FBorrowing} name="status" class="hidden">
-			<Control let:attrs>
-				<Label>Status</Label>
-				<Input {...attrs} bind:value={$FormBorrowing.status} type="text" placeholder="Status" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>Status</Label>
+					<Input {...props} bind:value={$FormBorrowing.status} type="text" placeholder="Status" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field form={FBorrowing} name="user_id" class="hidden">
-			<Control let:attrs>
-				<Label>User</Label>
-				<Input {...attrs} bind:value={$FormBorrowing.user_id} type="text" placeholder="User Id" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>User</Label>
+					<Input {...props} bind:value={$FormBorrowing.user_id} type="text" placeholder="User Id" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
-		<Button class="mt-4 {borrowingId ? 'hidden' : ''}" on:click={() => (borrowingConfirmDialog = !borrowingConfirmDialog)} disabled={$DelayedBorrowing ? true : false}>
+		<Button class="mt-4 {borrowingId ? 'hidden' : ''}" onclick={() => (borrowingConfirmDialog = !borrowingConfirmDialog)} disabled={$DelayedBorrowing ? true : false}>
 			{#if $DelayedBorrowing}
 				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" /> Creating...
 			{:else}
@@ -216,21 +229,25 @@
 					<div class="flex w-full flex-row gap-2">
 						<BorrowItemInput {FItem} {FormItem} {stockSkip} index={i} />
 						<Field form={FItem} name="items[{i}].quantity_out" class="flex-grow-0">
-							<Control let:attrs>
-								<Label>Quantity</Label>
-								<Input {...attrs} value={$FormItem.items[i].quantity_out} on:change={(e) => setItemQtyOut(e, i)} min="0" type="number" placeholder="Quantity Out" />
+							<Control>
+								{#snippet children({ props })}
+									<Label>Quantity</Label>
+									<Input {...props} value={$FormItem.items[i].quantity_out} onchange={(e: Event & { target: HTMLInputElement }) => setItemQtyOut(e, i)} min="0" type="number" placeholder="Quantity Out" />
+								{/snippet}
 							</Control>
 							<FieldErrors class="text-xs italic" />
 						</Field>
 						<ElementField form={FItem} name="items[{i}].borrow_id" class="hidden">
-							<Control let:attrs>
-								<Label>Borrow Id</Label>
-								<Input {...attrs} bind:value={$FormItem.items[i].borrow_id} type="text" placeholder="Borrow Id" />
+							<Control>
+								{#snippet children({ props })}
+									<Label>Borrow Id</Label>
+									<Input {...props} bind:value={$FormItem.items[i].borrow_id} type="text" placeholder="Borrow Id" />
+								{/snippet}
 							</Control>
 							<FieldErrors class="text-xs italic" />
 						</ElementField>
 						{#if i != 0}
-							<Button variant="outline" class="mt-8" on:click={() => removeItemByIndex(i)}><X class="h-4 w-4" /></Button>
+							<Button variant="outline" class="mt-8" onclick={() => removeItemByIndex(i)}><X class="h-4 w-4" /></Button>
 						{/if}
 					</div>
 				{/each}
@@ -238,15 +255,21 @@
 					<Button
 						variant="outline"
 						class="w-full min-w-32 max-w-40 sm:w-fit"
-						on:click={() => {
+						onclick={() => {
 							addItem();
 						}}><Plus class="mr-2 h-4 w-4 " />Add Item</Button>
-					<Button disabled={!borrowingId} variant="outline" class="w-full min-w-32 max-w-40 sm:w-fit md:mx-0" on:click={() => (scanning = !scanning)}>
+					<Button
+						disabled={!borrowingId}
+						variant="outline"
+						class="w-full min-w-32 max-w-40 sm:w-fit md:mx-0"
+						onclick={() => {
+							scanning = !scanning;
+						}}>
 						<ScanQrCode class="mr-2 h-4 w-4" />
 						Scan QR</Button>
 				</div>
 			</Field>
-			<Button class="mt-4 max-w-80" on:click={() => (itemConfirmDialog = !itemConfirmDialog)} disabled={$DelayedItem ? true : false}>
+			<Button class="mt-4 max-w-80" onclick={() => (itemConfirmDialog = !itemConfirmDialog)} disabled={$DelayedItem ? true : false}>
 				{#if $DelayedItem}
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin" /> Saving...
 				{:else}

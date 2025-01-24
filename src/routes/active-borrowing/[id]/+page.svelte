@@ -1,23 +1,25 @@
 <script lang="ts">
 	import { BorrowDataView, BorrowItemView, BorrowDataDelete, BorrowDataEdit, BorrowItemAdd } from '$lib/components/costum';
 	import { ChevronLeft, CalendarPlus, Plus, Pencil, Trash, LoaderCircle } from 'lucide-svelte';
-	import { writable } from 'svelte/store';
 	import { Button } from '$lib/components/ui/button';
 	import { time } from '$lib/helpers.js';
 
-	export let data;
+	let { data } = $props();
 
-	let isDeleteDataOpen: boolean = false;
-	let isEditDataOpen: boolean = false;
-	let isAddItemOpen: boolean = false;
-	let state = writable(false);
+	let isDeleteDataOpen: boolean = $state(false);
+	let isEditDataOpen: boolean = $state(false);
+	let isAddItemOpen: boolean = $state(false);
+	let isLoading = $state(false);
 
-	function stateHandler(e: CustomEvent<{ value: boolean }>) {
-		$state = e.detail.value;
+	function stateHandler(e?: boolean) {
+		if (e) isLoading = e;
 	}
 
-	$: stockIds = data.borrowItems.map((item) => {
-		return { stock_id: item.stock_id };
+	let stockIds: { stock_id: string }[] = $state([]);
+	$effect(() => {
+		stockIds = data.borrowItems.map((item) => {
+			return { stock_id: item.stock_id };
+		});
 	});
 </script>
 
@@ -48,15 +50,15 @@
 
 <BorrowDataDelete bind:open={isDeleteDataOpen} borrowItems={data.borrowItems} borrowData={data.borrowData} />
 <BorrowDataEdit bind:open={isEditDataOpen} borrowData={data.borrowData} />
-<BorrowItemAdd bind:open={isAddItemOpen} borrowData={data.borrowData} {stockIds} on:state={(e) => stateHandler(e)} />
+<BorrowItemAdd bind:open={isAddItemOpen} borrowData={data.borrowData} bind:stockIds onState={(e: boolean) => stateHandler(e)} />
 
 <div class="relative mt-12">
 	<h2 class="flex-1 text-base/7 font-semibold text-foreground sm:text-sm/6">Borrowing Data</h2>
 	<div class="absolute right-0 top-0 flex gap-2">
-		<Button size="icon" on:click={() => (isEditDataOpen = !isEditDataOpen)} variant="outline">
+		<Button size="icon" onclick={() => (isEditDataOpen = !isEditDataOpen)} variant="outline">
 			<Pencil class="h-4 w-4 text-lime-500" />
 		</Button>
-		<Button size="icon" on:click={() => (isDeleteDataOpen = !isDeleteDataOpen)} variant="outline">
+		<Button size="icon" onclick={() => (isDeleteDataOpen = !isDeleteDataOpen)} variant="outline">
 			<Trash class="h-4 w-4 text-destructive" />
 		</Button>
 	</div>
@@ -72,8 +74,8 @@
 			<BorrowItemView {item} bind:stockIds />
 		{/each}
 	</div>
-	<Button variant="outline" disabled={$state} class="mt-4 flex w-fit gap-2 bg-lime-400 hover:bg-lime-300 dark:bg-lime-600 dark:hover:bg-lime-500" on:click={() => (isAddItemOpen = !isAddItemOpen)}>
-		{#if $state}
+	<Button variant="outline" disabled={isLoading} class="mt-4 flex w-fit gap-2 bg-lime-400 hover:bg-lime-300 dark:bg-lime-600 dark:hover:bg-lime-500" onclick={() => (isAddItemOpen = !isAddItemOpen)}>
+		{#if isLoading}
 			<LoaderCircle class="h-4 w-4 animate-spin" />
 		{:else}
 			<Plus class="h-4 w-4" />

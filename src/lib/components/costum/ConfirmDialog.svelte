@@ -1,22 +1,8 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { Button } from '$lib/components/ui/button';
-	import { createEventDispatcher } from 'svelte';
 
-	const dispatch = createEventDispatcher();
-
-	function onCancel() {
-		dispatch('cancel');
-		open = false;
-	}
-
-	function onConfirm() {
-		dispatch('confirm');
-		open = false;
-	}
-
-	export let open = false;
-	export let title: string = 'Confirmation';
+	let { open = $bindable(false), title = 'Confirmation', onConfirm = () => {}, onCancel = () => {} } = $props();
 </script>
 
 <Dialog.Root bind:open>
@@ -27,9 +13,15 @@
 		</Dialog.Header>
 
 		<div class="flex justify-between gap-4">
-			<Button type="submit" class="flex w-full  justify-center p-2 text-center" on:click={onConfirm}>Yes</Button>
 			<Button
-				on:click={() => {
+				type="submit"
+				class="flex w-full  justify-center p-2 text-center"
+				onclick={() => {
+					onConfirm();
+					open = false;
+				}}>Yes</Button>
+			<Button
+				onclick={() => {
 					onCancel();
 					open = false;
 				}}

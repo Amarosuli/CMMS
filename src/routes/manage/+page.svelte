@@ -1,42 +1,13 @@
-<script lang="ts">
-	import { MaterialMaster, MaterialUnit, TransactionType } from '$lib/components/page';
-	import { Render, createRender } from 'svelte-headless-table';
-	import { page } from '$app/stores';
+<script>
+	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 
-	export let data;
-	const { user } = data;
-
-	const basePath = $page.url.pathname;
-
-	let subPages = [
-		{
-			hash: '#material-master',
-			title: 'Material Master',
-			render: createRender(MaterialMaster, { user, basePath, tableName: 'Material Master' })
-		},
-		{
-			hash: '#material-unit',
-			title: 'Material Unit',
-			render: createRender(MaterialUnit, { user, basePath, tableName: 'Material Unit' })
-		},
-		{
-			hash: '#transaction-type',
-			title: 'Transaction Type',
-			render: createRender(TransactionType, { tableName: 'Transaction Type' })
-		}
-	];
-
-	let activeSubPage = subPages[0];
-
-	$: subPages.forEach((page) => {
-		if (page.hash === $page.url.hash) {
-			activeSubPage = page;
-		}
+	onMount(() => {
+		goto('/manage/material-master');
 	});
 </script>
 
-<svelte:head>
-	<title>CMMS - {activeSubPage.title}</title>
-</svelte:head>
-
-<Render of={activeSubPage.render} />
+<div>
+	<h1>Master Data</h1>
+	<p>Master Data means all preset data that used for this application work as espected. And by design, master data is not meant to be editable by common users. Always make sure all changes to master data is maintain by super user.</p>
+</div>

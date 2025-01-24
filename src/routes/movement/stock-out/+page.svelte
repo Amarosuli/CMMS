@@ -9,12 +9,13 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { Input } from '$lib/components/ui/input';
 	import { toast } from 'svelte-sonner';
+	import { useId } from 'bits-ui';
 	import { goto } from '$app/navigation';
 	import { time } from '$lib/helpers.js';
 	import { tick } from 'svelte';
 	import { cn } from '$lib/utils.js';
 
-	export let data;
+	let { data } = $props();
 
 	const { user, transactionType, stock } = data;
 
@@ -68,23 +69,23 @@
 	});
 	const { form: formData, delayed, message, enhance } = form;
 
-	let open = false;
-	$: $formData.user_id = user ? user.id : '';
-	$: $formData.transaction_type = transactionType.find(({ label }: { label: string }) => label == 'SOUT')?.label as string;
+	let open = $state(false);
+	let selectedStock = $derived(stock.find((f) => f.value === $formData.stock_id));
+	let remainingStock: string = $state('');
+
+	const triggerId = useId();
+
+	$effect(() => {
+		$formData.user_id = user ? user.id : '';
+		$formData.transaction_type = transactionType.find(({ label }: { label: string }) => label == 'SOUT')?.label as string;
+		remainingStock = selectedStock?.quantity_available.toString() || '';
+	});
 
 	function closeAndFocusTrigger(triggerId: string) {
 		open = false;
 		tick().then(() => {
 			document.getElementById(triggerId)?.focus();
 		});
-	}
-
-	$: selectedStock = stock.find((f) => f.value === $formData.stock_id);
-
-	let remainingStock: string;
-	$: remainingStock = selectedStock?.quantity_available.toString() || '';
-	$: if ($formData.quantity) {
-		remainingStock = (Number(remainingStock) - $formData.quantity).toString();
 	}
 </script>
 
@@ -118,14 +119,16 @@
 	<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
 	<form class="mt-3 flex w-full max-w-80 flex-col text-base/6 sm:text-sm/6" action="?/save" method="post" use:enhance>
 		<Field {form} name="stock_id" class="flex flex-col">
-			<Popover.Root bind:open let:ids>
-				<Control let:attrs>
-					<Label>Stock {remainingStock ? `- Available Qty : ${remainingStock} ${selectedStock?.unit || ''}` : ''}</Label>
-					<Popover.Trigger class={cn(buttonVariants({ variant: 'outline' }), ' justify-between', !$formData.stock_id && 'text-muted-foreground')} role="combobox" {...attrs}>
-						{stock.find((f) => f.value === $formData.stock_id)?.detail ?? 'Select Material'}
-						<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
-					</Popover.Trigger>
-					<input hidden value={$formData.stock_id} name={attrs.name} />
+			<Popover.Root bind:open>
+				<Control id={triggerId}>
+					{#snippet children({ props })}
+						<Label>Stock {remainingStock ? `- Available Qty : ${(Number(remainingStock) - $formData.quantity).toString()} ${selectedStock?.unit || ''}` : ''}</Label>
+						<Popover.Trigger class={cn(buttonVariants({ variant: 'outline' }), ' justify-between truncate', !$formData.stock_id && 'text-muted-foreground')} role="combobox" {...props}>
+							{stock.find((f) => f.value === $formData.stock_id)?.detail ?? 'Select Material'}
+							<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+						</Popover.Trigger>
+						<input hidden value={$formData.stock_id} name={props.name} />
+					{/snippet}
 				</Control>
 				<Popover.Content class="p-0">
 					<Command.Root>
@@ -137,7 +140,7 @@
 									value={stock.detail}
 									onSelect={() => {
 										$formData.stock_id = stock.value;
-										closeAndFocusTrigger(ids.trigger);
+										closeAndFocusTrigger(triggerId);
 									}}>
 									{stock.label}
 									<Check class={cn('ml-auto h-4 w-4', stock.value !== $formData.stock_id && 'text-transparent')} />
@@ -150,37 +153,47 @@
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field {form} name="transaction_type" class="hidden">
-			<Control let:attrs>
-				<Label>Transaction Type</Label>
-				<Input {...attrs} bind:value={$formData.transaction_type} type="text" placeholder="Status" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>Transaction Type</Label>
+					<Input {...props} bind:value={$formData.transaction_type} type="text" placeholder="Status" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field {form} name="quantity">
-			<Control let:attrs>
-				<Label>Quantity</Label>
-				<Input {...attrs} bind:value={$formData.quantity} min="0" type="number" placeholder="Quantity" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>Quantity</Label>
+					<Input {...props} bind:value={$formData.quantity} min="0" type="number" placeholder="Quantity" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field {form} name="remark">
-			<Control let:attrs>
-				<Label>Remark</Label>
-				<Input {...attrs} bind:value={$formData.remark} type="text" placeholder="Remark" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>Remark</Label>
+					<Input {...props} bind:value={$formData.remark} type="text" placeholder="Remark" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field {form} name="user_id" class="hidden">
-			<Control let:attrs>
-				<Label>User</Label>
-				<Input {...attrs} bind:value={$formData.user_id} type="text" placeholder="Material Description" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>User</Label>
+					<Input {...props} bind:value={$formData.user_id} type="text" placeholder="Material Description" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
 		<Field {form} name="refference_id">
-			<Control let:attrs>
-				<Label>Refference</Label>
-				<Input {...attrs} bind:value={$formData.refference_id} type="text" placeholder="Refference" />
+			<Control>
+				{#snippet children({ props })}
+					<Label>Refference</Label>
+					<Input {...props} bind:value={$formData.refference_id} type="text" placeholder="Refference" />
+				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>

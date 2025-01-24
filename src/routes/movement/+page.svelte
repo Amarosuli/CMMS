@@ -3,24 +3,42 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { fade } from 'svelte/transition';
 	import { time } from '$lib/helpers.js';
+	import { onMount } from 'svelte';
 
-	export let data;
+	let { data } = $props();
 	const { allStockIn, allStockOut } = data;
 
-	$: isLoading = false;
+	let isLoading = $state(false);
 
 	const processData = () => {
 		isLoading = true;
 		const stockOut = allStockOut.map((stock) => {
-			return { id: stock.id, quantity: stock.quantity, transactionType: stock.transaction_type, remark: stock.remark, purchaseOrder: stock.expand?.stock_id.purchase_order, batchNumber: stock.expand?.stock_id.batch_number, user: stock.expand?.user_id.name, created: stock.created };
+			return { id: stock.id, quantity: stock.quantity, transactionType: stock.transaction_type, remark: stock.remark, purchaseOrder: stock.expand?.stock_id.purchase_order, batchNumber: stock.expand?.stock_id.batch_number, user: stock.expand?.user_id?.name, created: stock.created };
 		});
 		const stockIn = allStockIn.map((stock) => {
 			return { id: stock.id, quantity: stock.quantity, transactionType: stock.transaction_type, remark: stock.remark, purchaseOrder: stock.purchase_order, batchNumber: stock.batch_number, user: stock.expand?.user_id.name, created: stock.created };
 		});
 		isLoading = false;
-		return stockIn.concat(stockOut);
+
+		// return stockIn.concat(stockOut);
+		// ref to https://stackoverflow.com/questions/48242218/typescript-concat-arrays-with-different-element-types
+		// use spread instead concat
+		return [...stockIn, ...stockOut];
 	};
-	let stockMovement = processData();
+
+	let stockMovement: {
+		id: string;
+		quantity: number;
+		transactionType: string;
+		remark: string;
+		purchaseOrder: string | undefined;
+		batchNumber: string | undefined;
+		user: string | undefined;
+		created: string;
+	}[] = $state([]);
+	onMount(() => {
+		stockMovement = processData();
+	});
 </script>
 
 <svelte:head>
@@ -58,7 +76,7 @@
 			<li class="flex justify-between gap-x-6 border px-4 py-2 hover:bg-secondary">
 				<div class="flex min-w-0 flex-col md:flex-row md:gap-4">
 					<div class="flex w-20 min-w-20 flex-auto items-center divide-y">
-						<p class=" truncate text-xl font-bold text-foreground">{stock.transactionType}</p>
+						<p class=" truncate text-lg font-bold text-foreground">{stock.transactionType}</p>
 					</div>
 					<div class="min-w-0 flex-auto">
 						<p class="mt-1 truncate text-xs leading-5 text-foreground/50">Batch Number : <span class="text-xs font-semibold leading-6 text-foreground">{stock.batchNumber}</span></p>

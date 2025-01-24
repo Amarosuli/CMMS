@@ -9,18 +9,23 @@
 	import { cn } from '$lib/utils.js';
 	import { pb } from '$lib/pocketbaseClient';
 	import type { SuperFormData } from 'sveltekit-superforms/client';
+	import { useId } from 'bits-ui';
 
-	export let stockSkip: { id: string | undefined }[];
-	export let FItem;
-	export let FormItem: SuperFormData<{
-		items: {
-			stock_id: string;
-			quantity_out: number;
-			borrow_id: string;
-			date_out: string;
-		}[];
-	}>;
-	export let index;
+	interface Props {
+		stockSkip: { id: string | undefined }[];
+		FItem: any;
+		FormItem: SuperFormData<{
+			items: {
+				stock_id: string;
+				quantity_out: number;
+				borrow_id: string;
+				date_out: string;
+			}[];
+		}>;
+		index: any;
+	}
+
+	let { stockSkip, FItem, FormItem, index }: Props = $props();
 
 	let stock: {
 		value: string;
@@ -28,8 +33,8 @@
 		label: string;
 		detail: string;
 		unit: string;
-	}[] = [];
-	let open = false;
+	}[] = $state([]);
+	let open = $state(false);
 
 	onMount(async () => {
 		const result = await pb.collection('stock_master').getFullList({ expand: 'material_id.unit_id' });
@@ -50,11 +55,13 @@
 		});
 	});
 
-	$: stockUnit = stock.find((f) => f.value === $FormItem.items[index].stock_id)?.unit || '';
-	$: selectedStock = (stock.find((f) => f.value === $FormItem.items[index].stock_id)?.quantity_available || 0) - $FormItem.items[index].quantity_out;
-	$: stockAvailable = stock.filter((v) => {
-		return !stockSkip.find((t) => t.id === v.value);
-	});
+	let stockUnit = $derived(stock.find((f) => f.value === $FormItem.items[index].stock_id)?.unit || '');
+	let selectedStock = $derived((stock.find((f) => f.value === $FormItem.items[index].stock_id)?.quantity_available || 0) - $FormItem.items[index].quantity_out);
+	let stockAvailable = $derived(
+		stock.filter((v) => {
+			return !stockSkip.find((t) => t.id === v.value);
+		})
+	);
 
 	function closeAndFocusTrigger(triggerId: string) {
 		open = false;
@@ -62,17 +69,21 @@
 			document.getElementById(triggerId)?.focus();
 		});
 	}
+
+	let triggerId = useId();
 </script>
 
 <ElementField form={FItem} name="items[{index}].stock_id" class="flex w-full max-w-80 flex-col ">
-	<Popover.Root bind:open let:ids>
-		<Control let:attrs>
-			<Label class="mb-[0.15rem] mt-[0.2rem] py-[0.15rem]">Stock {selectedStock ? `- Available Qty : ${selectedStock} ${stockUnit}` : ''}</Label>
-			<Popover.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'justify-between truncate max-sm:max-w-64', !$FormItem.items[index].stock_id && 'text-muted-foreground')} role="combobox" {...attrs}>
-				{stock.find((f) => f.value === $FormItem.items[index].stock_id)?.detail ?? 'Select Material'}
-				<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
-			</Popover.Trigger>
-			<input hidden value={$FormItem.items[index].stock_id} name={attrs.name} />
+	<Popover.Root bind:open>
+		<Control id={triggerId}>
+			{#snippet children({ props })}
+				<Label class="mb-[0.15rem] mt-[0.2rem] py-[0.15rem]">Stock {selectedStock ? `- Available Qty : ${selectedStock} ${stockUnit}` : ''}</Label>
+				<Popover.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'justify-between truncate max-sm:max-w-64', !$FormItem.items[index].stock_id && 'text-muted-foreground')} role="combobox" {...props}>
+					{stock.find((f) => f.value === $FormItem.items[index].stock_id)?.detail ?? 'Select Material'}
+					<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+				</Popover.Trigger>
+				<input hidden value={$FormItem.items[index].stock_id} name={props.name} />
+			{/snippet}
 		</Control>
 		<FieldErrors class="text-xs italic" />
 		<Popover.Content class="p-0">
@@ -85,7 +96,7 @@
 							value={stock.detail}
 							onSelect={() => {
 								$FormItem.items[index].stock_id = stock.value;
-								closeAndFocusTrigger(ids.trigger);
+								closeAndFocusTrigger(triggerId);
 							}}>
 							{stock.label}
 							<Check class={cn('ml-auto h-4 w-4', stock.value !== $FormItem.items[index].stock_id && 'text-transparent')} />

@@ -5,11 +5,17 @@
 	import { Button } from '$lib/components/ui/button';
 	import { toast } from 'svelte-sonner';
 
-	export let id: string;
-	export let reload: Function = () => {};
-	export let open = false;
+	interface Props {
+		id: string;
+		reload?: Function;
+		open?: boolean;
+	}
 
-	async function handleDelete(event: any) {
+	let { id, reload = () => {}, open = $bindable(false) }: Props = $props();
+
+	async function handleDelete(event: SubmitEvent & { currentTarget: HTMLFormElement }) {
+		event.preventDefault();
+
 		const data = new FormData(event.currentTarget);
 
 		const response = await fetch(event.currentTarget.action, {
@@ -39,11 +45,11 @@
 			<Dialog.Description>Are you sure ?</Dialog.Description>
 		</Dialog.Header>
 		<!-- <div class="mt-6 flex w-full flex-col gap-4"> -->
-		<form action="?/delete" method="post" on:submit|preventDefault={handleDelete}>
+		<form action="?/delete" method="post" onsubmit={handleDelete}>
 			<input name="id" type="text" hidden value={id} />
 			<div class="flex justify-between gap-4">
 				<Button type="submit" class="flex w-full  justify-center p-2 text-center">Yes</Button>
-				<Button on:click={() => (open = false)} variant="outline" class="flex w-full  justify-center p-2 text-center">Cancel</Button>
+				<Button onclick={() => (open = false)} variant="outline" class="flex w-full  justify-center p-2 text-center">Cancel</Button>
 			</div>
 		</form>
 		<!-- </div> -->

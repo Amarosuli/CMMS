@@ -8,11 +8,15 @@
 
 	import type { BorrowItem, BorrowMovement } from '$lib/CostumTypes';
 
-	export let open: boolean = false;
-	export let borrowItems: BorrowItem[];
-	export let borrowData: BorrowMovement;
+	interface Props {
+		open?: boolean;
+		borrowItems: BorrowItem[];
+		borrowData: BorrowMovement;
+	}
 
-	let isDeleting: boolean = false;
+	let { open = $bindable(false), borrowItems, borrowData }: Props = $props();
+
+	let isDeleting: boolean = $state(false);
 
 	function balanceQuantityBorrowed(id: string, quantity_out: number) {
 		pb.collection('stock_master')
@@ -65,7 +69,7 @@
 			<Dialog.Description>This will also delete borrow items. Are you sure ?</Dialog.Description>
 		</Dialog.Header>
 		<div class="mt-6 flex w-full flex-col gap-4">
-			<Button class="mt-4" on:click={deleteHandler}>
+			<Button class="mt-4" onclick={deleteHandler}>
 				{#if isDeleting}
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin " />
 					Deleting...
