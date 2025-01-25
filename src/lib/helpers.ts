@@ -176,14 +176,3 @@ export const timeOfDay = () => {
 	if (isEvening) return 'Evening';
 	if (isNight) return 'Night';
 };
-
-export const clock = () => {
-	const initial = new Date();
-
-	return readable(initial, (set) => {
-		const update = () => set(new Date());
-		const interval = setInterval(update, 1000);
-
-		return () => clearInterval(interval);
-	});
-};
