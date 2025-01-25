@@ -1,6 +1,6 @@
-import PocketBase, { type ListResult, type RecordListOptions, type RecordModel } from 'pocketbase';
+import type { RecordListOptions, RecordModel } from 'pocketbase';
+import type { CollectionParam } from './CostumTypes';
 import { pb } from './pocketbaseClient';
-import type { FileUrlOption, TypedPocketBase, CollectionParam } from './CostumTypes';
 
 function debounce<T extends (...args: any[]) => void>(func: T, delay: number) {
 	let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -12,24 +12,9 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number) {
 	};
 }
 
-export type PageFile = {
-	readonly items: RecordModel[];
-	readonly currentPage: number;
-	readonly isLoading: boolean;
-	readonly hasNext: boolean;
-	readonly hasPrev: boolean;
-	readonly totalItems: number;
-	readonly totalPages: number;
-	readonly perPage: number;
-	reload: () => void;
-	addModifier: (f: (items: RecordModel[]) => void) => void;
-	load: () => void;
-	next: () => void;
-	prev: () => void;
-	sort: (column?: string) => void;
-};
+export type PageFile = ReturnType<typeof createPageFile>;
 
-export const createPageFile: (config: { collectionName: CollectionParam; perPage?: number; options?: RecordListOptions }) => PageFile = (config: { collectionName: CollectionParam; perPage?: number; options?: RecordListOptions }) => {
+export const createPageFile = (config: { collectionName: CollectionParam; perPage?: number; options?: RecordListOptions }) => {
 	let items: RecordModel[] = $state([] as unknown as RecordModel[]);
 	let isLoading: boolean = $state(false);
 	let currentPage: number = $state(1);

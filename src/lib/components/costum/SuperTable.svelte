@@ -11,7 +11,6 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { fade } from 'svelte/transition';
 	import { DataTableFilterInput } from '$lib/components/costum';
-	import { base } from '$app/paths';
 	import { page } from '$app/state';
 
 	let { tableName = 'Table', disableAdd = false, pageFile, table, columns }: { tableName?: string; disableAdd?: boolean; pageFile: PageFile; table: TableCore<RecordModel>; columns: ColumnDef<RecordModel>[] } = $props();
