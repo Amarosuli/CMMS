@@ -11,7 +11,7 @@
 
 <span class="relative">
 	<DropdownMenu.Root>
-		<DropdownMenu.Trigger class={buttonVariants({ variant: 'outline' }) + 'flex h-12 w-full items-center justify-start'}>
+		<DropdownMenu.Trigger class={buttonVariants({ variant: 'ghost' }) + 'flex h-12 w-full items-center justify-start'}>
 			<div class="flex w-full justify-between gap-2">
 				<Avatar.Root>
 					<Avatar.Image src="https://github.com/shadcn.png" alt="@shadcn" />

@@ -27,12 +27,12 @@
 				</span>
 			{/if}
 		</h1>
-		<div class="flex items-center gap-2">
+		<div class="grid grid-cols-2 items-center gap-2 sm:grid-flow-col">
 			<Button variant="outline">Export (CSV)</Button>
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					{#snippet child({ props })}
-						<Button {...props} variant="outline" class="ml-auto">
+						<Button {...props} variant="outline">
 							Filter <ChevronDown class="ml-2 size-4" />
 						</Button>
 					{/snippet}

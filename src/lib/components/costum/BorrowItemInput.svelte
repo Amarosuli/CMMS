@@ -73,14 +73,14 @@
 	let triggerId = useId();
 </script>
 
-<ElementField form={FItem} name="items[{index}].stock_id" class="flex w-full max-w-80 flex-col ">
+<ElementField form={FItem} name="items[{index}].stock_id" class="flex flex-col">
 	<Popover.Root bind:open>
 		<Control id={triggerId}>
 			{#snippet children({ props })}
 				<Label class="mb-[0.15rem] mt-[0.2rem] py-[0.15rem]">Stock {selectedStock ? `- Available Qty : ${selectedStock} ${stockUnit}` : ''}</Label>
-				<Popover.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'justify-between truncate max-sm:max-w-64', !$FormItem.items[index].stock_id && 'text-muted-foreground')} role="combobox" {...props}>
+				<Popover.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'w-[15rem] justify-between truncate md:w-full', !$FormItem.items[index].stock_id && 'text-muted-foreground')} role="combobox" {...props}>
 					{stock.find((f) => f.value === $FormItem.items[index].stock_id)?.detail ?? 'Select Material'}
-					<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+					<ChevronsUpDown class="ml-2 h-4 w-4 opacity-50" />
 				</Popover.Trigger>
 				<input hidden value={$FormItem.items[index].stock_id} name={props.name} />
 			{/snippet}

@@ -226,9 +226,9 @@
 				<Legend>Items</Legend>
 				<div class="flex w-full flex-row items-center gap-2"></div>
 				{#each $FormItem.items as _, i}
-					<div class="flex w-full flex-row gap-2">
+					<div class="flex w-full flex-row justify-start gap-2">
 						<BorrowItemInput {FItem} {FormItem} {stockSkip} index={i} />
-						<Field form={FItem} name="items[{i}].quantity_out" class="flex-grow-0">
+						<Field form={FItem} name="items[{i}].quantity_out" class="w-20 max-w-20 shrink-0">
 							<Control>
 								{#snippet children({ props })}
 									<Label>Quantity</Label>
@@ -247,11 +247,11 @@
 							<FieldErrors class="text-xs italic" />
 						</ElementField>
 						{#if i != 0}
-							<Button variant="outline" class="mt-8" onclick={() => removeItemByIndex(i)}><X class="h-4 w-4" /></Button>
+							<Button variant="outline" class="mt-8 w-14 shrink-0" onclick={() => removeItemByIndex(i)}><X class="h-4 w-4" /></Button>
 						{/if}
 					</div>
 				{/each}
-				<div class="gap-auto z-20 mt-4 flex w-full items-center justify-start gap-2">
+				<div class="gap-auto z-20 mt-4 flex w-fit items-center justify-between gap-2">
 					<Button
 						variant="outline"
 						class="w-full min-w-32 max-w-40 sm:w-fit"
