@@ -35,7 +35,7 @@
 		{#each sidebarMenu as menu}
 			<span class="relative" class:hidden={currentRole === undefined ? menu.role !== undefined : currentRole === 'super' ? false : currentRole === 'admin' ? menu.role === 'super' : currentRole === 'general' ? menu.role === 'super' || menu.role === 'admin' : false}>
 				<span class="absolute inset-y-2 -left-4 w-0.5 rounded-full bg-primary {currentPath === menu.url ? '' : 'hidden'}"></span>
-				<Button variant="ghost" class="flex w-full justify-start font-semibold text-secondary-foreground" href={`${menu.url}${menu.defaultHash ? menu.defaultHash : ''}`}>
+				<Button variant="ghost" class="flex w-full justify-start font-semibold text-secondary-foreground" href={menu.url}>
 					{@render icon(menu.icon)}
 					<span class="truncate">{menu.title}</span>
 				</Button>
@@ -43,8 +43,8 @@
 			{#if menu.sub}
 				{#each menu.sub as sub}
 					<span class="relative" class:hidden={currentRole === undefined ? menu.role !== undefined : currentRole === 'super' ? false : currentRole === 'admin' ? menu.role === 'super' : currentRole === 'general' ? menu.role === 'super' || menu.role === 'admin' : false}>
-						<Button variant="ghost" class="flex w-full justify-start pl-6 font-semibold text-secondary-foreground " href={menu.url + sub.hash}>
-							<ChevronRight class="mr-2 h-4 w-4 {currentHash === sub.hash ? 'text-primary' : ''}" />
+						<Button variant="ghost" class="flex w-full justify-start pl-6 font-semibold text-secondary-foreground " href={menu.url + sub.url}>
+							<ChevronRight class="mr-2 h-4 w-4 {currentHash === sub.url ? 'text-primary' : ''}" />
 							<span class="truncate">{sub.title}</span>
 						</Button>
 					</span>
