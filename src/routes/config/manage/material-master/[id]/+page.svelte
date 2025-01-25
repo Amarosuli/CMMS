@@ -14,6 +14,8 @@
 		}
 	});
 	let Unit = data.materialMaster?.expand?.unit_id ? { ...data.materialMaster.expand.unit_id, description: `(${data.materialMaster.expand.unit_id.description})` } : { code: 'Not Defined Yet', description: '' };
+
+	let backUrl = page.url.pathname.replace(/\/[^/]*$/, '');
 </script>
 
 <svelte:head>
@@ -21,7 +23,7 @@
 </svelte:head>
 
 <div>
-	<Button href="/manage/material-master" variant="outline" class="inline-flex items-center gap-2 text-sm/6">
+	<Button href={backUrl} variant="outline" class="inline-flex items-center gap-2 text-sm/6">
 		<ChevronLeft class="h-4 w-4" />
 		<span>Material Master</span>
 	</Button>

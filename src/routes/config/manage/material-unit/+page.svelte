@@ -7,12 +7,14 @@
 	import { createRawSnippet, onMount } from 'svelte';
 	import { createPageFile } from '$lib/PageTable.svelte';
 	import { page } from '$app/state';
+	import { Button } from '$lib/components/ui/button/index.js';
+	import { ChevronLeft } from 'lucide-svelte';
 
 	let { data } = $props();
 	const { user } = data;
 
 	const pageFile = createPageFile({
-		collectionName: 'transaction_type',
+		collectionName: 'material_unit',
 		perPage: 10
 	});
 
@@ -44,13 +46,13 @@
 					onclick: () => pageFile.sort(column.id)
 				}),
 			cell: ({ row }) => row.getValue('description')
+		},
+		{
+			id: 'actions',
+			cell: ({ row }) => {
+				return renderComponent(DataTableActions, { id: row.original.id, basePath: page.url.pathname, user, disableDelete: true });
+			}
 		}
-		// {
-		// 	id: 'actions',
-		// 	cell: ({ row }) => {
-		// 		return renderComponent(DataTableActions, { id: row.original.id, basePath: page.url.pathname, user, disableDelete: true });
-		// 	}
-		// }
 	];
 
 	let columnVisibility = $state<VisibilityState>({});
@@ -79,10 +81,19 @@
 	onMount(() => {
 		pageFile.load();
 	});
+
+	let backUrl = page.url.pathname.replace(/\/[^/]*$/, '');
 </script>
 
 <svelte:head>
-	<title>CMMS - Transaction Type</title>
+	<title>CMMS - Material Unit</title>
 </svelte:head>
 
-<SuperTable tableName="Transaction Type" {table} {pageFile} {columns} disableAdd={true} />
+<div>
+	<Button href={backUrl} variant="outline" class="inline-flex items-center gap-2 text-sm/6">
+		<ChevronLeft class="h-4 w-4" />
+		<span>Config</span>
+	</Button>
+</div>
+
+<SuperTable tableName="Material Unit" {table} {pageFile} {columns} />

@@ -1,30 +1,29 @@
 <script lang="ts">
 	import { LoaderCircle, ChevronLeft, CalendarPlus } from 'lucide-svelte';
-	import MaterialUnitForm from '$lib/components/page/MaterialUnitForm.svelte';
+	import MaterialMasterForm from '$lib/components/page/MaterialMasterForm.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { time } from '$lib/helpers.js';
+	import { page } from '$app/state';
 
-	interface Props {
-		data: any;
-	}
+	let { data } = $props();
 
-	let { data }: Props = $props();
+	let backUrl = page.url.pathname.replace(/\/[^/]*$/, '');
 </script>
 
 <svelte:head>
-	<title>CMMS - Add Material Unit</title>
+	<title>CMMS - Add Material Master</title>
 </svelte:head>
 
 <div>
-	<Button href="/manage/material-unit" variant="outline" class="inline-flex items-center gap-2 text-sm/6">
+	<Button href={backUrl} variant="outline" class="inline-flex items-center gap-2 text-sm/6">
 		<ChevronLeft class="h-4 w-4" />
-		<span>Material Unit</span>
+		<span>Material Master</span>
 	</Button>
 </div>
 
 <div class="mt-4 lg:mt-8">
 	<div class="flex items-center gap-4">
-		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Add <span class="text-foreground/50">Material Unit</span></h1>
+		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Add <span class="text-foreground/50">Material Master</span></h1>
 	</div>
 	<div class="isolate mt-2.5 flex flex-wrap justify-between gap-x-6 gap-y-4">
 		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
@@ -35,4 +34,4 @@
 	</div>
 </div>
 
-<MaterialUnitForm {data} submitText="Save" redirectUrl="/manage/material-unit" />
+<MaterialMasterForm {data} submitText="Save" redirectUrl="/manage/material-master" />

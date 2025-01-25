@@ -7,13 +7,21 @@
 	import { createRawSnippet, onMount } from 'svelte';
 	import { createPageFile } from '$lib/PageTable.svelte';
 	import { page } from '$app/state';
+	import { Button } from '$lib/components/ui/button/index.js';
+	import { ChevronLeft } from 'lucide-svelte';
 
 	let { data } = $props();
 	const { user } = data;
 
 	const pageFile = createPageFile({
-		collectionName: 'material_unit',
-		perPage: 10
+		collectionName: 'material_master',
+		perPage: 10,
+		options: { expand: 'unit_id' }
+	});
+	pageFile.addModifier((items: any[]) => {
+		return items.map((val) => {
+			return { ...val, unitCode: val.expand ? val.expand.unit_id.code : 'N/A', part_number: val.part_number ? val.part_number : '-' };
+		});
 	});
 
 	export const columns: ColumnDef<RecordModel>[] = [
@@ -44,6 +52,46 @@
 					onclick: () => pageFile.sort(column.id)
 				}),
 			cell: ({ row }) => row.getValue('description')
+		},
+		{
+			accessorKey: 'part_number',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Part Number',
+					disabled: pageFile.isLoading,
+					onclick: () => pageFile.sort(column.id)
+				}),
+			cell: ({ row }) => row.getValue('part_number')
+		},
+		{
+			accessorKey: 'unitCode',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Unit',
+					disabled: pageFile.isLoading,
+					onclick: () => pageFile.sort(column.id)
+				}),
+			cell: ({ row }) => row.getValue('unitCode')
+		},
+		{
+			accessorKey: 'minimum_quantity',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Minimum Quantity',
+					disabled: pageFile.isLoading,
+					onclick: () => pageFile.sort(column.id)
+				}),
+			cell: ({ row }) => row.getValue('minimum_quantity')
+		},
+		{
+			accessorKey: 'remark',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Remark',
+					disabled: pageFile.isLoading,
+					onclick: () => pageFile.sort(column.id)
+				}),
+			cell: ({ row }) => row.getValue('remark')
 		},
 		{
 			id: 'actions',
@@ -79,10 +127,19 @@
 	onMount(() => {
 		pageFile.load();
 	});
+
+	let backUrl = page.url.pathname.replace(/\/[^/]*$/, '');
 </script>
 
 <svelte:head>
-	<title>CMMS - Material Unit</title>
+	<title>CMMS - Material Master</title>
 </svelte:head>
 
-<SuperTable tableName="Material Unit" {table} {pageFile} {columns} />
+<div>
+	<Button href={backUrl} variant="outline" class="inline-flex items-center gap-2 text-sm/6">
+		<ChevronLeft class="h-4 w-4" />
+		<span>Config</span>
+	</Button>
+</div>
+
+<SuperTable tableName="Material Master" {table} {pageFile} {columns} />
