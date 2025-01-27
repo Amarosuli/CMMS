@@ -142,4 +142,4 @@
 	<title>CMMS - Stock Available</title>
 </svelte:head>
 
-<SuperTable tableName="Stock Available" {table} {pageFile} {columns} />
+<SuperTable tableName="Stock Available" {table} {pageFile} {columns} addUrl="/movement/stock-in" />

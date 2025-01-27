@@ -12,8 +12,8 @@
 	import { fade } from 'svelte/transition';
 	import { DataTableFilterInput } from '$lib/components/costum';
 	import { page } from '$app/state';
-
-	let { tableName = 'Table', disableAdd = false, pageFile, table, columns }: { tableName?: string; disableAdd?: boolean; pageFile: PageFile; table: TableCore<RecordModel>; columns: ColumnDef<RecordModel>[] } = $props();
+	// @TODO : use config property to hold all properties
+	let { tableName = 'Table', disableAdd = false, addUrl, pageFile, table, columns }: { tableName?: string; disableAdd?: boolean; addUrl?: string; pageFile: PageFile; table: TableCore<RecordModel>; columns: ColumnDef<RecordModel>[] } = $props();
 </script>
 
 <div class="w-full">
@@ -61,7 +61,7 @@
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
 			{#if !disableAdd}
-				<Button variant="ghost" class="overflow-hidden bg-primary hover:bg-primary/70" href="{page.url.pathname}/add">Add <PlusCircle class="h-4 w-4" /></Button>
+				<Button variant="ghost" class="overflow-hidden bg-primary hover:bg-primary/70" href={addUrl ? addUrl : page.url.pathname + '/add'}>Add <PlusCircle class="h-4 w-4" /></Button>
 			{/if}
 		</div>
 	</div>
