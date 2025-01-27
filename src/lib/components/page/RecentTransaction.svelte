@@ -23,21 +23,21 @@
 		{/if}
 	{:else}
 		{#each recentItems as item}
-			<div class="grid items-center border-x border-b p-2 text-xs first:border-t sm:grid-cols-2 sm:gap-0 md:text-sm xl:grid-cols-4 xl:gap-4">
+			<div class="grid items-center border-x border-b p-2 px-4 text-xs first:border-t sm:grid-cols-2 sm:gap-0 md:text-sm xl:grid-cols-4 xl:gap-4">
 				<p>{time(item.updated, { format: 'dddd, DD MMM YYYY - h:mm A' })}</p>
-				<div class="flex gap-2 md:flex-col">
+				<div class="flex md:flex-col">
 					<p>ESN {item.esn || '-'}</p>
-					<p class="md:hidden">/</p>
+					<p class="px-2 md:hidden">:</p>
 					<p>Order Number {item.order_number || '-'}</p>
 				</div>
-				<div class="flex gap-2 md:flex-col">
+				<div class="flex md:flex-col">
 					<p class="text-xs">{item.expand?.user_id.username}</p>
-					<p class="md:hidden">/</p>
+					<p class="px-2 md:hidden">:</p>
 					<p class="text-xs">{item.expand?.user_id.name}</p>
 				</div>
-				<div>
+				<div class="place-self-end">
 					<p class="hidden text-xs md:block">Status</p>
-					<p class="text-xs">{item.status}</p>
+					<p class="text-xs font-bold">{item.status}</p>
 				</div>
 			</div>
 		{/each}
