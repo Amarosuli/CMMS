@@ -59,8 +59,11 @@
 		<h2 class="text-base/7 font-semibold text-foreground sm:text-sm/6">Edit of Stock Master</h2>
 		<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
 		<p>This feature under review according to security. Add stock should be covered by stock-in, and stock-out will responsible for alteration quantity.</p>
+		<!-- @TODO : Edit should be possible according to the affected table is stock_in -->
+		<!-- @ATTENTION : Maybe it was mistake by the table design, stock_in and stock_out should record the transaction only, but there's must be another table to hold and balance the data as representative of stock table. -->
 	</div>
 {:else if currentView === 'Detail'}
+	<!-- @TODO : add image and also barcode, maybe barcode just have to render from detail page only. -->
 	<div class="mt-12">
 		<h2 class="text-base/7 font-semibold text-foreground sm:text-sm/6">Detail of Stock Master</h2>
 		<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
