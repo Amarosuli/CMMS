@@ -96,4 +96,4 @@
 	</Button>
 </div>
 
-<SuperTable tableName="Transaction Type" {table} {pageFile} {columns} disableAdd={true} />
+<SuperTable config={{ tableName: 'Transaction Type', disableAdd: true }} {table} {pageFile} {columns} />

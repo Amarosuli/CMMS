@@ -6,20 +6,40 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
 
-	import { ChevronDown, LoaderCircle, PlusCircle } from 'lucide-svelte';
+	import { ChevronDown, Filter, LoaderCircle, PlusCircle } from 'lucide-svelte';
 	import { FlexRender } from '../ui/data-table';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { fade } from 'svelte/transition';
 	import { DataTableFilterInput } from '$lib/components/costum';
 	import { page } from '$app/state';
-	// @TODO : use config property to hold all properties
-	let { tableName = 'Table', disableAdd = false, addUrl, pageFile, table, columns }: { tableName?: string; disableAdd?: boolean; addUrl?: string; pageFile: PageFile; table: TableCore<RecordModel>; columns: ColumnDef<RecordModel>[] } = $props();
+	import DataTableFilterDropdown from './DataTableFilterDropdown.svelte';
+
+	type Props = {
+		pageFile: PageFile;
+		table: TableCore<RecordModel>;
+		columns: ColumnDef<RecordModel>[];
+		config: {
+			tableName?: string;
+			disableAdd?: boolean;
+			addUrl?: string;
+		};
+	};
+	let {
+		pageFile,
+		table,
+		columns,
+		config = {
+			tableName: 'Table',
+			disableAdd: false,
+			addUrl: undefined
+		}
+	}: Props = $props();
 </script>
 
 <div class="w-full">
 	<div class="flex flex-col items-center gap-2 py-4 md:flex-row md:justify-between">
 		<h1 class="relative flex flex-shrink-0 items-center justify-center text-2xl/8 font-semibold sm:text-xl/8">
-			{tableName}
+			{config.tableName}
 			{#if pageFile.isLoading}
 				<span transition:fade={{ duration: 200 }} class="absolute -right-10 z-20 ml-4 items-center justify-center gap-3">
 					<LoaderCircle class="animate-spin text-primary" />
@@ -28,22 +48,7 @@
 		</h1>
 		<div class="grid grid-cols-2 items-center gap-2 sm:grid-flow-col">
 			<Button variant="outline">Export (CSV)</Button>
-			<DropdownMenu.Root>
-				<DropdownMenu.Trigger>
-					{#snippet child({ props })}
-						<Button {...props} variant="outline">
-							Filter <ChevronDown class="ml-2 size-4" />
-						</Button>
-					{/snippet}
-				</DropdownMenu.Trigger>
-				<DropdownMenu.Content align="end">
-					{#each table.getAllColumns().filter((col) => col.getCanHide()) as column}
-						<DropdownMenu.CheckboxItem class="capitalize" bind:checked={() => column.getIsVisible(), (v) => column.toggleVisibility(!!v)}>
-							{column.id}
-						</DropdownMenu.CheckboxItem>
-					{/each}
-				</DropdownMenu.Content>
-			</DropdownMenu.Root>
+			<DataTableFilterDropdown {pageFile} />
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					{#snippet child({ props })}
@@ -60,8 +65,8 @@
 					{/each}
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
-			{#if !disableAdd}
-				<Button variant="ghost" class="overflow-hidden bg-primary hover:bg-primary/70" href={addUrl ? addUrl : page.url.pathname + '/add'}>Add <PlusCircle class="h-4 w-4" /></Button>
+			{#if !config.disableAdd}
+				<Button variant="ghost" class="overflow-hidden bg-primary hover:bg-primary/70" href={config.addUrl ? config.addUrl : page.url.pathname + '/add'}>Add <PlusCircle class="h-4 w-4" /></Button>
 			{/if}
 		</div>
 	</div>

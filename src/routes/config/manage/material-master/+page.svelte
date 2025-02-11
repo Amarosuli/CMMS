@@ -142,4 +142,4 @@
 	</Button>
 </div>
 
-<SuperTable tableName="Material Master" {table} {pageFile} {columns} />
+<SuperTable config={{ tableName: 'Material Master' }} {table} {pageFile} {columns} />

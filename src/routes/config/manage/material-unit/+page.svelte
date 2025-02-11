@@ -96,4 +96,4 @@
 	</Button>
 </div>
 
-<SuperTable tableName="Material Unit" {table} {pageFile} {columns} />
+<SuperTable config={{ tableName: 'Material Unit' }} {table} {pageFile} {columns} />
