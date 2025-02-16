@@ -1,5 +1,4 @@
 export { default as SuperTable } from './SuperTable.svelte';
-export { default as DataTableFilterInput } from './DataTableFilterInput.svelte';
 export { default as DataTableActions } from './DataTableActions.svelte';
 export { default as DataTableSortColumn } from './DataTableSortColumn.svelte';
 export { default as DeleteDialog } from './DeleteDialog.svelte';
@@ -14,3 +13,7 @@ export { default as BorrowDataEdit } from './BorrowDataEdit.svelte';
 export { default as BorrowItemAdd } from './BorrowItemAdd.svelte';
 export { default as QRScanner } from './QRScanner.svelte';
 export { default as ViewQr } from './ViewQR.svelte';
+
+export { default as DataTableFilterDropdown } from './DataTableFilterDropdown.svelte';
+export { default as DataTableFilterOperator } from './DataTableFilterOperator.svelte';
+export { default as DataTableFilterColumn } from './DataTableFilterColumn.svelte';

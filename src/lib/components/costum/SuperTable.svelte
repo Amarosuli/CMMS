@@ -6,13 +6,12 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
 
-	import { ChevronDown, Filter, LoaderCircle, PlusCircle } from 'lucide-svelte';
+	import { ChevronDown, LoaderCircle, PlusCircle } from 'lucide-svelte';
+	import { DataTableFilterDropdown } from '.';
 	import { FlexRender } from '../ui/data-table';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { fade } from 'svelte/transition';
-	import { DataTableFilterInput } from '$lib/components/costum';
 	import { page } from '$app/state';
-	import DataTableFilterDropdown from './DataTableFilterDropdown.svelte';
 
 	type Props = {
 		pageFile: PageFile;
@@ -46,9 +45,8 @@
 				</span>
 			{/if}
 		</h1>
-		<div class="grid grid-cols-2 items-center gap-2 sm:grid-flow-col">
+		<div class="grid grid-flow-col gap-2 md:ml-auto md:w-fit">
 			<Button variant="outline">Export (CSV)</Button>
-			<DataTableFilterDropdown {pageFile} />
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					{#snippet child({ props })}
@@ -65,8 +63,10 @@
 					{/each}
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
+			<DataTableFilterDropdown {pageFile} {columns} />
 			{#if !config.disableAdd}
-				<Button variant="ghost" class="overflow-hidden bg-primary hover:bg-primary/70" href={config.addUrl ? config.addUrl : page.url.pathname + '/add'}>Add <PlusCircle class="h-4 w-4" /></Button>
+				<Button class="overflow-hidden " href={config.addUrl ? config.addUrl : page.url.pathname + '/add'}>
+					<span class="hidden md:block">Add</span> <PlusCircle class="h-4 w-4" /></Button>
 			{/if}
 		</div>
 	</div>

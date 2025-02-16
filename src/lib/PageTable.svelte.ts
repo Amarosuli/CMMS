@@ -1,4 +1,4 @@
-import type { RecordListOptions, RecordModel } from 'pocketbase';
+import type { ListOptions, RecordListOptions, RecordModel } from 'pocketbase';
 import type { CollectionParam } from './CostumTypes';
 import { pb } from './pocketbaseClient';
 
@@ -66,6 +66,14 @@ export const createPageFile = (config: { collectionName: CollectionParam; perPag
 		modifier.push(f);
 	};
 
+	const setFilter = (filter: string) => {
+		if (filter) {
+			options = { ...options, filter: filter };
+		} else {
+			options = { sort: options.sort };
+		}
+	};
+
 	const load = () => {
 		isLoading = true;
 		pb.collection(config.collectionName)
@@ -120,6 +128,7 @@ export const createPageFile = (config: { collectionName: CollectionParam; perPag
 			isLoading = true;
 			load();
 		},
+		setFilter,
 		addModifier,
 		load,
 		next,
