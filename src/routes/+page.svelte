@@ -111,8 +111,8 @@
 		<div>
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
-					{#snippet children()}
-						<Button variant="outline" class="ml-auto">
+					{#snippet child({ props })}
+						<Button {...props} variant="outline" class="ml-auto">
 							{checkedRange}
 							<ChevronDown class="ml-2 h-4 w-4" />
 						</Button>
