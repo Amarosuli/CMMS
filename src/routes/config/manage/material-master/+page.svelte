@@ -31,6 +31,7 @@
 				renderComponent(DataTableSortColumn, {
 					text: 'Code',
 					disabled: pageFile.isLoading,
+					direction: pageFile.sortBucket === column.id ? pageFile.sortDirection : undefined,
 					onclick: () => pageFile.sort(column.id)
 				}),
 			cell: ({ row }) => {
@@ -48,6 +49,7 @@
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
 					text: 'Description',
+					direction: pageFile.sortBucket === column.id ? pageFile.sortDirection : undefined,
 					disabled: pageFile.isLoading,
 					onclick: () => pageFile.sort(column.id)
 				}),
@@ -59,6 +61,7 @@
 				renderComponent(DataTableSortColumn, {
 					text: 'Part Number',
 					disabled: pageFile.isLoading,
+					direction: pageFile.sortBucket === column.id ? pageFile.sortDirection : undefined,
 					onclick: () => pageFile.sort(column.id)
 				}),
 			cell: ({ row }) => row.getValue('part_number')
@@ -69,7 +72,8 @@
 				renderComponent(DataTableSortColumn, {
 					text: 'Unit',
 					disabled: pageFile.isLoading,
-					onclick: () => pageFile.sort(column.id)
+					direction: pageFile.sortBucket === 'unit_id' ? pageFile.sortDirection : undefined,
+					onclick: () => pageFile.sort('unit_id')
 				}),
 			cell: ({ row }) => row.getValue('unitCode')
 		},
@@ -79,6 +83,7 @@
 				renderComponent(DataTableSortColumn, {
 					text: 'Minimum Quantity',
 					disabled: pageFile.isLoading,
+					direction: pageFile.sortBucket === column.id ? pageFile.sortDirection : undefined,
 					onclick: () => pageFile.sort(column.id)
 				}),
 			cell: ({ row }) => row.getValue('minimum_quantity')
@@ -89,6 +94,7 @@
 				renderComponent(DataTableSortColumn, {
 					text: 'Remark',
 					disabled: pageFile.isLoading,
+					direction: pageFile.sortBucket === column.id ? pageFile.sortDirection : undefined,
 					onclick: () => pageFile.sort(column.id)
 				}),
 			cell: ({ row }) => row.getValue('remark')

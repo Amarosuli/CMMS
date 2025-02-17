@@ -30,6 +30,7 @@
 				renderComponent(DataTableSortColumn, {
 					text: 'Batch Number',
 					disabled: pageFile.isLoading,
+					direction: pageFile.sortBucket === column.id ? pageFile.sortDirection : undefined,
 					onclick: () => pageFile.sort(column.id)
 				}),
 			cell: ({ row }) => {
@@ -48,7 +49,8 @@
 				renderComponent(DataTableSortColumn, {
 					text: 'Available Quantity',
 					disabled: pageFile.isLoading,
-					onclick: () => pageFile.sort(column.id)
+					direction: pageFile.sortBucket === 'quantity_available' ? pageFile.sortDirection : undefined,
+					onclick: () => pageFile.sort('quantity_available')
 				}),
 			cell: ({ row }) => {
 				let materialUnit = row.original.materialData?.expand?.unit_id?.code || 'EA';
@@ -61,7 +63,7 @@
 				renderComponent(DataTableSortColumn, {
 					text: 'Barcode',
 					disabled: pageFile.isLoading,
-					onclick: () => pageFile.sort(column.id)
+					direction: pageFile.sortBucket === column.id ? pageFile.sortDirection : undefined
 				}),
 			cell: ({ row }) => {
 				return renderComponent(ViewQr, { data: row.original });
@@ -73,7 +75,8 @@
 				renderComponent(DataTableSortColumn, {
 					text: 'Quantity Borrowed',
 					disabled: pageFile.isLoading,
-					onclick: () => pageFile.sort(column.id)
+					direction: pageFile.sortBucket === 'quantity_borrowed' ? pageFile.sortDirection : undefined,
+					onclick: () => pageFile.sort('quantity_borrowed')
 				}),
 			cell: ({ row }) => {
 				let materialUnit = row.original.materialData?.expand?.unit_id?.code || 'EA';
@@ -86,7 +89,8 @@
 				renderComponent(DataTableSortColumn, {
 					text: 'Code',
 					disabled: pageFile.isLoading,
-					onclick: () => pageFile.sort(column.id)
+					direction: pageFile.sortBucket === 'material_id.code' ? pageFile.sortDirection : undefined,
+					onclick: () => pageFile.sort('material_id.code')
 				}),
 			cell: ({ row }) => {
 				return row.original.materialData.code;
@@ -98,6 +102,7 @@
 				renderComponent(DataTableSortColumn, {
 					text: 'Description',
 					disabled: pageFile.isLoading,
+					direction: pageFile.sortBucket === column.id ? pageFile.sortDirection : undefined,
 					onclick: () => pageFile.sort(column.id)
 				}),
 			cell: ({ row }) => row.getValue('description')

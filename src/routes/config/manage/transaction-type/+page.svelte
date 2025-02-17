@@ -24,6 +24,7 @@
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
 					text: 'Code',
+					direction: pageFile.sortBucket === column.id ? pageFile.sortDirection : undefined,
 					disabled: pageFile.isLoading,
 					onclick: () => pageFile.sort(column.id)
 				}),
@@ -43,6 +44,7 @@
 				renderComponent(DataTableSortColumn, {
 					text: 'Description',
 					disabled: pageFile.isLoading,
+					direction: pageFile.sortBucket === column.id ? pageFile.sortDirection : undefined,
 					onclick: () => pageFile.sort(column.id)
 				}),
 			cell: ({ row }) => row.getValue('description')
