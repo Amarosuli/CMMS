@@ -53,7 +53,7 @@
 </script>
 
 <Dialog.Root bind:open>
-	<Dialog.Content class="p-10">
+	<Dialog.Content onInteractOutside={(e) => e.preventDefault()} class="p-10">
 		<Dialog.Header>
 			<Dialog.Title>Login</Dialog.Title>
 			<Dialog.Description>Utilize your power now!</Dialog.Description>
