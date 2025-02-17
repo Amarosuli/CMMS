@@ -34,7 +34,7 @@ export const createPageFile = (config: { collectionName: CollectionParam; perPag
 	let modifier: Function[] = [];
 	let options: RecordListOptions = $state({ ...config.options, sort: '-created' });
 	let sortBucket: string = $state('');
-	let sortDirection: string = $state<'dsc' | 'asc'>('dsc');
+	let sortDirection = $state<'dsc' | 'asc'>('dsc');
 
 	const sort = (column?: string) => {
 		if (column === sortBucket) {
@@ -123,6 +123,12 @@ export const createPageFile = (config: { collectionName: CollectionParam; perPag
 		},
 		get perPage() {
 			return perPage;
+		},
+		get sortBucket() {
+			return sortBucket;
+		},
+		get sortDirection() {
+			return sortDirection;
 		},
 		reload: () => {
 			isLoading = true;
