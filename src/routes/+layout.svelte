@@ -104,7 +104,7 @@
 	});
 </script>
 
-<Toaster />
+<Toaster position="top-center" />
 <ModeWatcher />
 <div class="relative isolate flex min-h-svh w-full bg-secondary-foreground/5 max-lg:flex-col">
 	<Navbar bind:currentHash bind:currentPath {sidebarMenu} {user} {currentRole} bind:openLoginDialog {logOut} />
