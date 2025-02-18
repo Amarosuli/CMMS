@@ -209,7 +209,7 @@
 	</form>
 	{#if $MessageBorrowing}
 		<div class="mt-6 flex w-full flex-col items-center justify-center bg-yellow-300">
-			<p class="p-2 text-center text-xs font-semibold text-background">{$MessageBorrowing.text} Now add material either manualy or by QR Code Scanner!</p>
+			<p class="p-2 text-center text-xs font-semibold text-black">Now add material either manualy or by QR Code Scanner!</p>
 		</div>
 		<div class="items-cemter mt-4 flex w-full justify-center">
 			<ArrowDown class="h-6 w-6 animate-bounce" />
