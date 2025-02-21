@@ -1,4 +1,4 @@
-import { fail, message, superValidate } from 'sveltekit-superforms';
+import { fail, message, superValidate, withFiles } from 'sveltekit-superforms';
 import { materialMasterSchema } from '$lib/zodSchema';
 import { redirect } from '@sveltejs/kit';
 import { zod } from 'sveltekit-superforms/adapters';
@@ -28,14 +28,18 @@ export const load = async ({ locals, url, params }) => {
 
 export const actions = {
 	default: async ({ locals, request, params }) => {
-		const form = await superValidate(request, zod(materialMasterSchema));
+		const formData = await request.formData();
+		const form = await superValidate(formData, zod(materialMasterSchema));
+
+		if (!form.data.images?.length) formData.delete('images');
+		if (!form.data.sds) formData.delete('sds');
 
 		let id = params.id;
 		if (!id) return message(form, 'id not define', { status: 400 });
-		if (!form.valid) return fail(400, { form });
+		if (!form.valid) return fail(400, withFiles({ form }));
 
 		try {
-			await locals.pb.collection('material_master').update(id, form.data);
+			await locals.pb.collection('material_master').update(id, formData);
 		} catch (error: any) {
 			const errorMessage = `${error?.response.message} | PocketBase error.`;
 			return message(form, errorMessage, { status: error?.status });

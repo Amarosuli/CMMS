@@ -2,12 +2,13 @@
 	import * as Select from '$lib/components/ui/select';
 
 	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
-	import { LoaderCircle } from 'lucide-svelte';
-	import { superForm } from 'sveltekit-superforms';
+	import { fileProxy, filesProxy, superForm } from 'sveltekit-superforms';
+	import { goto, invalidateAll } from '$app/navigation';
+	import { LoaderCircle, X } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { toast } from 'svelte-sonner';
-	import { goto } from '$app/navigation';
+	import { pb } from '$lib/pocketbaseClient';
 
 	interface Props {
 		data: any;
@@ -16,7 +17,7 @@
 		submitText?: string;
 	}
 
-	let { data, currentView = $bindable(undefined), redirectUrl = undefined, submitText = 'Update' }: Props = $props();
+	let { data = $bindable(), currentView = $bindable(undefined), redirectUrl = undefined, submitText = 'Update' }: Props = $props();
 
 	const { materialUnit } = data;
 	const form = superForm(data.form, {
@@ -29,6 +30,8 @@
 		}
 	});
 	const { form: formData, delayed, message, enhance } = form;
+	const pdfFiles = fileProxy(formData, 'sds');
+	const imgFiles = filesProxy(formData, 'images');
 
 	$effect(() => {
 		data.materialMaster && formData.set(data.materialMaster);
@@ -42,12 +45,47 @@
 				}
 			: undefined
 	);
+
+	function removeImage(id: string, name: string) {
+		const promise = pb
+			.collection('material_master')
+			.update(id, {
+				'images-': [name]
+			})
+			.then(() => {
+				invalidateAll();
+				currentView = 'Detail';
+			});
+
+		toast.promise(promise, {
+			loading: 'remove image...',
+			success: 'image has been removed',
+			error: 'remove error, try again!'
+		});
+	}
+	function removeSDS(id: string, name: string) {
+		const promise = pb
+			.collection('material_master')
+			.update(id, {
+				'sds-': [name]
+			})
+			.then(() => {
+				invalidateAll();
+				currentView = 'Detail';
+			});
+
+		toast.promise(promise, {
+			loading: 'remove sds...',
+			success: 'sds has been removed',
+			error: 'remove error, try again!'
+		});
+	}
 </script>
 
 <div class="mt-12">
 	<h2 class="text-base/7 font-semibold text-foreground sm:text-sm/6">Form Field</h2>
 	<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
-	<form class="mt-3 flex w-full max-w-80 flex-col text-base/6 sm:text-sm/6" method="post" use:enhance>
+	<form class="mt-3 flex w-full max-w-80 flex-col text-base/6 sm:text-sm/6" method="post" enctype="multipart/form-data" use:enhance>
 		<Field {form} name="code">
 			<Control>
 				{#snippet children({ props })}
@@ -109,6 +147,55 @@
 							</Select.Group>
 						</Select.Content>
 					</Select.Root>
+				{/snippet}
+			</Control>
+			<FieldErrors class="text-xs italic" />
+		</Field>
+		<Field {form} name="images">
+			<Control>
+				{#snippet children({ props })}
+					<Label>Images <span class="italic text-foreground/70">*PNG or JPG</span></Label>
+					<div class="flex flex-col divide-y">
+						{#each $formData.images as img}
+							<div class="flex items-center justify-between gap-2 px-2">
+								<span class="truncate italic text-destructive">
+									{img}
+								</span>
+								<Button variant="icon" onclick={() => removeImage($formData.id, img)}>
+									<X class="size-4" />
+								</Button>
+							</div>
+						{/each}
+					</div>
+					<Input {...props} bind:files={$imgFiles} multiple accept="image/png, image/jpeg" type="file" />
+				{/snippet}
+			</Control>
+			<FieldErrors class="text-xs italic" />
+		</Field>
+		<Field {form} name="sds">
+			<Control>
+				{#snippet children({ props })}
+					<Label>Safety Data Sheet <span class="italic text-foreground/70">*PDF Only</span></Label>
+					{#if $formData.sds}
+						<div class="flex items-center justify-between gap-2 px-2">
+							<span class="truncate italic text-destructive">
+								{$formData.sds}
+							</span>
+							<Button variant="icon" onclick={() => removeSDS($formData.id, $formData.sds)}>
+								<X class="size-4" />
+							</Button>
+						</div>
+					{/if}
+					<Input {...props} bind:files={$pdfFiles} accept="application/pdf" type="file" />
+				{/snippet}
+			</Control>
+			<FieldErrors class="text-xs italic" />
+		</Field>
+		<Field {form} name="url_refference">
+			<Control>
+				{#snippet children({ props })}
+					<Label>URL Refference</Label>
+					<Input {...props} bind:value={$formData.url_refference} type="text" placeholder="URL Refference" />
 				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
