@@ -17,3 +17,6 @@ export { default as ViewQr } from './ViewQR.svelte';
 export { default as DataTableFilterDropdown } from './DataTableFilterDropdown.svelte';
 export { default as DataTableFilterOperator } from './DataTableFilterOperator.svelte';
 export { default as DataTableFilterColumn } from './DataTableFilterColumn.svelte';
+
+export { default as ImageCarousel } from './ImageCarousel.svelte';
+export { default as PDFLink } from './PDFLink.svelte';
