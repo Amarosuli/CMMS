@@ -11,13 +11,29 @@ export const materialUnitSchema = z.object({
 	description: z.string().trim()
 });
 
+export const materialGroupSchema = z.object({
+	name: z.string().trim().min(1, 'Group name is required'),
+	description: z.string().trim()
+});
+
 export const materialMasterSchema = z.object({
 	code: z.string().trim().min(1, 'Material code is required'),
 	description: z.string().trim().min(5, 'You should put the description of this material'),
 	part_number: z.string().trim().min(1, 'Part number is required'),
 	minimum_quantity: z.number({ message: 'Accept number only' }).min(1, 'Minimal quantity is required'),
 	remark: z.string().trim().optional(),
-	unit_id: z.string().trim().min(1, 'You have to choose the unit of material')
+	unit_id: z.string().trim().min(1, 'You have to choose the unit of material'),
+	images: z
+		.instanceof(File)
+		.refine((f) => f.size < 3_000_000, 'Max 3 MB upload images.')
+		.array()
+		.optional(),
+	sds: z
+		.instanceof(File)
+		.refine((f) => f.size < 5_000_000, 'Max 5 MB upload files')
+		.optional(),
+	url_refference: z.string().optional(),
+	group_id: z.string().trim().optional()
 });
 
 export const stockInSchema = z.object({
