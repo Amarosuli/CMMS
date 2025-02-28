@@ -27,11 +27,13 @@ export const materialMasterSchema = z.object({
 		.instanceof(File)
 		.refine((f) => f.size < 3_000_000, 'Max 3 MB upload images.')
 		.array()
-		.optional(),
+		.optional()
+		.nullable(),
 	sds: z
 		.instanceof(File)
 		.refine((f) => f.size < 5_000_000, 'Max 5 MB upload files')
-		.optional(),
+		.optional()
+		.nullable(),
 	url_refference: z.string().optional(),
 	group_id: z.string().trim().optional()
 });

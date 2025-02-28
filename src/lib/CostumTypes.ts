@@ -4,7 +4,9 @@ export interface MaterialMaster extends RecordModel {
 	code: string;
 	description: string;
 	part_number: string;
-	minimum_quantity: string;
+	minimum_quantity: number;
+	images: string[];
+	sds: string;
 	remark: string;
 	unit_id: MaterialUnit['id'];
 	expand?: {
