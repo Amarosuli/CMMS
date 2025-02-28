@@ -72,7 +72,7 @@
 		{#if user}
 			<DropdownMenu.Separator />
 			<DropdownMenu.Item onclick={() => goto(`${basePath}/${id}`)}>Detail</DropdownMenu.Item>
-			<DropdownMenu.Item onclick={() => goto(`${basePath}/${id}#edit`)}>Edit</DropdownMenu.Item>
+			<DropdownMenu.Item onclick={() => goto(`${basePath}/${id}/edit`)}>Edit</DropdownMenu.Item>
 			{#if !disableDelete}
 				<DropdownMenu.Item onclick={() => (open = true)}>Delete</DropdownMenu.Item>
 			{/if}
