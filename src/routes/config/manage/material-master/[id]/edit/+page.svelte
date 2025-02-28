@@ -1,4 +1,5 @@
 <script lang="ts">
+	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import * as Select from '$lib/components/ui/select';
 
 	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
@@ -11,9 +12,11 @@
 	import { goto } from '$app/navigation';
 	import { time } from '$lib/helpers.js';
 	import { page } from '$app/state';
+	import { pb } from '$lib/pocketbaseClient';
 
 	let { data } = $props();
 
+	let materialMaster = $state(data.materialMaster);
 	let backUrl = page.url.pathname.replace(/\/[^/]*$/, '');
 	let redirectUrl = backUrl;
 
@@ -30,6 +33,16 @@
 	const pdfFiles = fileProxy(formData, 'sds');
 	const imgFiles = filesProxy(formData, 'images');
 
+	$effect(() => {
+		if (materialMaster) {
+			formData.set({
+				...materialMaster,
+				images: null,
+				sds: null
+			});
+		}
+	});
+
 	let selectedUnit = $derived(
 		$formData.unit_id
 			? {
@@ -39,16 +52,70 @@
 			: undefined
 	);
 
+	function removeImage(id: string, name: string) {
+		const promise = pb
+			.collection('material_master')
+			.update(id, {
+				'images-': [name]
+			})
+			.then(() => {
+				materialMaster = { ...materialMaster!, images: materialMaster!.images.filter((image) => image != name) };
+				confirmDialogOpen = false;
+				confirmDialogFunction = () => {};
+			});
+
+		toast.promise(promise, {
+			loading: 'remove image...',
+			success: 'image has been removed',
+			error: 'remove error, try again!'
+		});
+	}
+
+	function removeSDS(id: string, name: string) {
+		const promise = pb
+			.collection('material_master')
+			.update(id, {
+				'sds-': [name]
+			})
+			.then(() => {
+				materialMaster = { ...materialMaster!, sds: '' };
+				confirmDialogOpen = false;
+				confirmDialogFunction = () => {};
+			});
+
+		toast.promise(promise, {
+			loading: 'remove sds...',
+			success: 'sds has been removed',
+			error: 'remove error, try again!'
+		});
+	}
+
+	let confirmDialogOpen = $state(false);
+	let confirmDialogFunction = $state(() => {});
+
 	let selectedPDF: string = $state('');
 	let selectedImages: string = $state('');
 </script>
 
 <svelte:head>
-	<title>CMMS - Add Material Master</title>
+	<title>CMMS - Edit Material Master</title>
 </svelte:head>
 
+<AlertDialog.Root bind:open={confirmDialogOpen}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+			<AlertDialog.Description>This action cannot be undone. This will permanently delete file.</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+			<AlertDialog.Action onclick={() => confirmDialogFunction()}>Continue</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>
+
 <div>
-	<Button href={backUrl} variant="outline" class="inline-flex items-center gap-2 text-sm/6">
+	<Button href="/config/manage/material-master" variant="outline" class="inline-flex items-center gap-2 text-sm/6">
 		<ChevronLeft class="h-4 w-4" />
 		<span>Material Master</span>
 	</Button>
@@ -56,13 +123,17 @@
 
 <div class="mt-4 lg:mt-8">
 	<div class="flex items-center gap-4">
-		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Add <span class="text-foreground/50">Material Master</span></h1>
+		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Edit <span class="text-foreground/50">Material Master</span></h1>
+		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 sm:text-xs/5 forced-colors:outline">{data.id}</span>
 	</div>
 	<div class="isolate mt-2.5 flex flex-wrap justify-between gap-x-6 gap-y-4">
 		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
 			<span class="flex items-center gap-3 text-base/6 sm:text-sm/6">
 				<CalendarPlus class="h-4 w-4" />
-				<span>{time(new Date())}</span></span>
+				<span>{time(data.materialMaster?.created)}</span></span>
+		</div>
+		<div class="flex gap-4">
+			<Button variant="outline" onclick={() => goto(backUrl)} class="min-w-20 ">Detail</Button>
 		</div>
 	</div>
 </div>
@@ -141,7 +212,24 @@
 			<Control>
 				{#snippet children({ props })}
 					<Label>Images <span class="italic text-foreground/70">*PNG or JPG</span></Label>
+					<div class="flex flex-col divide-y">
+						{#each materialMaster!.images as img}
+							<div class="flex items-center justify-between gap-2 px-2">
+								<span class="truncate italic text-destructive">
+									{img}
+								</span>
 
+								<Button
+									variant="ghost"
+									onclick={() => {
+										confirmDialogOpen = true;
+										confirmDialogFunction = () => removeImage(materialMaster!.id, img);
+									}}>
+									<X class="size-4" />
+								</Button>
+							</div>
+						{/each}
+					</div>
 					<input
 						{...props}
 						bind:files={$imgFiles}
@@ -165,7 +253,22 @@
 			<Control>
 				{#snippet children({ props })}
 					<Label>Safety Data Sheet <span class="italic text-foreground/70">*PDF Only</span></Label>
+					{#if materialMaster!.sds}
+						<div class="flex items-center justify-between gap-2 px-2">
+							<span class="truncate italic text-destructive">
+								{materialMaster!.sds}
+							</span>
 
+							<Button
+								variant="icon"
+								onclick={() => {
+									confirmDialogOpen = true;
+									confirmDialogFunction = () => removeSDS(materialMaster!.id, materialMaster!.sds);
+								}}>
+								<X class="size-4" />
+							</Button>
+						</div>
+					{/if}
 					<input
 						{...props}
 						bind:files={$pdfFiles}
@@ -195,9 +298,9 @@
 		</Field>
 		<Button class="mt-4" type="submit" disabled={$delayed ? true : false}>
 			{#if $delayed}
-				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" /> Saving...
+				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" /> Updating...
 			{:else}
-				Save
+				Update
 			{/if}
 		</Button>
 		{#if $message}
