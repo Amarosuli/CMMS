@@ -116,7 +116,7 @@
 				{@render children?.()}
 			</div>
 			{#if isLogOut || loadingPage}
-				<div transition:fade={{ duration: 400 }} class="absolute inset-0 z-10 flex h-screen w-full items-center justify-center bg-foreground/10">
+				<div transition:fade={{ duration: 400 }} class="absolute inset-0 z-40 flex h-full w-full items-center justify-center bg-foreground/10">
 					<LoaderCircle class="h-4 w-4 animate-spin text-primary" />
 					<p class="ml-2 text-xs">Loading...</p>
 				</div>
