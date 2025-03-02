@@ -13,6 +13,7 @@
 	import { page } from '$app/state';
 
 	let { data } = $props();
+	let { userData } = data;
 
 	let backUrl = page.url.pathname.replace(/\/[^/]*$/, '');
 
@@ -51,10 +52,18 @@
 				}
 			: undefined
 	);
+
+	$effect(() => {
+		if (userData) {
+			formData.set({
+				...userData
+			});
+		}
+	});
 </script>
 
 <svelte:head>
-	<title>CMMS - Add User</title>
+	<title>CMMS - Edit User</title>
 </svelte:head>
 
 <div>
@@ -66,13 +75,17 @@
 
 <div class="mt-4 lg:mt-8">
 	<div class="flex items-center gap-4">
-		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Add <span class="text-foreground/50">User</span></h1>
+		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Edit <span class="text-foreground/50">User</span></h1>
+		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 sm:text-xs/5 forced-colors:outline">{data.id}</span>
 	</div>
 	<div class="isolate mt-2.5 flex flex-wrap justify-between gap-x-6 gap-y-4">
 		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
 			<span class="flex items-center gap-3 text-base/6 sm:text-sm/6">
 				<CalendarPlus class="h-4 w-4" />
-				<span>{time(new Date())}</span></span>
+				<span>{time(data.userData?.created)}</span></span>
+		</div>
+		<div class="flex gap-4">
+			<Button variant="outline" onclick={() => goto(backUrl)} class="min-w-20 ">Detail</Button>
 		</div>
 	</div>
 </div>
@@ -148,7 +161,7 @@
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
-		<Field {form} name="password">
+		<!-- <Field {form} name="password">
 			<Control>
 				{#snippet children({ props })}
 					<Label>Password</Label>
@@ -165,12 +178,12 @@
 				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
-		</Field>
+		</Field> -->
 		<Button class="mt-4" type="submit" disabled={$delayed ? true : false}>
 			{#if $delayed}
-				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" /> Saving...
+				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" /> Updating...
 			{:else}
-				Save
+				Update
 			{/if}
 		</Button>
 		{#if $message}

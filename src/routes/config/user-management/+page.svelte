@@ -3,12 +3,12 @@
 
 	import { type ColumnDef, type VisibilityState, getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
 	import { createSvelteTable, renderComponent, renderSnippet } from '$lib/components/ui/data-table/index.js';
+	import { DataTableActions, DataTableSortColumn, SuperTable } from '$lib/components/costum';
+	import { createRawSnippet, onMount } from 'svelte';
 	import { createPageFile } from '$lib/PageTable.svelte';
 	import { ChevronLeft } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { page } from '$app/state';
-	import { DataTableSortColumn, SuperTable } from '$lib/components/costum';
-	import { createRawSnippet, onMount } from 'svelte';
 
 	let { data } = $props();
 	// i really want to try the createPageFile is generic, maybe type will work
@@ -67,13 +67,13 @@
 					onclick: () => pageFile.sort(column.id)
 				}),
 			cell: ({ row }) => row.getValue('unit')
+		},
+		{
+			id: 'actions',
+			cell: ({ row }) => {
+				return renderComponent(DataTableActions, { id: row.original.id, basePath: page.url.pathname, user: data.user, disableDelete: true });
+			}
 		}
-		// {
-		// 	id: 'actions',
-		// 	cell: ({ row }) => {
-		// 		return renderComponent(DataTableActions, { id: row.original.id, basePath: page.url.pathname, user, disableDelete: true });
-		// 	}
-		// }
 	];
 
 	let columnVisibility = $state<VisibilityState>({});
