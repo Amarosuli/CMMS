@@ -1,4 +1,4 @@
-import type { ListOptions, RecordListOptions, RecordModel } from 'pocketbase';
+import type { AuthModel, RecordListOptions, RecordModel } from 'pocketbase';
 import type { CollectionParam } from './CostumTypes';
 import { pb } from './pocketbaseClient';
 
@@ -35,6 +35,8 @@ export const createPageFile = (config: { collectionName: CollectionParam; perPag
 	let options: RecordListOptions = $state({ ...config.options, sort: '-created' });
 	let sortBucket: string = $state('');
 	let sortDirection = $state<'dsc' | 'asc'>('dsc');
+	let token = $state('');
+	let model: AuthModel | undefined = $state(undefined);
 
 	const sort = (column?: string) => {
 		if (column === sortBucket) {
@@ -74,8 +76,15 @@ export const createPageFile = (config: { collectionName: CollectionParam; perPag
 		}
 	};
 
+	const setAuth = (tokenAuth: string, modelAuth: AuthModel) => {
+		token = tokenAuth;
+		model = modelAuth;
+	};
+
 	const load = () => {
 		isLoading = true;
+		if (token.length && model) pb.authStore.save(token, model);
+
 		pb.collection(config.collectionName)
 			.getList(currentPage, perPage, options)
 			.then((res) => {
@@ -139,6 +148,7 @@ export const createPageFile = (config: { collectionName: CollectionParam; perPag
 		load,
 		next,
 		prev,
-		sort
+		sort,
+		setAuth
 	};
 };
