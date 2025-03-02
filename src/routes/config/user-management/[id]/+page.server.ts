@@ -8,6 +8,8 @@ export const load = async ({ locals, params }) => {
 	}
 
 	return {
+		token: locals.pb.authStore.token,
+		model: locals.pb.authStore.model,
 		id: params.id,
 		userData: await getUserData()
 	};

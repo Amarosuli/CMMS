@@ -260,7 +260,7 @@
 							</span>
 
 							<Button
-								variant="icon"
+								variant="ghost"
 								onclick={() => {
 									confirmDialogOpen = true;
 									confirmDialogFunction = () => removeSDS(materialMaster!.id, materialMaster!.sds);
