@@ -1,9 +1,19 @@
 import { z } from 'zod';
-import { BorrowStatus } from './CostumTypes';
+import { BorrowStatus, UserUnit, UserRole } from './CostumTypes';
 
 export const loginSchema = z.object({
 	employeeId: z.string().trim().min(6, 'Employee Id is required, Minimal 6 Characters'),
 	password: z.string().trim().min(8, 'Minimal password is 8 Characters')
+});
+
+export const userSchema = z.object({
+	username: z.string().trim().min(6, 'Employee Id is required, Minimal 6 Characters'),
+	email: z.string().email().optional(),
+	name: z.string().min(1, 'Name is required'),
+	unit: z.nativeEnum(UserUnit, { required_error: 'Unit is required' }),
+	role: z.nativeEnum(UserRole, { required_error: 'Role is required' }),
+	password: z.string().trim().min(8, 'Password is required, Minimal 8 Characters'),
+	passwordConfirm: z.string().trim().min(8, 'Password is required, Minimal 8 Characters')
 });
 
 export const materialUnitSchema = z.object({
