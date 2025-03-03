@@ -7,13 +7,15 @@
 
 	interface Props {
 		id: string;
-		reload?: Function;
 		open?: boolean;
+		reload?: () => void;
 	}
 
-	let { id, reload = () => {}, open = $bindable(false) }: Props = $props();
+	let { id, open = $bindable(false), reload = () => {} }: Props = $props();
+	let isLoading = $state(false);
 
 	async function handleDelete(event: SubmitEvent & { currentTarget: HTMLFormElement }) {
+		isLoading = true;
 		event.preventDefault();
 
 		const data = new FormData(event.currentTarget);
@@ -27,11 +29,15 @@
 
 		if (result.type === 'success') {
 			if (result.data?.message) toast.success(result.data?.message as string);
+			open = false;
 			reload();
+			isLoading = false;
 		}
 
 		if (result.type === 'failure') {
 			if (result.data?.message) toast.error(result.data?.message as string);
+			open = false;
+			isLoading = false;
 		}
 
 		applyAction(result);
@@ -44,14 +50,12 @@
 			<Dialog.Title>Delete</Dialog.Title>
 			<Dialog.Description>Are you sure ?</Dialog.Description>
 		</Dialog.Header>
-		<!-- <div class="mt-6 flex w-full flex-col gap-4"> -->
 		<form action="?/delete" method="post" onsubmit={handleDelete}>
 			<input name="id" type="text" hidden value={id} />
 			<div class="flex justify-between gap-4">
-				<Button type="submit" class="flex w-full  justify-center p-2 text-center">Yes</Button>
+				<Button type="submit" class="flex w-full  justify-center p-2 text-center">{isLoading ? 'Deleting...' : 'Yes'}</Button>
 				<Button onclick={() => (open = false)} variant="outline" class="flex w-full  justify-center p-2 text-center">Cancel</Button>
 			</div>
 		</form>
-		<!-- </div> -->
 	</Dialog.Content>
 </Dialog.Root>

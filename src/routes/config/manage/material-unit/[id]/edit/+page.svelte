@@ -1,35 +1,61 @@
 <script lang="ts">
+	import { ChevronLeft, CalendarPlus, LoaderCircle } from 'lucide-svelte';
 	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
-	import { LoaderCircle } from 'lucide-svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
-	import { toast } from 'svelte-sonner';
+	import { time } from '$lib/helpers.js';
 	import { goto } from '$app/navigation';
+	import { toast } from 'svelte-sonner';
+	import { page } from '$app/state';
 
-	interface Props {
-		data: any;
-		currentView?: 'Edit' | 'Detail' | undefined;
-		redirectUrl?: string | undefined;
-		submitText?: string;
-	}
-
-	let { data, currentView = $bindable(undefined), redirectUrl = undefined, submitText = 'Update' }: Props = $props();
+	let { data } = $props();
 
 	const form = superForm(data.form, {
 		onUpdated({ form }) {
 			if (form.valid) {
 				toast.success(form.message);
-				if (redirectUrl) goto(redirectUrl);
-				currentView = 'Detail';
+				goto('/config/manage/material-unit');
 			}
 		}
 	});
+
 	const { form: formData, delayed, message, enhance } = form;
+
 	$effect(() => {
 		data.unit && formData.set(data.unit);
 	});
+
+	let backUrl = page.url.pathname.replace(/\/[^/]*$/, '');
 </script>
+
+<svelte:head>
+	<title>CMMS - Edit Material Unit</title>
+</svelte:head>
+
+<div>
+	<Button href="/config/manage/material-unit" variant="outline" class="inline-flex items-center gap-2 text-sm/6">
+		<ChevronLeft class="h-4 w-4" />
+		<span>Material Unit</span>
+	</Button>
+</div>
+
+<div class="mt-4 lg:mt-8">
+	<div class="flex items-center gap-4">
+		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Edit <span class="text-foreground/50">Material Unit</span></h1>
+		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 sm:text-xs/5 forced-colors:outline">{data.id}</span>
+	</div>
+	<div class="isolate mt-2.5 flex flex-wrap justify-between gap-x-6 gap-y-4">
+		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
+			<span class="flex items-center gap-3 text-base/6 sm:text-sm/6">
+				<CalendarPlus class="h-4 w-4" />
+				<span>{time(data.unit?.created)}</span></span>
+		</div>
+		<div class="flex gap-4">
+			<Button variant="outline" onclick={() => goto(backUrl)} class="min-w-20 ">Detail</Button>
+		</div>
+	</div>
+</div>
 
 <div class="mt-12">
 	<h2 class="text-base/7 font-semibold text-foreground sm:text-sm/6">Form Field</h2>
@@ -55,9 +81,9 @@
 		</Field>
 		<Button class="mt-4" type="submit" disabled={$delayed ? true : false}>
 			{#if $delayed}
-				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" /> Saving...
+				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" /> Updating...
 			{:else}
-				{submitText}
+				Update
 			{/if}
 		</Button>
 		{#if $message}

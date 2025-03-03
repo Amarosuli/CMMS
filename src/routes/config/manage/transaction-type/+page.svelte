@@ -3,7 +3,7 @@
 
 	import { type ColumnDef, type VisibilityState, getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
 	import { createSvelteTable, renderComponent, renderSnippet } from '$lib/components/ui/data-table/index.js';
-	import { DataTableActions, DataTableSortColumn, SuperTable } from '$lib/components/costum';
+	import { DataTableSortColumn, SuperTable } from '$lib/components/costum';
 	import { createRawSnippet, onMount } from 'svelte';
 	import { createPageFile } from '$lib/PageTable.svelte';
 	import { page } from '$app/state';
@@ -49,12 +49,6 @@
 				}),
 			cell: ({ row }) => row.getValue('description')
 		}
-		// {
-		// 	id: 'actions',
-		// 	cell: ({ row }) => {
-		// 		return renderComponent(DataTableActions, { id: row.original.id, basePath: page.url.pathname, user, disableDelete: true });
-		// 	}
-		// }
 	];
 
 	let columnVisibility = $state<VisibilityState>({});
