@@ -14,10 +14,10 @@
 
 	let { data } = $props();
 	const { user } = data;
+
 	let borrowingConfirmDialog: boolean = $state(false);
 	let itemConfirmDialog: boolean = $state(false);
-
-	let borrowingId = $state('');
+	let borrowingId: string = $state('');
 
 	const FBorrowing = superForm(data.formBorrowing, {
 		resetForm: false,
@@ -106,8 +106,8 @@
 		return false;
 	}
 
-	function handleCaptured(e: CustomEvent<{ data: { stock_id: string; material_id: string } }>) {
-		const data = e.detail.data;
+	function handleCaptured(e: { stock_id: string; material_id: string }) {
+		const data = e;
 		if (!$FormItem.items[0].stock_id) {
 			$FormItem.items[0].stock_id = data.stock_id;
 			return;
@@ -142,7 +142,7 @@
 	});
 </script>
 
-<QRScanner bind:scanning on:captured={handleCaptured} />
+<QRScanner bind:scanning oncaptured={handleCaptured} />
 <ConfirmDialog title="Confirm the data is correct!" bind:open={borrowingConfirmDialog} onConfirm={submitBorrowing} />
 <ConfirmDialog bind:open={itemConfirmDialog} onConfirm={submitItem} />
 
