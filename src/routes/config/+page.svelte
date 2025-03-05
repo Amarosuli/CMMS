@@ -21,6 +21,12 @@
 					url: page.url.pathname + '/manage/material-unit'
 				},
 				{
+					title: 'Material Group',
+					description: 'Type to define the group of material.',
+					icon: FileType,
+					url: page.url.pathname + '/material-group'
+				},
+				{
 					title: 'Transaction Type',
 					description: 'Type to define the movement type.',
 					icon: FileType,

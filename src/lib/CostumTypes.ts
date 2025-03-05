@@ -20,6 +20,11 @@ export interface MaterialUnit extends RecordModel {
 	description: string;
 }
 
+export interface MaterialGroup extends RecordModel {
+	name: string;
+	description: string;
+}
+
 export interface TransactionType extends RecordModel {
 	code: string;
 	description: string;
@@ -145,6 +150,7 @@ export interface TypedPocketBase extends PocketBase {
 	collection(idOrName: string): RecordService;
 	collection(idOrName: 'users'): RecordService<User>;
 	collection(idOrName: 'material_unit'): RecordService<MaterialUnit>;
+	collection(idOrName: 'material_group'): RecordService<MaterialGroup>;
 	collection(idOrName: 'material_master'): RecordService<MaterialMaster>;
 	collection(idOrName: 'stock_master'): RecordService<StockMaster>;
 	collection(idOrName: 'stock_in'): RecordService<StockIn>;
@@ -158,4 +164,4 @@ export type FileUrlOption = {
 	thumb?: string;
 };
 
-export type CollectionParam = string | 'users' | 'material_unit' | 'material_master' | 'stock_master' | 'stock_in' | 'stock_out' | 'borrow_item' | 'borrow_movement';
+export type CollectionParam = string | 'users' | 'material_unit' | 'material_group' | 'material_master' | 'stock_master' | 'stock_in' | 'stock_out' | 'borrow_item' | 'borrow_movement';
