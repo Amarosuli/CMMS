@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import { Button } from '$lib/components/ui/button';
-	import { Separator } from '$lib/components/ui/separator';
 	import { BookUser, BrickWall, FileType, PencilRuler, type Icon as IconType } from 'lucide-svelte';
+	import { Separator } from '$lib/components/ui/separator';
+	import { Button } from '$lib/components/ui/button';
+	import { page } from '$app/state';
 
 	let configs = [
 		{
@@ -12,13 +12,13 @@
 					title: 'Material Master',
 					description: 'Setup you material master, code, minimum quantity, etc.',
 					icon: BrickWall,
-					url: page.url.pathname + '/manage/material-master'
+					url: page.url.pathname + '/material-master'
 				},
 				{
 					title: 'Material Unit',
 					description: 'Customize your material unit for unit of measurement.',
 					icon: PencilRuler,
-					url: page.url.pathname + '/manage/material-unit'
+					url: page.url.pathname + '/material-unit'
 				},
 				{
 					title: 'Material Group',
@@ -30,7 +30,7 @@
 					title: 'Transaction Type',
 					description: 'Type to define the movement type.',
 					icon: FileType,
-					url: page.url.pathname + '/manage/transaction-type'
+					url: page.url.pathname + '/transaction-type'
 				}
 			]
 		},

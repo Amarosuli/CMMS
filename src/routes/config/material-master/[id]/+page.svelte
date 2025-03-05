@@ -16,7 +16,7 @@
 </svelte:head>
 
 <div>
-	<Button href="/config/manage/material-master" variant="outline" class="inline-flex items-center gap-2 text-sm/6">
+	<Button href="/config/material-master" variant="outline" class="inline-flex items-center gap-2 text-sm/6">
 		<ChevronLeft class="h-4 w-4" />
 		<span>Material Master</span>
 	</Button>

@@ -34,7 +34,7 @@
 </svelte:head>
 
 <div>
-	<Button href="/config/manage/material-unit" variant="outline" class="inline-flex items-center gap-2 text-sm/6">
+	<Button href="/config/material-unit" variant="outline" class="inline-flex items-center gap-2 text-sm/6">
 		<ChevronLeft class="h-4 w-4" />
 		<span>Material Unit</span>
 	</Button>
