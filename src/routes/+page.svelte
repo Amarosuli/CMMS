@@ -2,17 +2,13 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import { ChevronDown, Plus, CircleDot } from 'lucide-svelte';
 	import { RecentTransaction } from '$lib/components/page';
-	import { Button } from '$lib/components/ui/button';
 	import { time, timeOfDay } from '$lib/helpers';
-	import { pb } from '$lib/pocketbaseClient';
 	import { onMount } from 'svelte';
+	import { Button } from '$lib/components/ui/button';
+	import { pb } from '$lib/pocketbaseClient';
 	import NumberFlow from '@number-flow/svelte';
 
-	interface Props {
-		data: any;
-	}
-
-	let { data }: Props = $props();
+	let { data } = $props();
 	const { user } = data;
 
 	const ranges = [

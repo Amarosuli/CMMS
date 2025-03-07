@@ -66,6 +66,11 @@
 		$formData.quantity_out = parseInt(target.value);
 	}
 
+	function setItemQtyReturn(e: Event & { target: HTMLInputElement }) {
+		const target = e.target;
+		$formData.quantity_return = parseInt(target.value);
+	}
+
 	async function balanceQtyIfStockDifferent(stock_id: string, quantity_borrowed: number) {
 		const stock = await pb.collection('stock_master').getOne(stock_id);
 		let finalQty = stock.quantity_borrowed - item.quantity_out;
@@ -166,37 +171,12 @@
 							<LoaderCircle class="h-4 w-4 animate-spin" />
 						{/if}
 					</p>
-					<!-- <Popover.Root bind:open={openStock} let:ids>
-						<Label class="mb-[0.15rem] mt-[0.2rem] py-[0.15rem]">Stock {selectedStock ? `- Available Qty : ${selectedStock} ${stockUnit}` : ''}</Label>
-						<Popover.Trigger class={cn(buttonVariants({ variant: 'outline' }), 'justify-between truncate', !$formData.stock_id && 'text-muted-foreground')} role="combobox">
-							{stock.find((f) => f.value === $formData.stock_id)?.detail ?? 'Select Material'}
-							<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
-						</Popover.Trigger>
-						<input hidden value={$formData.stock_id} name="stock_id" />
-
-						<Popover.Content class="p-0">
-							<Command.Root>
-								<Command.Input autofocus placeholder="Search Stock..." class="h-9" />
-								<Command.Empty>No stock found.</Command.Empty>
-								<Command.Group class="max-h-56 overflow-y-auto">
-									{#each stockAvailable as stock}
-										<Command.Item
-											value={stock.detail}
-											onSelect={() => {
-												$formData.stock_id = stock.value;
-												closeAndFocusTrigger(ids.trigger);
-											}}>
-											{stock.label}
-											<Check class={cn('ml-auto h-4 w-4', stock.value !== $formData.stock_id && 'text-transparent')} />
-										</Command.Item>
-									{/each}
-								</Command.Group>
-							</Command.Root>
-						</Popover.Content>
-					</Popover.Root> -->
 
 					<Label for="quantity_out">Quantity Out</Label>
 					<Input id="quantity_out" bind:value={$formData.quantity_out} min="1" type="number" placeholder="Quantity Out" onchange={(e: Event & { target: HTMLInputElement }) => setItemQtyOut(e)} />
+
+					<Label for="quantity_return" class="mt-2">Quantity Return</Label>
+					<Input id="quantity_return" bind:value={$formData.quantity_return} max={$formData.quantity_out} type="number" placeholder="Quantity Return" onchange={(e: Event & { target: HTMLInputElement }) => setItemQtyReturn(e)} />
 				</div>
 				<Button class="mt-4" type="submit" onclick={saveItem} disabled={isSaving ? true : false}>
 					{#if isSaving}

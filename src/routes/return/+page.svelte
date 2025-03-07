@@ -1,14 +1,10 @@
 <script lang="ts">
-	import { LoaderCircle, ScanQrCode, ArrowDown, CalendarPlus, Plus, X } from 'lucide-svelte';
-	import { time } from '$lib/helpers';
+	import { CalendarPlus } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { goto } from '$app/navigation';
+	import { time } from '$lib/helpers';
 
-	interface Props {
-		data: any;
-	}
-
-	let { data }: Props = $props();
+	let { data } = $props();
 </script>
 
 <div class="mt-4 lg:mt-8">
@@ -42,7 +38,7 @@
 					<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 sm:text-xs/5 forced-colors:outline">{item.status}</span>
 				</div>
 			</Button>
-			<Button onclick={() => goto('/active-borrowing/' + item.id)} variant="outline" class="absolute right-2 top-2 ">Edit</Button>
+			<Button onclick={() => goto(`/active-borrowing/${item.id}?fromUrl=/return`)} variant="outline" class="absolute right-2 top-2 ">Edit</Button>
 		</div>
 	{/each}
 </div>

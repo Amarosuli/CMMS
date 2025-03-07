@@ -3,16 +3,17 @@
 	import { ChevronLeft, CalendarPlus, Plus, Pencil, Trash, LoaderCircle } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { time } from '$lib/helpers.js';
+	import { page } from '$app/state';
 
 	let { data } = $props();
 
 	let isDeleteDataOpen: boolean = $state(false);
 	let isEditDataOpen: boolean = $state(false);
 	let isAddItemOpen: boolean = $state(false);
-	let isLoading = $state(false);
+	let isLoading: boolean = $state(false);
 
-	function stateHandler(e?: boolean) {
-		if (e) isLoading = e;
+	function stateHandler(e: boolean) {
+		isLoading = e;
 	}
 
 	let stockIds: { stock_id: string }[] = $state([]);
@@ -28,9 +29,9 @@
 </svelte:head>
 
 <div>
-	<Button href="/active-borrowing" variant="outline" class="inline-flex items-center gap-2 text-sm/6">
+	<Button href={page.url.searchParams.get('fromUrl') || '/active-borrowing'} variant="outline" class="inline-flex items-center gap-2 text-sm/6">
 		<ChevronLeft class="h-4 w-4" />
-		<span>Active Borrowing</span>
+		<span>{page.url.searchParams.get('fromUrl') ? 'Return Material' : 'Active Borrowing'}</span>
 	</Button>
 </div>
 

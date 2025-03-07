@@ -3,17 +3,17 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as Command from '$lib/components/ui/command/index.js';
 
-	import { onMount, tick } from 'svelte';
 	import { LoaderCircle, Check, ChevronsUpDown } from 'lucide-svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import { borrowItemOutSchema } from '$lib/zodSchema';
 	import { invalidateAll } from '$app/navigation';
+	import { onMount, tick } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { Label } from '$lib/components/ui/label';
 	import { Input } from '$lib/components/ui/input';
 	import { toast } from 'svelte-sonner';
-	import { cn } from '$lib/utils';
 	import { pb } from '$lib/pocketbaseClient';
+	import { cn } from '$lib/utils';
 
 	import type { BorrowItem, BorrowMovement } from '$lib/CostumTypes';
 	import { useId } from 'bits-ui';
@@ -40,7 +40,7 @@
 	let formData = writable<BorrowItem>({} as BorrowItem);
 
 	onMount(async () => {
-		const result = await pb.collection('stock_master').getFullList({ expand: 'material_id.unit_id' });
+		const result = await pb.collection('stock_master').getFullList({ filter: 'quantity_available != "0"', expand: 'material_id.unit_id' });
 		result.forEach(({ id, batch_number, expand, quantity_available, quantity_borrowed }) => {
 			stock = [
 				...stock,
@@ -48,7 +48,7 @@
 					value: id,
 					quantity_available: quantity_available - quantity_borrowed,
 					label: batch_number + ' - ' + expand?.material_id.code,
-					detail: expand?.material_id.code + ' - ' + expand?.material_id.part_number,
+					detail: expand?.material_id.code + ' - ' + expand?.material_id.part_number + ' - (' + quantity_available + ')',
 					unit: expand?.material_id.expand?.unit_id.code || ''
 				}
 			];
@@ -114,7 +114,6 @@
 		})
 	);
 	$effect(() => {
-		// selectedStock = (stock.find((f) => f.value === $formData.stock_id)?.quantity_available || 0) - $formData.quantity_out || null;
 		if (!open) {
 			selectedStock = null;
 			isSaving = false;
@@ -169,7 +168,7 @@
 					</Popover.Root>
 
 					<Label for="quantity_out">Quantity Out</Label>
-					<Input id="quantity_out" bind:value={$formData.quantity_out} min="1" type="number" placeholder="Quantity Out" onchange={(e: Event & { target: HTMLInputElement }) => setItemQtyOut(e)} />
+					<Input id="quantity_out" bind:value={$formData.quantity_out} min="1" type="number" placeholder="Quantity Out" onchange={(e: Event & { currentTarget: EventTarget & HTMLInputElement }) => setItemQtyOut(e)} />
 				</div>
 				<Button class="mt-4" type="submit" onclick={saveItem} disabled={isSaving ? true : false}>
 					{#if isSaving}
