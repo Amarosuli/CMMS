@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" generics="TData, TValue">
 	import type { RecordModel } from 'pocketbase';
 	import type { ColumnDef } from '@tanstack/table-core';
 	import type { PageFile } from '$lib/PageTable.svelte';
@@ -12,7 +12,7 @@
 	import { Input } from '../ui/input';
 	import { z } from 'zod';
 
-	let { pageFile, columns }: { pageFile: PageFile; columns: ColumnDef<RecordModel>[] } = $props();
+	let { pageFile, columns }: { pageFile: PageFile; columns: ColumnDef<TData, TValue>[] } = $props();
 
 	onMount(() => {
 		// @ts-ignore

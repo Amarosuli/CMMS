@@ -1,6 +1,5 @@
-<script lang="ts">
+<script lang="ts" generics="TData, TValue">
 	import type { ColumnDef, Table as TableCore } from '@tanstack/table-core';
-	import type { RecordModel } from 'pocketbase';
 	import type { PageFile } from '$lib/PageTable.svelte';
 
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
@@ -15,8 +14,8 @@
 
 	type Props = {
 		pageFile: PageFile;
-		table: TableCore<RecordModel>;
-		columns: ColumnDef<RecordModel>[];
+		table: TableCore<TData>;
+		columns: ColumnDef<TData, TValue>[];
 		config: {
 			tableName?: string;
 			disableAdd?: boolean;
