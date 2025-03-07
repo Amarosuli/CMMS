@@ -93,6 +93,7 @@
 		}
 		isSaving = true;
 		let data = res.data.items[0];
+		console.log(data);
 
 		const { stock_id, quantity_out } = data;
 		const stock = await pb.collection('stock_master').getOne(stock_id);
@@ -138,6 +139,7 @@
 			$formData.id = item.id;
 			$formData.borrow_id = item.borrow_id;
 			$formData.quantity_out = item.quantity_out;
+			$formData.quantity_return = item.quantity_return;
 			$formData.stock_id = item.stock_id;
 			$formData.date_out = new Date().toUTCString();
 			getStockToUpdate();
@@ -176,7 +178,7 @@
 					<Input id="quantity_out" bind:value={$formData.quantity_out} min="1" type="number" placeholder="Quantity Out" onchange={(e: Event & { target: HTMLInputElement }) => setItemQtyOut(e)} />
 
 					<Label for="quantity_return" class="mt-2">Quantity Return</Label>
-					<Input id="quantity_return" bind:value={$formData.quantity_return} max={$formData.quantity_out} type="number" placeholder="Quantity Return" onchange={(e: Event & { target: HTMLInputElement }) => setItemQtyReturn(e)} />
+					<Input id="quantity_return" bind:value={$formData.quantity_return} min="0" max={$formData.quantity_out} type="number" placeholder="Quantity Return" onchange={(e: Event & { target: HTMLInputElement }) => setItemQtyReturn(e)} />
 				</div>
 				<Button class="mt-4" type="submit" onclick={saveItem} disabled={isSaving ? true : false}>
 					{#if isSaving}

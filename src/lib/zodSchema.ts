@@ -101,6 +101,7 @@ export const borrowItemOutSchema = z.object({
 			borrow_id: z.string().trim().min(1, 'Borrow id is required'),
 			stock_id: z.string().trim().min(1, 'Stock Master is required'),
 			quantity_out: z.number().min(1, 'Out quantity is required, at least 1'),
+			quantity_return: z.number().optional(),
 			date_out: z.string({ message: 'Date out is required' }).transform((str: string) => new Date(str).toUTCString())
 		})
 		.array()
