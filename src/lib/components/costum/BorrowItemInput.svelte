@@ -3,7 +3,7 @@
 	import * as Command from '$lib/components/ui/command/index.js';
 
 	import { FieldErrors, Control, Label, ElementField } from '$lib/components/ui/form';
-	import { ChevronsUpDown, Check } from 'lucide-svelte';
+	import { ChevronsUpDown, Check } from '@lucide/svelte';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { onMount, tick } from 'svelte';
 	import { cn } from '$lib/utils.js';

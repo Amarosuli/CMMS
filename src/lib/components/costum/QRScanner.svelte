@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Html5Qrcode, Html5QrcodeSupportedFormats, type Html5QrcodeResult } from 'html5-qrcode';
-	import { X, LoaderCircle } from 'lucide-svelte';
+	import { X, LoaderCircle } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { toast } from 'svelte-sonner';

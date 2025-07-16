@@ -2,7 +2,7 @@
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 
-	import { ChevronLeft, CalendarPlus, TriangleAlert, LoaderCircle } from 'lucide-svelte';
+	import { ChevronLeft, CalendarPlus, TriangleAlert, LoaderCircle } from '@lucide/svelte';
 	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { Button } from '$lib/components/ui/button';

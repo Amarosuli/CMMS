@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Drawer from '$lib/components/ui/drawer';
-	import { CalendarPlus, ChevronLeft, Eye, Pencil, LoaderCircle, SquareUser } from 'lucide-svelte';
+	import { CalendarPlus, ChevronLeft, Eye, Pencil, LoaderCircle, SquareUser } from '@lucide/svelte';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import { deserialize } from '$app/forms';

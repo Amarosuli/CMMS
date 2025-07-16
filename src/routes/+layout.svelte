@@ -8,7 +8,7 @@
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
 	// icons
-	import { SendToBack, Archive, FolderInput, FolderOutput, House, LoaderCircle, Settings } from 'lucide-svelte';
+	import { SendToBack, Archive, FolderInput, FolderOutput, House, LoaderCircle, Settings } from '@lucide/svelte';
 
 	interface Props {
 		data: any;

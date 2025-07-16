@@ -4,7 +4,7 @@
 
 	import { qr } from '@svelte-put/qr/svg';
 	import { Button } from '../ui/button';
-	import { QrCode } from 'lucide-svelte';
+	import { QrCode } from '@lucide/svelte';
 
 	let { data } = $props();
 	let open: boolean = $state(false);

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { BorrowItemDelete, BorrowItemEdit } from '.';
-	import { Pencil, Trash, LoaderCircle } from 'lucide-svelte';
+	import { Pencil, Trash, LoaderCircle } from '@lucide/svelte';
 	import { Button } from '../ui/button';
 
 	import type { BorrowItem, BorrowMovement } from '$lib/CostumTypes';

@@ -3,7 +3,7 @@
 	import * as Avatar from '$lib/components/ui/avatar';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	// icons
-	import { Lightbulb, LogOut } from 'lucide-svelte';
+	import { Lightbulb, LogOut } from '@lucide/svelte';
 
 	/** @type {{user: any, logOut: any}} */
 	let { user, logOut } = $props();

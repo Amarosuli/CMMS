@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CalendarPlus, ChevronLeft, Eye, Plus, Minus, LoaderCircle } from 'lucide-svelte';
+	import { CalendarPlus, ChevronLeft, Eye, Plus, Minus, LoaderCircle } from '@lucide/svelte';
 	import { ConfirmDialog } from '$lib/components/costum';
 	import { writable } from 'svelte/store';
 	import { Button } from '$lib/components/ui/button/index.js';

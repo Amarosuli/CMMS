@@ -6,7 +6,7 @@
 	import { DataTableActions, DataTableSortColumn, SuperTable } from '$lib/components/costum';
 	import { createRawSnippet, onMount } from 'svelte';
 	import { createPageFile } from '$lib/PageTable.svelte';
-	import { ChevronLeft } from 'lucide-svelte';
+	import { ChevronLeft } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { page } from '$app/state';
 

@@ -4,8 +4,8 @@
 
 	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
 	import { fileProxy, filesProxy, superForm } from 'sveltekit-superforms';
-	import { ChevronLeft, CalendarPlus } from 'lucide-svelte';
-	import { LoaderCircle, X } from 'lucide-svelte';
+	import { ChevronLeft, CalendarPlus } from '@lucide/svelte';
+	import { LoaderCircle, X } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { toast } from 'svelte-sonner';

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Select from '$lib/components/ui/select';
 
-	import { LoaderCircle, ChevronLeft, CalendarPlus } from 'lucide-svelte';
+	import { LoaderCircle, ChevronLeft, CalendarPlus } from '@lucide/svelte';
 	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
 	import SuperDebug, { superForm } from 'sveltekit-superforms';
 	import { UserRole, UserUnit } from '$lib/CostumTypes.js';

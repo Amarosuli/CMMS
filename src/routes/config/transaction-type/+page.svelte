@@ -8,7 +8,7 @@
 	import { createPageFile } from '$lib/PageTable.svelte';
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import { ChevronLeft } from 'lucide-svelte';
+	import { ChevronLeft } from '@lucide/svelte';
 
 	let { data } = $props();
 	const { user } = data;

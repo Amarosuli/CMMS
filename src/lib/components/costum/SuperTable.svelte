@@ -5,7 +5,7 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
 
-	import { ChevronDown, LoaderCircle, PlusCircle } from 'lucide-svelte';
+	import { ChevronDown, LoaderCircle, PlusCircle } from '@lucide/svelte';
 	import { DataTableFilterDropdown } from '.';
 	import { FlexRender } from '../ui/data-table';
 	import { Button } from '$lib/components/ui/button/index.js';

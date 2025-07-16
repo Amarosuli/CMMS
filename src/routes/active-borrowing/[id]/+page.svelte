@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { BorrowDataView, BorrowItemView, BorrowDataDelete, BorrowDataEdit, BorrowItemAdd } from '$lib/components/costum';
-	import { ChevronLeft, CalendarPlus, Plus, Pencil, Trash, LoaderCircle } from 'lucide-svelte';
+	import { ChevronLeft, CalendarPlus, Plus, Pencil, Trash, LoaderCircle } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { time } from '$lib/helpers.js';
 	import { page } from '$app/state';

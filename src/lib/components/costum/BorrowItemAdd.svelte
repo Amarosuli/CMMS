@@ -3,7 +3,7 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import * as Command from '$lib/components/ui/command/index.js';
 
-	import { LoaderCircle, Check, ChevronsUpDown } from 'lucide-svelte';
+	import { LoaderCircle, Check, ChevronsUpDown } from '@lucide/svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import { borrowItemOutSchema } from '$lib/zodSchema';
 	import { invalidateAll } from '$app/navigation';

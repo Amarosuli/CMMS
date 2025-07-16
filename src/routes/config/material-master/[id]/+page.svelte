@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronLeft, CalendarPlus } from 'lucide-svelte';
+	import { ChevronLeft, CalendarPlus } from '@lucide/svelte';
 	import { ImageCarousel, PDFLink } from '$lib/components/costum';
 	import { Button } from '$lib/components/ui/button';
 	import { time } from '$lib/helpers.js';

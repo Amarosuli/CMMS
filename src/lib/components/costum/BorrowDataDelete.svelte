@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import { LoaderCircle } from 'lucide-svelte';
+	import { LoaderCircle } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';

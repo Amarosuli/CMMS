@@ -2,7 +2,7 @@
 	import { toggleMode } from 'mode-watcher';
 	import { Button } from '$lib/components/ui/button';
 	// icons
-	import { ChevronRight, MoveRight, Moon, Sun, type Icon as IconType } from 'lucide-svelte';
+	import { ChevronRight, MoveRight, Moon, Sun, type Icon as IconType } from '@lucide/svelte';
 
 	interface Props {
 		sidebarMenu: any;

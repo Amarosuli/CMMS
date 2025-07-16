@@ -2,7 +2,7 @@
 	import type { BorrowMovement } from '$lib/CostumTypes';
 	import { time } from '$lib/helpers';
 	import { pb } from '$lib/pocketbaseClient';
-	import { LoaderCircle } from 'lucide-svelte';
+	import { LoaderCircle } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 
 	let isLoading = $state(false);

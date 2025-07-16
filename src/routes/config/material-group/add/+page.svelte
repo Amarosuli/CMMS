@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronLeft, CalendarPlus, LoaderCircle } from 'lucide-svelte';
+	import { ChevronLeft, CalendarPlus, LoaderCircle } from '@lucide/svelte';
 	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
 	import { superForm } from 'sveltekit-superforms';
 	import { Button } from '$lib/components/ui/button';

@@ -4,7 +4,7 @@
 	import { afterNavigate } from '$app/navigation';
 	import { buttonVariants } from '$lib/components/ui/button';
 	// icons
-	import { AlignLeft } from 'lucide-svelte';
+	import { AlignLeft } from '@lucide/svelte';
 
 	/** @type {{sidebarMenu: any, currentRole: any, currentPath: any, currentHash: any, user: any, openLoginDialog?: boolean, logOut: any}} */
 	let { sidebarMenu, currentRole, currentPath = $bindable(), currentHash = $bindable(), user, openLoginDialog = $bindable(false), logOut } = $props();

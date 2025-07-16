@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CalendarPlus } from 'lucide-svelte';
+	import { CalendarPlus } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { goto } from '$app/navigation';
 	import { time } from '$lib/helpers';

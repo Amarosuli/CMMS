@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-	import { ChevronDown, Plus, CircleDot } from 'lucide-svelte';
+	import { ChevronDown, Plus, CircleDot } from '@lucide/svelte';
 	import { RecentTransaction } from '$lib/components/page';
 	import { time, timeOfDay } from '$lib/helpers';
 	import { onMount } from 'svelte';

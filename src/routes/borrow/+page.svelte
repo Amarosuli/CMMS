@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { FieldErrors, Control, Field, Label, Legend, ElementField } from '$lib/components/ui/form';
-	import { LoaderCircle, ScanQrCode, ArrowDown, CalendarPlus, Plus, X } from 'lucide-svelte';
+	import { LoaderCircle, ScanQrCode, ArrowDown, CalendarPlus, Plus, X } from '@lucide/svelte';
 	import { BorrowItemInput, ConfirmDialog } from '$lib/components/costum';
 	import { goto, onNavigate } from '$app/navigation';
 	import { BorrowStatus } from '$lib/CostumTypes.js';

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { BookUser, BrickWall, FileType, PencilRuler, type Icon as IconType } from 'lucide-svelte';
+	import { BookUser, BrickWall, FileType, PencilRuler, type Icon as IconType } from '@lucide/svelte';
 	import { Separator } from '$lib/components/ui/separator';
 	import { Button } from '$lib/components/ui/button';
 	import { page } from '$app/state';

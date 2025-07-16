@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CalendarPlus, ChevronLeft, LoaderCircle } from 'lucide-svelte';
+	import { CalendarPlus, ChevronLeft, LoaderCircle } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { fade } from 'svelte/transition';
 	import { time } from '$lib/helpers.js';

@@ -6,7 +6,7 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 
 	import { DataTableFilterOperator, DataTableFilterColumn } from '.';
-	import { Check, Filter, Plus, Trash2, X } from 'lucide-svelte';
+	import { Check, Filter, Plus, Trash2, X } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { onMount } from 'svelte';
 	import { Input } from '../ui/input';

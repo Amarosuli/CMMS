@@ -2,7 +2,7 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 
 	import { invalidateAll } from '$app/navigation';
-	import { LoaderCircle } from 'lucide-svelte';
+	import { LoaderCircle } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { toast } from 'svelte-sonner';
 	import { pb } from '$lib/pocketbaseClient';

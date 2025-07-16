@@ -2,7 +2,7 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 
 	import { DeleteDialog } from './';
-	import { Ellipsis } from 'lucide-svelte';
+	import { Ellipsis } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
