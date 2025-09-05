@@ -8,7 +8,7 @@
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
 	// icons
-	import { SendToBack, Archive, FolderInput, FolderOutput, House, LoaderCircle, Settings } from '@lucide/svelte';
+	import { SendToBack, Archive, FolderInput, FolderOutput, House, LoaderCircle, Settings, LayoutDashboard } from '@lucide/svelte';
 
 	interface Props {
 		data: any;
@@ -42,9 +42,15 @@
 			url: '/'
 		},
 		{
+			title: 'Dashboard',
+			icon: LayoutDashboard,
+			url: '/dashboard',
+			role: Role.GENERAL
+		},
+		{
 			title: 'Borrow',
 			icon: FolderOutput,
-			url: '/borrow',
+			url: '/borrow_onsite',
 			role: Role.GENERAL
 		},
 		{
@@ -106,18 +112,18 @@
 
 <Toaster position="top-center" />
 <ModeWatcher />
-<div class="relative isolate flex min-h-svh w-full bg-secondary-foreground/5 max-lg:flex-col">
+<div class="bg-secondary-foreground/5 relative isolate flex min-h-svh w-full max-lg:flex-col">
 	<Navbar bind:currentHash bind:currentPath {sidebarMenu} {user} {currentRole} bind:openLoginDialog {logOut} />
 	<NavbarSmall bind:currentHash bind:currentPath {sidebarMenu} {user} {currentRole} bind:openLoginDialog {logOut} />
-	<main class="flex flex-1 flex-col pb-2 lg:min-w-0 lg:pl-64 lg:pr-2 lg:pt-2">
+	<main class="flex flex-1 flex-col pb-2 lg:min-w-0 lg:pt-2 lg:pr-2 lg:pl-64">
 		<LoginDialog bind:open={openLoginDialog} />
-		<div class="relative grow overflow-hidden bg-background p-6 text-foreground lg:rounded-lg lg:p-10 lg:shadow-sm lg:ring-1 lg:ring-secondary-foreground/10">
+		<div class="bg-background text-foreground lg:ring-secondary-foreground/10 relative grow overflow-hidden p-6 lg:rounded-lg lg:p-10 lg:shadow-sm lg:ring-1">
 			<div class="mx-auto max-w-6xl">
 				{@render children?.()}
 			</div>
 			{#if isLogOut || loadingPage}
-				<div transition:fade={{ duration: 400 }} class="absolute inset-0 z-40 flex h-full w-full items-center justify-center bg-foreground/10">
-					<LoaderCircle class="h-4 w-4 animate-spin text-primary" />
+				<div transition:fade={{ duration: 400 }} class="bg-foreground/10 absolute inset-0 z-40 flex h-full w-full items-center justify-center">
+					<LoaderCircle class="text-primary h-4 w-4 animate-spin" />
 					<p class="ml-2 text-xs">Loading...</p>
 				</div>
 			{/if}

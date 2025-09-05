@@ -1,17 +1,7 @@
 <script lang="ts">
 	import { AspectRatio as AspectRatioPrimitive } from "bits-ui";
 
-	type $$Props = AspectRatioPrimitive.Props;
-
-	interface Props {
-		ratio?: $$Props["ratio"];
-		children?: import('svelte').Snippet;
-		[key: string]: any
-	}
-
-	let { ratio = 4 / 3, children, ...rest }: Props = $props();
+	let { ref = $bindable(null), ...restProps }: AspectRatioPrimitive.RootProps = $props();
 </script>
 
-<AspectRatioPrimitive.Root {ratio} {...rest}>
-	{@render children?.()}
-</AspectRatioPrimitive.Root>
+<AspectRatioPrimitive.Root bind:ref data-slot="aspect-ratio" {...restProps} />
