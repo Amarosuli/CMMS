@@ -2,22 +2,26 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
 
 	import { time } from '$lib/helpers';
 	import { CalendarPlus, ChevronLeft, LoaderCircle, ScanBarcode } from '@lucide/svelte';
 	import { fade } from 'svelte/transition';
-	import { getStockItem, getUserDetail } from './transaction.remote';
-	import type { StockMaster, User } from '$lib/CostumTypes';
+	import { checkOut, getStockByBatchNumber, getStockById, getUserDetail } from './transaction.remote';
+	import type { BorrowStatus, StockMaster, User } from '$lib/CostumTypes';
 	import Scanner from './Scanner.svelte';
+	import { toast } from 'svelte-sonner';
+	import { redirect } from '@sveltejs/kit';
+	import { goto } from '$app/navigation';
 
 	let borrowingData = $state({
 		basicData: {
 			user_id: '',
 			order_number: '',
 			esn: '',
-			status: 'OPEN'
+			status: 'OPEN' as BorrowStatus
 		},
-		items: [] as { stock_id: string; quantity_out: number }[]
+		items: [] as { borrow_id?: string; stock_id: string; quantity_out: number }[]
 	});
 
 	let isLoading = $state(false);
@@ -27,8 +31,10 @@
 	let userId = $state('');
 	let userData: User | null = $state(null);
 	let getUserLoading = $state(false);
+	let isTyping = $state(false);
 
 	async function doneTyping() {
+		isTyping = false;
 		getUserLoading = true;
 		const res = await getUserDetail(userId);
 		if (res.status === 'fail') {
@@ -43,28 +49,62 @@
 
 	let isScanning = $state(false);
 	let initValue = $state('');
+	let isQuering = $state(false);
 
 	$effect(() => {
 		if (userData) {
 			console.log('jo');
-
 			borrowingData.basicData.user_id = userData.id;
 		} else {
 			console.log('de');
 			borrowingData.basicData.user_id = '';
 		}
-
-		console.log(dada);
 	});
 
-	let dada = $derived(() => {
-		let dummy = [] as StockMaster[];
-		FormItem.forEach(async (item) => {
-			let result = await getStockItem(item);
-			dummy = [...dummy, result];
-		});
-		return dummy;
-	});
+	async function addToTray(batchNumber: string) {
+		isQuering = true;
+		let result = await getStockByBatchNumber(batchNumber);
+		if (result && result.status === 'success') {
+			const isDuplicate = borrowingData.items.find((stock) => {
+				if (stock.stock_id === result.data?.id) {
+					stock.quantity_out += 1;
+					return true;
+				}
+				return false;
+			});
+			isQuering = false;
+			if (!isDuplicate) borrowingData.items.push({ stock_id: result.data?.id as string, quantity_out: 1 });
+		} else {
+			isQuering = false;
+			return;
+		}
+	}
+
+	async function save() {
+		delayedItem = true;
+		await checkOut({
+			basicData: borrowingData.basicData,
+			itemData: borrowingData.items.map((item) => {
+				return {
+					borrow_id: borrowingData.basicData.user_id,
+					stock_id: item.stock_id,
+					quantity_out: item.quantity_out
+				};
+			})
+		})
+			.then((result) => {
+				result.forEach((res) => {
+					toast.info(`${(res.status, res.message)}`);
+				});
+			})
+			.catch((err) => {
+				console.log(err);
+			})
+			.finally(() => {
+				delayedItem = false;
+				goto('/dashboard');
+			});
+	}
 </script>
 
 <svelte:head>
@@ -99,14 +139,20 @@
 	<div class="flex items-center gap-4">
 		<div class="flex w-full max-w-sm flex-col gap-1.5">
 			<Label for="user_id">Employee ID</Label>
-			<Input id="user_id" name="user_id" bind:value={userId} type="text" placeholder="Employee ID" onblur={doneTyping} />
+			<Input id="user_id" name="user_id" bind:value={userId} type="text" placeholder="Employee ID" onfocus={() => (isTyping = true)} onblur={doneTyping} />
 		</div>
 		{#if getUserLoading}
-			<p class="text-foreground/50 text-sm/4">Get user detail...</p>
+			<div class="mt-4">
+				<p class="text-foreground/50 text-sm/4">Get employee detail...</p>
+			</div>
 		{:else}
 			<div class="mt-4">
-				<p class="text-foreground/50 text-sm/4">Name: {userData?.name}</p>
-				<p class="text-foreground/50 text-sm/4">Unit: {userData?.unit}</p>
+				{#if userData}
+					<p class="text-foreground/50 text-sm/4">Name: {userData?.name}</p>
+					<p class="text-foreground/50 text-sm/4">Unit: {userData?.unit}</p>
+				{:else}
+					<p class="text-foreground/50 text-sm/4">{isTyping ? '' : 'No Employee Data Found'}</p>
+				{/if}
 			</div>
 		{/if}
 	</div>
@@ -133,40 +179,49 @@
 	</h2>
 	<hr role="presentation" class="border-foreground/10 mt-4 w-full border-t" />
 	<div class="mt-3 flex w-full flex-col text-base/6 sm:text-sm/6">
-		{#each dada() as item, i}
-			<div class="mb-3 flex w-full flex-row items-center justify-start gap-2">
-				<Input class="w-fit " name="batch_number_{i}" value={FormItem[i]} type="text" placeholder="Batch Number" />
-				<!-- {#await getStockItem(FormItem[i])}
-					<LoaderCircle class="text-primary h-4 w-4 animate-spin" />
-				{:then result} -->
-				<div class="border-foreground/70 flex h-9 items-center gap-3 rounded-md border px-3 text-sm">
-					<p>{item.expand?.material_id.part_number}</p>
-					<p class="border-foreground/70 border-l pl-3">{item.expand?.material_id.description}</p>
-					<p class="border-foreground/70 border-l pl-3">Available Quantity - {item.quantity_available} {item.expand?.material_id.expand?.unit_id.code}</p>
-				</div>
-				<div class="border-foreground/70 flex h-9 items-center gap-3 rounded-md border px-3 text-sm">
-					<p>Borrowed Quantity -</p>
-				</div>
-				<!-- {/await} -->
-			</div>
-		{/each}
-		<div class="mb-3 flex w-fit flex-row justify-start gap-2">
+		<div class="mb-3 flex w-fit flex-col justify-start gap-2">
+			<Label for="batch_number">Batch Number</Label>
 			<Input
+				id="batch_number"
 				name="batch_number"
 				type="text"
-				placeholder="Batch Number"
+				placeholder="Input Batch Number"
 				bind:value={initValue}
 				onkeypress={(e) => {
 					if (e.key === 'Enter') {
-						if (initValue) {
-							FormItem = [...FormItem, initValue];
-						}
+						addToTray(initValue);
 						initValue = '';
 					}
 				}} />
 		</div>
 
-		<Button class="mt-4 max-w-80" disabled={delayedItem ? true : false}>
+		{#each borrowingData.items as item, i}
+			<div class="mb-3 flex w-full flex-row items-center justify-start gap-2">
+				{#await getStockById(item.stock_id)}
+					<div class="flex gap-3">
+						<Skeleton class="h-9 w-[300px]" />
+						<Skeleton class="h-9 w-32" />
+					</div>
+				{:then result}
+					<div class="border-foreground/70 flex h-9 items-center gap-3 rounded-md border px-3 text-xs">
+						<p>{result.data?.expand?.material_id.part_number}</p>
+						<p class="border-foreground/70 border-l pl-3">{result.data?.expand?.material_id.description}</p>
+						<p class="border-foreground/70 border-l pl-3">Available Quantity - {result.data?.quantity_available} {result.data?.expand?.material_id.expand?.unit_id.code}</p>
+					</div>
+					<div class="border-foreground/70 flex h-9 items-center gap-3 rounded-md border bg-lime-300 px-3 text-xs">
+						<p>Borrowed Quantity - {item.quantity_out}</p>
+					</div>
+				{/await}
+			</div>
+		{/each}
+		{#if isQuering}
+			<div class="flex gap-3">
+				<Skeleton class="h-9 w-[300px]" />
+				<Skeleton class="h-9 w-32" />
+			</div>
+		{/if}
+
+		<Button class="mt-4 max-w-80 cursor-pointer" disabled={delayedItem ? true : false} onclick={save}>
 			{#if delayedItem}
 				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" /> Saving...
 			{:else}

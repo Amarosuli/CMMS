@@ -1,8 +1,6 @@
 import { getRequestEvent, query } from '$app/server';
-import { BorrowStatus } from '$lib/CostumTypes';
-import { error, json } from '@sveltejs/kit';
-import { add } from 'layerchart';
-import type { RecordModel } from 'pocketbase';
+import { BorrowStatus, type BorrowItem } from '$lib/CostumTypes';
+import { toast } from 'svelte-sonner';
 import { array, nativeEnum, number, object, string } from 'zod';
 
 export const getUserDetail = query(string(), async (userId) => {
@@ -11,6 +9,7 @@ export const getUserDetail = query(string(), async (userId) => {
 		.collection('users')
 		.getFirstListItem('username="' + userId + '"')
 		.then((user) => {
+			console.log(user);
 			return { status: 'success', data: user };
 		})
 		.catch((err) => {
@@ -18,27 +17,44 @@ export const getUserDetail = query(string(), async (userId) => {
 		});
 });
 
-export const getStockItem = query(string(), async (batchNumber) => {
+export const getStockByBatchNumber = query(string(), async (batchNumber) => {
 	const { locals } = getRequestEvent();
-	const stockItem = await locals.pb.collection('stock_master').getFirstListItem('batch_number="' + batchNumber + '"', { expand: 'material_id.unit_id' });
-
-	return stockItem;
+	return locals.pb
+		.collection('stock_master')
+		.getFirstListItem('batch_number="' + batchNumber + '"', { expand: 'material_id.unit_id' })
+		.then((stock) => {
+			return { status: 'success', data: stock };
+		})
+		.catch((err) => {
+			return { status: 'fail', data: null };
+		});
 });
 
-export const getStockItemById = query(string(), async (stockId) => {
+export const getStockById = query(string(), async (stockId) => {
 	const { locals } = getRequestEvent();
-	const stock = await locals.pb.collection('stock_master').getOne(stockId);
-
-	return stock;
+	return locals.pb
+		.collection('stock_master')
+		.getOne(stockId, { expand: 'material_id.unit_id' })
+		.then((stock) => {
+			return { status: 'success', data: stock };
+		})
+		.catch((err) => {
+			return { status: 'fail', data: null };
+		});
 });
 
 export const createBorrow = query(object({ user_id: string(), status: nativeEnum(BorrowStatus), order_number: string(), esn: string() }), async (data) => {
 	const { locals } = getRequestEvent();
 
-	const borrowing = await locals.pb.collection('borrow_movement').create(data);
-	if (!borrowing) return error(500, 'Failed to create borrowing record');
-
-	return borrowing;
+	return locals.pb
+		.collection('borrow_movement')
+		.create(data)
+		.then((borrow) => {
+			return { status: 'success', data: borrow };
+		})
+		.catch((err) => {
+			return { status: 'fail', data: null };
+		});
 });
 
 export const addBorrowItem = query(
@@ -51,14 +67,25 @@ export const addBorrowItem = query(
 	async (item) => {
 		const { locals } = getRequestEvent();
 
-		const borrowItem = await locals.pb.collection('borrow_item').create(item);
-		if (!borrowItem) return error(500, 'Failed to create borrow item record');
-
-		return borrowItem;
+		return locals.pb
+			.collection('borrow_item')
+			.create(item)
+			.then((borrowItem) => {
+				return { status: 'success', data: borrowItem };
+			})
+			.catch((err) => {
+				return { status: 'fail', data: null };
+			});
 	}
 );
 
-export const createTransaction = query(
+interface CheckOut {
+	status: 'success' | 'fail';
+	data?: BorrowItem;
+	message?: string;
+}
+
+export const checkOut = query(
 	object({
 		basicData: object({
 			user_id: string(),
@@ -70,25 +97,57 @@ export const createTransaction = query(
 			object({
 				borrow_id: string(),
 				stock_id: string(),
-				quantity_out: number(),
-				date_out: string()
+				quantity_out: number()
 			})
 		)
 	}),
+
 	async ({ basicData, itemData }) => {
-		const { locals } = getRequestEvent();
-		let result: RecordModel[] = [];
+		let result: CheckOut[] = $state([]) as CheckOut[];
 
-		const borrowData = await createBorrow(basicData);
+		const { status: borrowStatus, data: borrowData } = await createBorrow(basicData);
 
-		for (let index = 0; index < itemData.length; index++) {
-			const item = itemData[index];
+		if (borrowData && borrowStatus === 'success') {
+			toast.info('Create Borrow Success')
+			for (let index = 0; index < itemData.length; index++) {
+				const item = itemData[index];
+				const { status, data } = await getStockById(item.stock_id);
 
-			const stock = await getStockItemById(item.stock_id);
-			await locals.pb.collection('stock_master').update(item.stock_id, { ...stock, quantity_borrowed: stock.quantity_borrowed + item.quantity_out });
-			result[index] = await addBorrowItem({ ...item, borrow_id: borrowData.id });
+				if (status === 'success' && data) {
+					const updateStockResult = await updateStockOnCheckOut({ stockId: item.stock_id, current_quantity_borrowed: data.quantity_borrowed, quantity_out: item.quantity_out });
+					const { status: addBorrowStatus, data: addBorrowData } = await addBorrowItem({ ...item, borrow_id: borrowData.id, date_out: new Date().toISOString() });
 
-			return result;
+					if (addBorrowStatus === 'fail') {
+						result.push({ status: addBorrowStatus, message: `Stock Not Found. Ref - ${item.stock_id}` });
+					} else if (addBorrowData && addBorrowStatus === 'success') {
+						result.push({ status: addBorrowStatus, data: addBorrowData });
+					}
+				} else {
+					result.push({ status: 'fail', message: `Stock Not Found. Ref - ${item.stock_id}` });
+				}
+			}
 		}
+		return result;
+	}
+);
+
+export const updateStockOnCheckOut = query(
+	object({
+		stockId: string(),
+		current_quantity_borrowed: number(),
+		quantity_out: number()
+	}),
+	async ({ stockId, current_quantity_borrowed, quantity_out }) => {
+		const { locals } = getRequestEvent();
+
+		return locals.pb
+			.collection('stock_master')
+			.update(stockId, { quantity_borrowed: current_quantity_borrowed + quantity_out })
+			.then((result) => {
+				return { status: 'success', data: result };
+			})
+			.catch((err) => {
+				return { status: 'fail', data: null };
+			});
 	}
 );

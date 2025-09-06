@@ -27,7 +27,7 @@
 	});
 </script>
 
-<div transition:fade={{ duration: 200 }} class="absolute inset-0 z-40 bg-sky-300/50 backdrop-blur-sm">
+<div transition:fade={{ duration: 200 }} class="absolute w-full h-full inset-0 z-40 bg-sky-300/50 backdrop-blur-md">
 	<div class="flex h-full w-full flex-col items-center justify-center gap-4">
 		<div class="mb-6 flex w-[300px] items-center justify-center gap-4 rounded-lg bg-gray-800 p-6 font-semibold text-white shadow-xl">
 			<ScanBarcode class="size-8 animate-pulse" />
