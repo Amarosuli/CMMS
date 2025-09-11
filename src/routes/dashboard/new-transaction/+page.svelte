@@ -5,13 +5,12 @@
 	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
 
 	import { time } from '$lib/helpers';
-	import { CalendarPlus, ChevronLeft, LoaderCircle, ScanBarcode } from '@lucide/svelte';
+	import { BookmarkCheck, BookmarkX, CalendarPlus, LoaderCircle, ScanBarcode } from '@lucide/svelte';
 	import { fade } from 'svelte/transition';
 	import { checkOut, getStockByBatchNumber, getStockById, getUserDetail } from './transaction.remote';
-	import type { BorrowStatus, StockMaster, User } from '$lib/CostumTypes';
+	import type { BorrowStatus, User } from '$lib/CostumTypes';
 	import Scanner from './Scanner.svelte';
 	import { toast } from 'svelte-sonner';
-	import { redirect } from '@sveltejs/kit';
 	import { goto } from '$app/navigation';
 
 	let borrowingData = $state({
@@ -28,7 +27,7 @@
 	let delayedItem = $state(false);
 	let FormItem: string[] = $state([]);
 
-	let userId = $state('');
+	let employeeId = $state('');
 	let userData: User | null = $state(null);
 	let getUserLoading = $state(false);
 	let isTyping = $state(false);
@@ -36,8 +35,8 @@
 	async function doneTyping() {
 		isTyping = false;
 		getUserLoading = true;
-		const res = await getUserDetail(userId);
-		if (res.status === 'fail') {
+		const res = await getUserDetail(employeeId);
+		if (res.status === 'failed') {
 			userData = null;
 			getUserLoading = false;
 			return;
@@ -53,10 +52,8 @@
 
 	$effect(() => {
 		if (userData) {
-			console.log('jo');
 			borrowingData.basicData.user_id = userData.id;
 		} else {
-			console.log('de');
 			borrowingData.basicData.user_id = '';
 		}
 	});
@@ -81,6 +78,11 @@
 	}
 
 	async function save() {
+		if (borrowingData.basicData.user_id === '') {
+			toast.error('Employee ID is required');
+			return;
+		}
+
 		delayedItem = true;
 		await checkOut({
 			basicData: borrowingData.basicData,
@@ -94,11 +96,15 @@
 		})
 			.then((result) => {
 				result.forEach((res) => {
-					toast.info(`${(res.status, res.message)}`);
+					if (res.message) {
+						toast.info(res.message);
+					} else {
+						toast.info(res.status);
+					}
 				});
 			})
 			.catch((err) => {
-				console.log(err);
+				toast.error(err);
 			})
 			.finally(() => {
 				delayedItem = false;
@@ -114,8 +120,6 @@
 {#if isScanning}
 	<Scanner bind:isScanning />
 {/if}
-
-{JSON.stringify(borrowingData)}
 
 <div class="mt-4 lg:mt-8">
 	<div class="flex items-center gap-4">
@@ -135,11 +139,11 @@
 	</div>
 </div>
 
-<form method="POST" class="mt-4 space-y-3">
+<div class="mt-4 space-y-3">
 	<div class="flex items-center gap-4">
 		<div class="flex w-full max-w-sm flex-col gap-1.5">
 			<Label for="user_id">Employee ID</Label>
-			<Input id="user_id" name="user_id" bind:value={userId} type="text" placeholder="Employee ID" onfocus={() => (isTyping = true)} onblur={doneTyping} />
+			<Input id="user_id" name="user_id" bind:value={employeeId} type="text" placeholder="Employee ID" onfocus={() => (isTyping = true)} onblur={doneTyping} />
 		</div>
 		{#if getUserLoading}
 			<div class="mt-4">
@@ -148,10 +152,18 @@
 		{:else}
 			<div class="mt-4">
 				{#if userData}
-					<p class="text-foreground/50 text-sm/4">Name: {userData?.name}</p>
-					<p class="text-foreground/50 text-sm/4">Unit: {userData?.unit}</p>
+					<div class="flex items-center gap-3">
+						<BookmarkCheck class="size-6 text-lime-400" />
+						<div>
+							<p class="text-foreground/80 text-sm/4">Name: {userData?.name}</p>
+							<p class="text-foreground/80 text-sm/4">Unit: {userData?.unit}</p>
+						</div>
+					</div>
 				{:else}
-					<p class="text-foreground/50 text-sm/4">{isTyping ? '' : 'No Employee Data Found'}</p>
+					<div class="flex items-center gap-3">
+						<BookmarkX class="text-destructive size-6" />
+						<p class="text-foreground/80 text-sm/4">{isTyping ? '' : 'No Employee Data Found'}</p>
+					</div>
 				{/if}
 			</div>
 		{/if}
@@ -164,11 +176,9 @@
 		<Label for="esn">ESN or A/C Register</Label>
 		<Input id="esn" name="esn" bind:value={borrowingData.basicData.esn} type="text" placeholder="ESN or A/C Register" />
 	</div>
-</form>
+</div>
 
-{FormItem}
-
-<div class="mt-6">
+<div class="mt-6" class:hidden={borrowingData.basicData.user_id === ''}>
 	<h2 class="text-foreground text-base/7 font-semibold sm:text-sm/6">
 		Borrowing Items <Button
 			variant="outline"
@@ -187,7 +197,7 @@
 				type="text"
 				placeholder="Input Batch Number"
 				bind:value={initValue}
-				onkeypress={(e) => {
+				onkeypress={(e: KeyboardEvent) => {
 					if (e.key === 'Enter') {
 						addToTray(initValue);
 						initValue = '';

@@ -1,10 +1,18 @@
 <script lang="ts">
+	import { SuperTable } from '$lib/components/costum';
 	import { Button } from '$lib/components/ui/button';
 	import { time } from '$lib/helpers';
+	import { createPageFile } from '$lib/PageTable.svelte';
 	import { CalendarPlus, ChevronLeft, LoaderCircle } from '@lucide/svelte';
 	import { fade } from 'svelte/transition';
 
 	let isLoading = $state(false);
+
+	const pageFile = createPageFile({
+		collectionName: 'borrow_movement',
+		perPage: 20,
+		options: { expand: 'user_id' }
+	});
 </script>
 
 <svelte:head>
@@ -28,3 +36,5 @@
 		</div>
 	</div>
 </div>
+
+<!-- <SuperTable config={} /> -->
