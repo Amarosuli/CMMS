@@ -47,18 +47,18 @@
 			url: '/dashboard',
 			role: Role.GENERAL
 		},
-		{
-			title: 'Borrow',
-			icon: FolderOutput,
-			url: '/borrow_onsite',
-			role: Role.GENERAL
-		},
-		{
-			title: 'Return',
-			icon: FolderInput,
-			url: '/return',
-			role: Role.GENERAL
-		},
+		// {
+		// 	title: 'Borrow',
+		// 	icon: FolderOutput,
+		// 	url: '/borrow_onsite',
+		// 	role: Role.GENERAL
+		// },
+		// {
+		// 	title: 'Return',
+		// 	icon: FolderInput,
+		// 	url: '/return',
+		// 	role: Role.GENERAL
+		// },
 		{
 			title: 'Stock',
 			icon: Archive,

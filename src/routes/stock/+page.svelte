@@ -7,6 +7,7 @@
 	import { createRawSnippet, onMount } from 'svelte';
 	import { createPageFile } from '$lib/PageTable.svelte';
 	import { page } from '$app/state';
+	import ViewBarcode from '$lib/components/costum/ViewBarcode.svelte';
 
 	let { data } = $props();
 	const { user } = data;
@@ -24,6 +25,25 @@
 	});
 
 	export const columns: ColumnDef<RecordModel>[] = [
+		{
+			id: 'material_description',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Material Description',
+					disabled: pageFile.isLoading,
+					direction: pageFile.sortBucket === 'material_id.description' ? pageFile.sortDirection : undefined,
+					onclick: () => pageFile.sort('material_id.description')
+				}),
+			cell: ({ row }) => {
+				const Snippet = createRawSnippet<[string]>(() => {
+					const data = row.original.expand?.material_id.description.toLowerCase();
+					return {
+						render: () => `<div class="capitalize">${data}</div>`
+					};
+				});
+				return renderSnippet(Snippet, row.getValue('material_description'));
+			}
+		},
 		{
 			accessorKey: 'batch_number',
 			header: ({ column }) =>
@@ -66,7 +86,7 @@
 					direction: pageFile.sortBucket === column.id ? pageFile.sortDirection : undefined
 				}),
 			cell: ({ row }) => {
-				return renderComponent(ViewQr, { data: row.original });
+				return renderComponent(ViewBarcode, { data: row.original });
 			}
 		},
 		{

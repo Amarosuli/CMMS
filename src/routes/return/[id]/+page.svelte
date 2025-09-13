@@ -7,6 +7,7 @@
 	import { goto } from '$app/navigation';
 	import { time } from '$lib/helpers';
 	import { pb } from '$lib/pocketbaseClient.js';
+	import { page } from '$app/state';
 
 	import type { StockMaster } from '$lib/CostumTypes.js';
 
@@ -54,7 +55,7 @@
 <ConfirmDialog title="This action means the material returned is in accordance to the actual" bind:open onConfirm={() => checkOut()} />
 
 <div>
-	<Button href="/return" variant="outline" class="inline-flex items-center gap-2 text-sm/6">
+	<Button href={page.url.searchParams.get('fromUrl') || '/return'} variant="outline" class="inline-flex items-center gap-2 text-sm/6">
 		<ChevronLeft class="h-4 w-4" />
 		<span>Return</span>
 	</Button>
@@ -63,7 +64,7 @@
 <div class="mt-4 lg:mt-8">
 	<div class="flex items-center gap-4">
 		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Crosscheck <span class="text-foreground/50">Before Checkout</span></h1>
-		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 sm:text-xs/5 forced-colors:outline"></span>
+		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 forced-colors:outline"></span>
 	</div>
 	<div class="isolate mt-2.5 flex flex-wrap justify-between gap-x-6 gap-y-4">
 		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">

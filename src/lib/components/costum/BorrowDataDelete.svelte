@@ -43,10 +43,11 @@
 			.then(() => {
 				toast.success('Delete borrow data successfully!');
 				goto('/active-borrowing');
-				isDeleting = false;
+				open = false;
 			})
 			.catch((error) => {
 				toast.error(error.message);
+				isDeleting = false;
 			});
 	}
 	function deleteHandler() {
@@ -69,7 +70,7 @@
 			<Dialog.Description>This will also delete borrow items. Are you sure ?</Dialog.Description>
 		</Dialog.Header>
 		<div class="mt-6 flex w-full flex-col gap-4">
-			<Button class="mt-4" onclick={deleteHandler}>
+			<Button class="mt-4" onclick={deleteHandler} disabled={isDeleting}>
 				{#if isDeleting}
 					<LoaderCircle class="mr-2 h-4 w-4 animate-spin " />
 					Deleting...

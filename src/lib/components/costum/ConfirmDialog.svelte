@@ -12,7 +12,7 @@
 			<Dialog.Description>Are you sure ?</Dialog.Description>
 		</Dialog.Header>
 
-		<div class="flex justify-between gap-4">
+		<div class="flex w-fit justify-between gap-4">
 			<Button
 				type="submit"
 				class="flex w-full  justify-center p-2 text-center"

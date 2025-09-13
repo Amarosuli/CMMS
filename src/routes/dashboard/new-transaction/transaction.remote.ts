@@ -32,20 +32,12 @@ export const createBorrow = query(object({ user_id: string(), status: nativeEnum
 	return { status, data };
 });
 
-export const addBorrowItem = query(
-	object({
-		borrow_id: string(),
-		stock_id: string(),
-		quantity_out: number(),
-		date_out: string()
-	}),
-	async (item) => {
-		const { locals } = getRequestEvent();
-		const { status, data, error } = await tryCatch(locals.pb.collection('borrow_item').create(item));
+export const addBorrowItem = query(object({ borrow_id: string(), stock_id: string(), quantity_out: number(), date_out: string() }), async (item) => {
+	const { locals } = getRequestEvent();
+	const { status, data, error } = await tryCatch(locals.pb.collection('borrow_item').create(item));
 
-		return { status, data };
-	}
-);
+	return { status, data };
+});
 
 interface CheckOut {
 	status: 'success' | 'failed';
@@ -76,7 +68,6 @@ export const checkOut = query(
 		const { status: borrowStatus, data: borrowData } = await createBorrow(basicData);
 
 		if (borrowData && borrowStatus === 'success') {
-			toast.info('Create Borrow Success');
 			for (let index = 0; index < itemData.length; index++) {
 				const item = itemData[index];
 				const { status, data } = await getStockById(item.stock_id);
@@ -86,9 +77,9 @@ export const checkOut = query(
 					const { status: addBorrowStatus, data: addBorrowData } = await addBorrowItem({ ...item, borrow_id: borrowData.id, date_out: new Date().toISOString() });
 
 					if (addBorrowStatus === 'failed') {
-						result.push({ status: addBorrowStatus, message: `Stock Not Found. Ref - ${item.stock_id}` });
+						result.push({ status: addBorrowStatus, message: `Stock Not Found. Ref - ${data.expand?.material_id.description}` });
 					} else if (addBorrowData && addBorrowStatus === 'success') {
-						result.push({ status: addBorrowStatus, data: addBorrowData, message: `Success borrow ${item.stock_id}` });
+						result.push({ status: addBorrowStatus, data: addBorrowData, message: `Success borrow ${data.expand?.material_id.description}` });
 					}
 				} else {
 					result.push({ status: 'failed', message: `Stock Not Found. Ref - ${item.stock_id}` });
@@ -99,16 +90,9 @@ export const checkOut = query(
 	}
 );
 
-export const updateStockOnCheckOut = query(
-	object({
-		stockId: string(),
-		current_quantity_borrowed: number(),
-		quantity_out: number()
-	}),
-	async ({ stockId, current_quantity_borrowed, quantity_out }) => {
-		const { locals } = getRequestEvent();
-		const { status, data, error } = await tryCatch(locals.pb.collection('stock_master').update(stockId, { quantity_borrowed: current_quantity_borrowed + quantity_out }));
+export const updateStockOnCheckOut = query(object({ stockId: string(), current_quantity_borrowed: number(), quantity_out: number() }), async ({ stockId, current_quantity_borrowed, quantity_out }) => {
+	const { locals } = getRequestEvent();
+	const { status, data, error } = await tryCatch(locals.pb.collection('stock_master').update(stockId, { quantity_borrowed: current_quantity_borrowed + quantity_out }));
 
-		return { status, data };
-	}
-);
+	return { status, data };
+});
