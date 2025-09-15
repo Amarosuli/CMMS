@@ -14,7 +14,7 @@ export const load = async ({ locals }) => {
 				value: id,
 				quantity_available,
 				label: batch_number + ' - ' + expand?.material_id.code,
-				detail: expand?.material_id.code + ' - ' + expand?.material_id.part_number + ' - ' + expand?.material_id.description,
+				detail: expand?.material_id.code + ' - ' + expand?.material_id.part_number + ' - ' + expand?.material_id.description + ' - ' + batch_number,
 				unit: expand?.material_id.expand?.unit_id.code || ''
 			};
 		});

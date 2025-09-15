@@ -12,11 +12,12 @@ export { default as BorrowDataDelete } from './BorrowDataDelete.svelte';
 export { default as BorrowDataEdit } from './BorrowDataEdit.svelte';
 export { default as BorrowItemAdd } from './BorrowItemAdd.svelte';
 export { default as QRScanner } from './QRScanner.svelte';
-export { default as ViewQr } from './ViewQR.svelte';
+export { default as ViewBarcode } from './ViewBarcode.svelte';
 
 export { default as DataTableFilterDropdown } from './DataTableFilterDropdown.svelte';
 export { default as DataTableFilterOperator } from './DataTableFilterOperator.svelte';
 export { default as DataTableFilterColumn } from './DataTableFilterColumn.svelte';
+export { default as ExportWidget } from './ExportWidget.svelte';
 
 export { default as ImageCarousel } from './ImageCarousel.svelte';
 export { default as PDFLink } from './PDFLink.svelte';

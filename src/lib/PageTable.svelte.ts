@@ -68,6 +68,11 @@ export const createPageFile = (config: { collectionName: CollectionParam; perPag
 		modifier.push(f);
 	};
 
+	const getAll = async (option?: RecordListOptions) => {
+		const result = await pb.collection(config.collectionName).getFullList({ ...options, sort: '-created' });
+		return result;
+	};
+
 	const setFilter = (filter: string) => {
 		if (filter) {
 			options = { ...options, filter: filter };
@@ -146,6 +151,7 @@ export const createPageFile = (config: { collectionName: CollectionParam; perPag
 		setFilter,
 		addModifier,
 		load,
+		getAll,
 		next,
 		prev,
 		sort,

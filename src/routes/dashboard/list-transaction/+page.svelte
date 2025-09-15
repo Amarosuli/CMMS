@@ -7,8 +7,8 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
-	function stopPropagation(fn) {
-		return function (event) {
+	function stopPropagation(fn: Function) {
+		return function (event: Event) {
 			event.stopPropagation();
 			fn.call(this, event);
 		};

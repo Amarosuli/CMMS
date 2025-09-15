@@ -3,11 +3,10 @@
 
 	import { type ColumnDef, type VisibilityState, getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
 	import { createSvelteTable, renderComponent, renderSnippet } from '$lib/components/ui/data-table/index.js';
-	import { DataTableActions, DataTableSortColumn, SuperTable, ViewQr } from '$lib/components/costum';
+	import { DataTableActions, DataTableSortColumn, ExportWidget, SuperTable, ViewBarcode } from '$lib/components/costum';
 	import { createRawSnippet, onMount } from 'svelte';
 	import { createPageFile } from '$lib/PageTable.svelte';
 	import { page } from '$app/state';
-	import ViewBarcode from '$lib/components/costum/ViewBarcode.svelte';
 
 	let { data } = $props();
 	const { user } = data;
@@ -167,4 +166,6 @@
 	<title>CMMS - Stock Available</title>
 </svelte:head>
 
-<SuperTable config={{ tableName: 'Stock Available', addUrl: '/movement/stock-in' }} {table} {pageFile} {columns} />
+<SuperTable config={{ tableName: 'Stock Available', addUrl: '/movement/stock-in' }} {table} {pageFile} {columns}>
+	<ExportWidget {pageFile} />
+</SuperTable>

@@ -59,7 +59,7 @@
 							toast.error(er);
 						})
 						.finally(() => {
-							goto('/movement');
+							goto('/stock');
 						});
 				}
 
@@ -189,7 +189,9 @@
 								type="single"
 								value={expiredAt as DateValue}
 								bind:placeholder
-								onValueChange={(v) => {
+								class="rounded-md border shadow-sm"
+								captionLayout="dropdown"
+								onValueChange={(v: number) => {
 									if (v) {
 										$formData.expired_date = v.toString();
 									} else {

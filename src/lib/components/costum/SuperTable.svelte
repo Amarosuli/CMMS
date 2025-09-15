@@ -8,9 +8,10 @@
 	import { ChevronDown, LoaderCircle, PlusCircle } from '@lucide/svelte';
 	import { DataTableFilterDropdown } from '.';
 	import { FlexRender } from '../ui/data-table';
-	import { Button } from '$lib/components/ui/button/index.js';
+	import { Button, type ButtonProps } from '$lib/components/ui/button/index.js';
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
+	import type { Snippet } from 'svelte';
 
 	type Props = {
 		pageFile: PageFile;
@@ -21,6 +22,8 @@
 			disableAdd?: boolean;
 			addUrl?: string;
 		};
+		exportWidget?: Snippet;
+		children?: Snippet;
 	};
 	let {
 		pageFile,
@@ -30,7 +33,9 @@
 			tableName: 'Table',
 			disableAdd: false,
 			addUrl: undefined
-		}
+		},
+		children,
+		exportWidget
 	}: Props = $props();
 </script>
 
@@ -40,15 +45,16 @@
 			{config.tableName}
 			{#if pageFile.isLoading}
 				<span transition:fade={{ duration: 200 }} class="absolute -right-10 z-20 ml-4 items-center justify-center gap-3">
-					<LoaderCircle class="animate-spin text-primary" />
+					<LoaderCircle class="text-primary animate-spin" />
 				</span>
 			{/if}
 		</h1>
 		<div class="grid grid-flow-col gap-2 md:ml-auto md:w-fit">
-			<Button variant="outline">Export (CSV)</Button>
+			{@render children?.()}
+
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
-					{#snippet child({ props })}
+					{#snippet child({ props }: { props: ButtonProps })}
 						<Button {...props} variant="outline" class="ml-auto">
 							Columns <ChevronDown class="ml-2 size-4" />
 						</Button>
@@ -102,7 +108,7 @@
 		</Table.Root>
 	</div>
 	<div class="flex items-center justify-end space-x-2 pt-4">
-		<div class="flex-1 text-sm text-muted-foreground">
+		<div class="text-muted-foreground flex-1 text-sm">
 			{pageFile.currentPage} of
 			{pageFile.totalPages} page(s).
 		</div>
