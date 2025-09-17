@@ -2,7 +2,7 @@
 	import Papa from 'papaparse';
 	import type { StockMaster } from '$lib/CostumTypes';
 	import type { PageFile } from '$lib/PageTable.svelte';
-	import { type Template } from '@pdfme/common';
+	// import { type Template } from '@pdfme/common';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { buttonVariants } from '../ui/button';
 	import { Button } from '../ui/button';
@@ -17,6 +17,7 @@
 
 	let isLoading = $state(false);
 	const pageFileB = pageFile;
+
 	async function getCSV() {
 		isLoading = true;
 		infoState = 'Generate CSV ...';
@@ -57,16 +58,34 @@
 		isLoading = true;
 		infoState = 'Generate PDF ...';
 
-		const data = (await pageFileB.getAll({ expand: 'material_id' })) as StockMaster[];
-		const resultObject: Record<string, string> = {};
+		const data = (await pageFileB.getAll({ expand: 'material_id', filter: 'quantity_available>0' })) as StockMaster[];
+		let resultObjectArray: Record<string, string>[] = [];
+		let currentObject: Record<string, string> = {};
+		let keyIndex = 1;
 
 		for (let index = 0; index < data.length; index++) {
-			const key = `{${index + 1}}bn`;
-			resultObject[key] = data[index].batch_number;
+			const item = data[index];
+			const multiplier = data[index].quantity_available;
+
+			for (let m = 0; m < multiplier; m++) {
+				const key = `{${keyIndex}}bn`;
+				currentObject[key] = item.batch_number;
+				if (keyIndex === 100) {
+					resultObjectArray.push(currentObject);
+					currentObject = {};
+					keyIndex = 1;
+				} else {
+					keyIndex++;
+				}
+			}
 		}
 
-		const template: Template = barcodeListTemplate;
-		const inputs = [resultObject];
+		if (Object.keys(currentObject).length > 0) {
+			resultObjectArray.push(currentObject);
+		}
+
+		const template = barcodeListTemplate;
+		const inputs = resultObjectArray;
 		const plugins = { code128: barcodes.code128, text: text, rectangle: rectangle };
 
 		generate({ template, inputs, plugins })
@@ -112,9 +131,9 @@
 				{infoState}
 			</p>
 		</div>
-		<Dialog.Footer>
-			<Button disabled={isLoading} onclick={getCSV}>Export CSV</Button>
-			<Button disabled={isLoading} onclick={getPDFBarcodeList}>Export PDF (List Barcode)</Button>
+		<Dialog.Footer class="mx-auto justify-center">
+			<Button class="cursor-pointer" disabled={isLoading} onclick={getCSV}>Export CSV</Button>
+			<Button class="cursor-pointer" disabled={isLoading} onclick={getPDFBarcodeList}>Export PDF (List Barcode)</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>

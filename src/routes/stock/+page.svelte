@@ -1,12 +1,11 @@
 <script lang="ts">
-	import type { RecordModel } from 'pocketbase';
-
 	import { type ColumnDef, type VisibilityState, getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
 	import { createSvelteTable, renderComponent, renderSnippet } from '$lib/components/ui/data-table/index.js';
 	import { DataTableActions, DataTableSortColumn, ExportWidget, SuperTable, ViewBarcode } from '$lib/components/costum';
 	import { createRawSnippet, onMount } from 'svelte';
 	import { createPageFile } from '$lib/PageTable.svelte';
 	import { page } from '$app/state';
+	import { Button } from '$lib/components/ui/button/index.js';
 
 	let { data } = $props();
 	const { user } = data;
@@ -14,7 +13,8 @@
 	const pageFile = createPageFile({
 		collectionName: 'stock_master',
 		perPage: 10,
-		options: { expand: 'material_id,material_id.unit_id' }
+		// svelte-ignore state_referenced_locally
+		options: { expand: 'material_id,material_id.unit_id', filter: 'status="ACTIVE"' }
 	});
 
 	pageFile.addModifier((items: any[]) => {
@@ -22,7 +22,6 @@
 			return { ...val, materialData: val.expand ? val.expand.material_id : 'N/A' };
 		});
 	});
-	$inspect(pageFile.items);
 
 	export const columns: ColumnDef<(typeof pageFile)['items'][number]>[] = [
 		{
@@ -95,7 +94,7 @@
 			}
 		},
 		{
-			id: 'QR',
+			id: 'Barcode',
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
 					text: 'Barcode',
@@ -169,6 +168,22 @@
 	onMount(() => {
 		pageFile.load();
 	});
+
+	let activeFilter = $state(0);
+
+	function changeFilter(index: number) {
+		if (index === 1) {
+			activeFilter = 1;
+			pageFile.setFilter('status="INACTIVE"');
+		} else if (index === 2) {
+			activeFilter = 2;
+			pageFile.setFilter('status="ACTIVE"||status="INACTIVE"');
+		} else {
+			activeFilter = 0;
+			pageFile.setFilter('');
+		}
+		pageFile.reload();
+	}
 </script>
 
 <svelte:head>
@@ -176,5 +191,27 @@
 </svelte:head>
 
 <SuperTable config={{ tableName: 'Stock Available', addUrl: '/movement/stock-in' }} {table} {pageFile} {columns}>
+	<div class="overflow-hidden rounded-md outline">
+		<Button
+			class={activeFilter === 1 ? 'bg-primary/50' : ''}
+			variant="ghost"
+			onclick={() => {
+				if (activeFilter !== 1) {
+					changeFilter(1);
+				} else {
+					changeFilter(0);
+				}
+			}}>Show Inactive</Button>
+		<Button
+			class={activeFilter === 2 ? 'bg-primary/50' : ''}
+			variant="ghost"
+			onclick={() => {
+				if (activeFilter !== 2) {
+					changeFilter(2);
+				} else {
+					changeFilter(0);
+				}
+			}}>Show All</Button>
+	</div>
 	<ExportWidget {pageFile} />
 </SuperTable>

@@ -2,6 +2,8 @@ import { fail, message, superValidate } from 'sveltekit-superforms';
 import { stockInSchema } from '$lib/zodSchema';
 import { redirect } from '@sveltejs/kit';
 import { zod } from 'sveltekit-superforms/adapters';
+import { tryCatch } from '$lib/TryCatch';
+import type { StockMaster } from '$lib/CostumTypes.js';
 
 export const load = async ({ locals, params }) => {
 	if (!locals.user) throw redirect(302, '/'); // Prevent guest users from accessing this page directly.
@@ -15,7 +17,12 @@ export const load = async ({ locals, params }) => {
 
 	const getStockMasterById = async () => {
 		let id = params.id;
-		if (id) return await locals.pb.collection('stock_master').getOne(id, { expand: 'material_id.unit_id' });
+		if (id) {
+			const { status, data } = await tryCatch(locals.pb.collection('stock_master').getOne(id, { expand: 'material_id.unit_id' }));
+			return data;
+		} else {
+			return {} as StockMaster;
+		}
 	};
 
 	return {

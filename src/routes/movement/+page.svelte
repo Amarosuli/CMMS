@@ -7,10 +7,13 @@
 	import { onMount } from 'svelte';
 
 	let recentMovements: StockMovement[] = $state([]);
-	onMount(async () => {
-		recentMovements = (await getRecentMovements()) || [];
-	});
 	let isLoading = $state(false);
+
+	onMount(async () => {
+		isLoading = true;
+		recentMovements = (await getRecentMovements()) || [];
+		isLoading = false;
+	});
 </script>
 
 <svelte:head>
@@ -44,27 +47,25 @@
 
 <div class="mt-12">
 	<ul role="list" class="">
-		{#each recentMovements as stock (stock.id)}
-			<li class="hover:bg-secondary flex justify-between gap-x-6 border px-4 py-2">
-				<div class="flex min-w-0 flex-col md:flex-row md:gap-4">
-					<div class="flex w-20 min-w-20 flex-auto items-center divide-y">
-						<p class=" text-foreground truncate text-lg font-bold">{stock.transactionType}</p>
+		<ol class="border-primary/50 relative border-s">
+			{#each recentMovements as stock (stock.id)}
+				<li class="ms-4 mb-7" in:fade>
+					<div class="border-primary bg-primary absolute -start-1.5 mt-1.5 h-3 w-3 rounded-full border"></div>
+					<time class="mb-1 text-sm leading-none font-normal">{time(stock.created)}</time>
+					<h3 class="text-md font-bold">{stock.transactionType === 'SIN' ? 'Stock In' : ' Stock Out'}</h3>
+					<div class="flex w-[300px] flex-col text-xs font-normal text-gray-700 dark:text-gray-400">
+						<p class="flex justify-between border-b pt-1">Batch Number <span class="text-primary dark:text-foreground font-semibold transition-colors ease-out">{stock.batchNumber}</span></p>
+						<p class="flex justify-between border-b pt-1">Purchase Order <span class="text-primary dark:text-foreground font-semibold transition-colors ease-out">{stock.purchaseOrder}</span></p>
+						<p class="flex justify-between border-b pt-1">Quantity <span class="text-primary dark:text-foreground font-semibold transition-colors ease-out">{stock.quantity}</span></p>
+						<p class="flex justify-between border-b pt-1">Remark <span class="text-primary dark:text-foreground max-w-[200px] font-semibold capitalize transition-colors ease-out">{stock.remark.toLowerCase() || ''}</span></p>
 					</div>
-					<div class="min-w-0 flex-auto">
-						<p class="text-foreground/50 mt-1 truncate text-xs leading-5">Batch Number : <span class="text-foreground text-xs leading-6 font-semibold">{stock.batchNumber}</span></p>
-						<p class="text-foreground/50 mt-1 truncate text-xs leading-5">Purchase Order : <span class="text-foreground text-xs leading-6 font-semibold">{stock?.purchaseOrder}</span></p>
-					</div>
-					<div class="min-w-0 flex-auto">
-						<p class="text-foreground/50 mt-1 truncate text-xs leading-5">Quantity : <span class="text-foreground text-xs leading-6 font-semibold">{stock.quantity} EA</span></p>
-						<p class="text-foreground/50 mt-1 truncate text-xs leading-5">Remark : <span class="text-foreground text-xs leading-6 font-semibold">{stock.remark || '-'}</span></p>
-					</div>
-				</div>
-				<div class="hidden shrink-0 sm:flex sm:flex-col sm:items-end">
-					<p class="text-foreground text-xs leading-6 font-semibold">{stock.user}</p>
-					<p class="text-foreground/50 mt-1 text-xs leading-5 italic">{time(stock.created)}</p>
-				</div>
-			</li>{/each}
-		{#if recentMovements.length === 0}
+				</li>
+			{/each}
+		</ol>
+
+		{#if isLoading}
+			<p class="text-foreground/50 text-center text-sm/6 italic">Loading History ...</p>
+		{:else if recentMovements.length === 0}
 			<p class="text-foreground/50 text-center text-sm/6 italic">No recent stock movement</p>
 		{/if}
 	</ul>
