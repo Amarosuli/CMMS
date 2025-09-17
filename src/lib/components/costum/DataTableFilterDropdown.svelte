@@ -1,5 +1,4 @@
 <script lang="ts" generics="TData, TValue">
-	import type { RecordModel } from 'pocketbase';
 	import type { ColumnDef } from '@tanstack/table-core';
 	import type { PageFile } from '$lib/PageTable.svelte';
 
@@ -7,7 +6,7 @@
 
 	import { DataTableFilterOperator, DataTableFilterColumn } from '.';
 	import { Check, Filter, Plus, Trash2, X } from '@lucide/svelte';
-	import { Button } from '$lib/components/ui/button/index.js';
+	import { Button, type ButtonProps } from '$lib/components/ui/button/index.js';
 	import { onMount } from 'svelte';
 	import { Input } from '../ui/input';
 	import { z } from 'zod';
@@ -16,8 +15,8 @@
 
 	onMount(() => {
 		// @ts-ignore
-		for (let { accessorKey } of columns) {
-			if (accessorKey) columnOption.push({ label: accessorKey, value: accessorKey });
+		for (let { accessorKey, id } of columns) {
+			if (accessorKey && id) columnOption.push({ label: id, value: accessorKey });
 		}
 	});
 
@@ -89,12 +88,12 @@
 		if (!v) handleFilter();
 	}}>
 	<DropdownMenu.Trigger>
-		{#snippet child({ props })}
+		{#snippet child({ props }: { props: ButtonProps })}
 			<Button {...props} variant="outline" class="relative">
 				<span class="hidden md:block">Filter</span>
 				<Filter class="size-4" />
 				{#if activeFilter}
-					<span class="rounded bg-secondary-foreground px-2 py-1 text-xs text-secondary">{activeFilter}</span>
+					<span class="bg-secondary-foreground text-secondary rounded px-2 py-1 text-xs">{activeFilter}</span>
 				{/if}
 			</Button>
 		{/snippet}

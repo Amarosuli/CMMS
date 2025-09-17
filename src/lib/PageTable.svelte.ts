@@ -1,5 +1,5 @@
-import type { AuthModel, RecordListOptions, RecordModel } from 'pocketbase';
-import type { CollectionParam } from './CostumTypes';
+import type { AuthModel, ListResult, RecordListOptions, RecordModel } from 'pocketbase';
+import type { CollectionTypeMap } from './CostumTypes';
 import { pb } from './pocketbaseClient';
 
 function debounce<T extends (...args: any[]) => void>(func: T, delay: number) {
@@ -14,8 +14,9 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number) {
 
 export type PageFile = ReturnType<typeof createPageFile>;
 
-export const createPageFile = (config: { collectionName: CollectionParam; perPage?: number; options?: RecordListOptions }) => {
-	let items: RecordModel[] = $state([] as unknown as RecordModel[]);
+export const createPageFile = <K extends keyof CollectionTypeMap>(config: { collectionName: K; perPage?: number; options?: RecordListOptions }) => {
+	type T = CollectionTypeMap[K];
+	let items: T[] = $state([] as T[]);
 	let isLoading: boolean = $state(false);
 	let currentPage: number = $state(1);
 	let totalPages: number = $state(0);
@@ -77,7 +78,7 @@ export const createPageFile = (config: { collectionName: CollectionParam; perPag
 		if (filter) {
 			options = { ...options, filter: filter };
 		} else {
-			options = { sort: options.sort };
+			options = { ...config.options };
 		}
 	};
 
@@ -96,13 +97,13 @@ export const createPageFile = (config: { collectionName: CollectionParam; perPag
 				totalPages = res.totalPages;
 				totalItems = res.totalItems;
 				if (modifier.length) {
-					let final: RecordModel[] = [];
+					let final: T[] = [];
 					modifier.forEach((f) => {
 						final = f(res.items);
 					});
 					items = final;
 				} else {
-					items = res.items;
+					items = res.items as T[];
 				}
 			})
 			.catch((error) => {

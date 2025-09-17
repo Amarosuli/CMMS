@@ -12,7 +12,7 @@ export interface MaterialMaster extends RecordModel {
 	expand?: {
 		unit_id: MaterialUnit;
 	};
-	unitCode: string;
+	unitCode: MaterialUnit['code'];
 }
 
 export interface MaterialUnit extends RecordModel {
@@ -141,13 +141,14 @@ export interface BorrowMovement extends RecordModel {
 	order_number: string;
 	esn: string;
 	status: BorrowStatus;
-	expand: {
+	expand?: {
 		user_id: User;
 	};
 }
 
 export interface TypedPocketBase extends PocketBase {
 	collection(idOrName: string): RecordService;
+	collection<K extends keyof CollectionTypeMap>(idOrName: K): RecordService<CollectionTypeMap[K]>;
 	collection(idOrName: 'users'): RecordService<User>;
 	collection(idOrName: 'material_unit'): RecordService<MaterialUnit>;
 	collection(idOrName: 'material_group'): RecordService<MaterialGroup>;
@@ -164,4 +165,16 @@ export type FileUrlOption = {
 	thumb?: string;
 };
 
-export type CollectionParam = string | 'users' | 'material_unit' | 'material_group' | 'material_master' | 'stock_master' | 'stock_in' | 'stock_out' | 'borrow_item' | 'borrow_movement';
+export type CollectionTypeMap = {
+	users: User;
+	material_unit: MaterialUnit;
+	material_group: MaterialGroup;
+	material_master: MaterialMaster;
+	stock_master: StockMaster;
+	stock_in: StockIn;
+	stock_out: StockOut;
+	borrow_item: BorrowItem;
+	borrow_movement: BorrowMovement;
+};
+
+export type CollectionParam = keyof CollectionTypeMap;

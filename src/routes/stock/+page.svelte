@@ -22,10 +22,12 @@
 			return { ...val, materialData: val.expand ? val.expand.material_id : 'N/A' };
 		});
 	});
+	$inspect(pageFile.items);
 
-	export const columns: ColumnDef<RecordModel>[] = [
+	export const columns: ColumnDef<(typeof pageFile)['items'][number]>[] = [
 		{
-			id: 'material_description',
+			accessorKey: 'material_id.description',
+			id: 'Description',
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
 					text: 'Material Description',
@@ -40,11 +42,32 @@
 						render: () => `<div class="capitalize">${data}</div>`
 					};
 				});
-				return renderSnippet(Snippet, row.getValue('material_description'));
+				return renderSnippet(Snippet);
+			}
+		},
+		{
+			accessorKey: 'material_id.part_number',
+			id: 'Part Number',
+			header: ({ column }) =>
+				renderComponent(DataTableSortColumn, {
+					text: 'Part Number',
+					disabled: pageFile.isLoading,
+					direction: pageFile.sortBucket === 'material_id.part_number' ? pageFile.sortDirection : undefined,
+					onclick: () => pageFile.sort('material_id.part_number')
+				}),
+			cell: ({ row }) => {
+				const Snippet = createRawSnippet<[string]>(() => {
+					const data = row.original.expand?.material_id.part_number.toLowerCase();
+					return {
+						render: () => `<div class="uppercase">${data}</div>`
+					};
+				});
+				return renderSnippet(Snippet);
 			}
 		},
 		{
 			accessorKey: 'batch_number',
+			id: 'Batch Number',
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
 					text: 'Batch Number',
@@ -53,17 +76,12 @@
 					onclick: () => pageFile.sort(column.id)
 				}),
 			cell: ({ row }) => {
-				const Snippet = createRawSnippet<[string]>((getData) => {
-					const data = getData();
-					return {
-						render: () => `<div class="capitalize">${data}</div>`
-					};
-				});
-				return renderSnippet(Snippet, row.getValue('batch_number'));
+				return row.original.batch_number;
 			}
 		},
 		{
-			id: 'quantity available',
+			accessorKey: 'quantity_available',
+			id: 'Quantity Available',
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
 					text: 'Available Quantity',
@@ -89,6 +107,7 @@
 			}
 		},
 		{
+			accessorKey: 'quantity_borrowed',
 			id: 'Quantity Borrowed',
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
@@ -103,7 +122,8 @@
 			}
 		},
 		{
-			accessorKey: 'code',
+			accessorKey: 'material_id.code',
+			id: 'Code',
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
 					text: 'Code',
@@ -114,17 +134,6 @@
 			cell: ({ row }) => {
 				return row.original.materialData.code;
 			}
-		},
-		{
-			accessorKey: 'description',
-			header: ({ column }) =>
-				renderComponent(DataTableSortColumn, {
-					text: 'Description',
-					disabled: pageFile.isLoading,
-					direction: pageFile.sortBucket === column.id ? pageFile.sortDirection : undefined,
-					onclick: () => pageFile.sort(column.id)
-				}),
-			cell: ({ row }) => row.getValue('description')
 		},
 		{
 			id: 'actions',

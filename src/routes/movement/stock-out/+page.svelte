@@ -146,7 +146,7 @@
 										<p class="block w-full text-xs">{stock.detail.split('-')[0]}</p>
 										<p class="block w-full text-xs">{stock.detail.split('-')[1]}</p>
 										<p class="block w-full text-xs capitalize">{stock.detail.split('-')[2].toLowerCase()}</p>
-										<p class="block w-full text-xs">{stock.detail.split('-')[3]}</p>
+										<p class="text-primary block w-full text-xs">{stock.detail.split('-')[3]}</p>
 									</div>
 									<Check class={cn('ml-auto h-4 w-4', stock.value !== $formData.stock_id && 'text-transparent')} />
 								</Command.Item>

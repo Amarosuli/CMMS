@@ -3,7 +3,7 @@
 	import * as Command from '$lib/components/ui/command/index.js';
 
 	import { LoaderCircle, ChevronLeft, CalendarPlus, CalendarIcon, ChevronsUpDown, Check } from '@lucide/svelte';
-	import { DateFormatter, parseDate, getLocalTimeZone, type DateValue, today } from '@internationalized/date';
+	import { DateFormatter, parseDate, getLocalTimeZone, type DateValue, today, CalendarDate } from '@internationalized/date';
 	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { deserialize } from '$app/forms';
@@ -20,6 +20,9 @@
 	let { data } = $props();
 
 	const { user, transactionType, materialMaster } = data;
+
+	const toDay = new Date().toISOString().split('T')[0].split('-');
+	const maxValueDate: DateValue = new CalendarDate(parseInt(toDay[0]), parseInt(toDay[1]), parseInt(toDay[2])).add({ years: 300 });
 
 	const createStockMaster = async (data: Record<string, any>) => {
 		let formData = new FormData();
@@ -146,7 +149,7 @@
 									<div class="flex flex-col">
 										<p class="block w-full text-xs">{material.detail.split('-')[0]}</p>
 										<p class="block w-full text-xs">{material.detail.split('-')[1]}</p>
-										<p class="block w-full text-xs capitalize">{material.detail.split('-')[2]}</p>
+										<p class="block w-full text-xs capitalize">{material.detail.split('-')[2].toLowerCase()}</p>
 									</div>
 									<Check class={cn('ml-auto h-4 w-4', material.value !== $formData.material_id && 'text-transparent')} />
 								</Command.Item>
@@ -191,6 +194,7 @@
 								bind:placeholder
 								class="rounded-md border shadow-sm"
 								captionLayout="dropdown"
+								maxValue={maxValueDate}
 								onValueChange={(v: number) => {
 									if (v) {
 										$formData.expired_date = v.toString();

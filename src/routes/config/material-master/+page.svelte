@@ -5,7 +5,7 @@
 	import { createSvelteTable, renderComponent, renderSnippet } from '$lib/components/ui/data-table/index.js';
 	import { DataTableActions, DataTableSortColumn, SuperTable } from '$lib/components/costum';
 	import { createRawSnippet, onMount } from 'svelte';
-	import { createPageFile } from '$lib/PageTable.svelte';
+	import { createPageFile, type PageFile } from '$lib/PageTable.svelte';
 	import { ChevronLeft } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { page } from '$app/state';
@@ -24,7 +24,7 @@
 		});
 	});
 
-	export const columns: ColumnDef<RecordModel>[] = [
+	export const columns: ColumnDef<(typeof pageFile)['items'][number]>[] = [
 		{
 			accessorKey: 'code',
 			header: ({ column }) =>

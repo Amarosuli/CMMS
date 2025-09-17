@@ -1,9 +1,15 @@
 <script lang="ts">
+	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
+	import * as Select from '$lib/components/ui/select';
+
+	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
+	import { fileProxy, filesProxy, superForm } from 'sveltekit-superforms';
 	import { ChevronLeft, CalendarPlus } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { time } from '$lib/helpers.js';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
+	import type { MaterialMaster } from '$lib/CostumTypes.js';
 
 	let { data } = $props();
 
@@ -12,11 +18,29 @@
 	let material = data.stockMaster?.expand?.material_id ? { ...data.stockMaster.expand.material_id } : { code: '-', part_number: '-', description: '-' };
 	let unit = data.stockMaster?.expand?.material_id?.expand?.unit_id ? { code: data.stockMaster.expand.material_id.expand.unit_id.code } : { code: '' };
 	let qtyAvailableInStore = data.stockMaster?.quantity_borrowed && data.stockMaster?.quantity_available ? `: ${data.stockMaster.quantity_available - data.stockMaster.quantity_borrowed} ${unit.code}` : '';
+
+	let confirmDialogOpen = $state(false);
+	let confirmDialogFunction = $state(() => {});
+
+	let formData: MaterialMaster = $state({} as MaterialMaster);
 </script>
 
 <svelte:head>
 	<title>CMMS - Edit Stock Master</title>
 </svelte:head>
+
+<AlertDialog.Root bind:open={confirmDialogOpen}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+			<AlertDialog.Description>This action cannot be undone. This will permanently delete file.</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+			<AlertDialog.Action onclick={() => confirmDialogFunction()}>Continue</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>
 
 <div>
 	<Button href="/stock" variant="outline" class="inline-flex items-center gap-2 text-sm/6">
@@ -28,7 +52,7 @@
 <div class="mt-4 lg:mt-8">
 	<div class="flex items-center gap-4">
 		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Edit <span class="text-foreground/50">Stock Master</span></h1>
-		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 sm:text-xs/5 forced-colors:outline">{data.id}</span>
+		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 forced-colors:outline">{data.id}</span>
 	</div>
 	<div class="isolate mt-2.5 flex flex-wrap justify-between gap-x-6 gap-y-4">
 		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
@@ -43,9 +67,8 @@
 </div>
 
 <div class="mt-12">
-	<h2 class="text-base/7 font-semibold text-foreground sm:text-sm/6">Edit of Stock Master</h2>
-	<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
-	<p>This feature under review according to security. Add stock should be covered by stock-in, and stock-out will responsible for alteration quantity.</p>
-	<!-- @TODO : Edit should be possible according to the affected table is stock_in -->
-	<!-- @ATTENTION : Maybe it was mistake by the table design, stock_in and stock_out should record the transaction only, but there's must be another table to hold and balance the data as representative of stock table. -->
+	<h2 class="text-foreground text-base/7 font-semibold sm:text-sm/6">Edit of Stock Master</h2>
+	<hr role="presentation" class="border-foreground/10 mt-4 w-full border-t" />
+
+	<form class="mt-3 flex w-full max-w-80 flex-col text-base/6 sm:text-sm/6" method="post" enctype="multipart/form-data"></form>
 </div>
