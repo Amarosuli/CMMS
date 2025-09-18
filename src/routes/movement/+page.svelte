@@ -29,7 +29,7 @@
 
 <div class="mt-4 lg:mt-8">
 	<div class="flex items-center gap-4">
-		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Recent <span class="text-foreground/50">Stock Movement</span></h1>
+		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Recent <span class="text-foreground/50">Stock Movement (To Day)</span></h1>
 		{#if isLoading}
 			<span transition:fade={{ duration: 200 }} class="ml-4 flex items-center justify-center gap-3">
 				<LoaderCircle class="text-primary animate-spin" />
@@ -66,7 +66,7 @@
 		{#if isLoading}
 			<p class="text-foreground/50 text-center text-sm/6 italic">Loading History ...</p>
 		{:else if recentMovements.length === 0}
-			<p class="text-foreground/50 text-center text-sm/6 italic">No recent stock movement</p>
+			<p class="text-foreground/50 text-center text-sm/6 italic">No stock movement today</p>
 		{/if}
 	</ul>
 </div>

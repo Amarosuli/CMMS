@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { time } from '$lib/helpers';
-	import { CalendarPlus, ChevronLeft, CircleUserRound, LoaderCircle } from '@lucide/svelte';
+	import { BanknoteArrowUp, CalendarPlus, ChevronLeft, CircleUserRound, LoaderCircle, Pencil } from '@lucide/svelte';
 	import { fade } from 'svelte/transition';
 	import { getActiveBorrowing } from './list-transaction.remote';
-	import { onMount } from 'svelte';
+
 	import { goto } from '$app/navigation';
 
-	function stopPropagation(fn: Function) {
-		return function (event: Event) {
-			event.stopPropagation();
-			fn.call(this, event);
-		};
-	}
+	// function stopPropagation(fn: Function) {
+	// 	return function (event: Event) {
+	// 		event.stopPropagation();
+	// 		fn.call(this, event);
+	// 	};
+	// }
 	let isLoading = $state(false);
 </script>
 
@@ -39,24 +39,31 @@
 </div>
 
 <!-- <SuperTable config={} /> -->
-<div class="w-h-full mt-3 grid grid-cols-4 gap-3">
+<div class="mt-3 grid h-full w-full grid-cols-3 gap-2">
 	{#await getActiveBorrowing()}
-		<span transition:fade={{ duration: 200 }} class="ml-4 flex items-center justify-center gap-3">
+		<span transition:fade={{ duration: 200 }} class="absolute z-10 ml-4 flex items-center justify-center gap-3">
 			<LoaderCircle class="text-primary animate-spin" /> Loading ...
 		</span>
 	{:then { status, data }}
 		{#if status === 'success'}
-			{#each data!.items as item}
-				<Button onclick={() => goto(`/return/${item.id}?fromUrl=/dashboard/list-transaction`)} variant="ghost" class="relative flex h-full w-full cursor-pointer items-center gap-4 rounded-2xl border px-5 py-3 shadow-md transition-colors ease-in-out select-none ">
-					<Button variant="ghost" onclick={stopPropagation(() => goto(`/active-borrowing/${item.id}?fromUrl=/dashboard/list-transaction`))} class="absolute top-1 left-1 z-20 rounded-2xl bg-amber-200">Edit</Button>
-					<CircleUserRound class="mt-5 size-12" />
-					<div class="flex flex-col text-sm">
-						<p>{item.expand?.user_id.username} - {item.expand?.user_id.name}</p>
-						<p class="flex justify-between text-xs">ESN <span>{item.esn || '-'}</span></p>
-						<p class="flex justify-between text-xs">Order <span>{item.order_number || '-'}</span></p>
-						<p class="flex justify-between pb-2 text-xs">Status <span>{item.status}</span></p>
+			{#each data! as item, index}
+				<div in:fade={{ delay: 5000 * index }} class="flex h-full w-full items-center justify-between gap-3 overflow-hidden rounded-2xl bg-slate-200 transition-colors ease-in-out select-none dark:bg-slate-900">
+					<div class="flex h-full w-full items-center justify-center bg-slate-400 dark:bg-slate-800">
+						<CircleUserRound class="text-foreground/50 size-24" />
 					</div>
-				</Button>
+					<div class="flex w-2/3 flex-col items-center justify-end py-2 pr-3">
+						<div class="flex w-full flex-col justify-between text-sm">
+							<p class="truncate font-semibold">{item.expand?.user_id.username} - {item.expand?.user_id.name}</p>
+							<p class="flex justify-between border-b pt-1 text-xs">ESN <span>{item.esn || '-'}</span></p>
+							<p class="flex justify-between border-b pt-1 text-xs">Order <span>{item.order_number || '-'}</span></p>
+							<p class="flex justify-between border-b pt-1 text-xs">Status <span>{item.status}</span></p>
+						</div>
+						<div class="mt-2 flex w-full items-center justify-end gap-3 self-end">
+							<Button variant="outline" class="cursor-pointer " onclick={() => goto(`/active-borrowing/${item.id}?fromUrl=/dashboard/list-transaction`)}><Pencil class="size-4 text-amber-300" /> Edit</Button>
+							<Button variant="outline" class="cursor-pointer" onclick={() => goto(`/return/${item.id}?fromUrl=/dashboard/list-transaction`)}><BanknoteArrowUp class="text-primary size-4" /> Return</Button>
+						</div>
+					</div>
+				</div>
 			{/each}
 		{:else}
 			<p>Error occured</p>

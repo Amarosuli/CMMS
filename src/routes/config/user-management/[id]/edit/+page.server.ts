@@ -1,7 +1,10 @@
-import { fail, message, superValidate } from 'sveltekit-superforms';
+import { fail, message, superValidate, type ErrorStatus } from 'sveltekit-superforms';
 import { userSchema } from '$lib/zodSchema';
 import { redirect } from '@sveltejs/kit';
 import { zod } from 'sveltekit-superforms/adapters';
+import { tryCatch } from '$lib/TryCatch.js';
+import { ClientResponseError } from 'pocketbase';
+import { User } from '@lucide/svelte';
 
 export const load = async ({ locals, params }) => {
 	if (!locals.user) throw redirect(302, '/'); // Prevent guest users from accessing this page directly.
@@ -25,13 +28,13 @@ export const actions = {
 		if (!id) return message(form, 'id not define', { status: 400 });
 		if (!form.valid) return fail(400, { form });
 
-		try {
-			await locals.pb.collection('users').update(id, form.data);
-		} catch (error: any) {
-			const errorMessage = `${error?.response.message} | PocketBase error.`;
-			return message(form, errorMessage, { status: error?.status });
-		}
+		const { status, error } = await tryCatch<User, ClientResponseError>(locals.pb.collection('users').update(id, form.data));
 
-		return message(form, 'Create Successfully!');
+		if (status === 'failed') {
+			const errorMessage = `${error?.response.message} | PocketBase error.`;
+			return message(form, errorMessage, { status: error?.status as ErrorStatus });
+		} else {
+			return message(form, 'Create Successfully!');
+		}
 	}
 };

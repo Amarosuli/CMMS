@@ -12,27 +12,27 @@
 	let isLoading = $state(false);
 	let confirmDialog: boolean[] = $state([]);
 
-	interface openBorrowingType {
-		user: User;
-		isCheckOut: boolean;
-		user_id: string;
-		order_number: string;
-		esn: string;
-		status: BorrowStatus;
-		expand: { user_id: User };
-		collectionId: string;
-		collectionName: string;
-		id: string;
-		created: string;
-		updated: string;
-	}
+	// interface openBorrowingType {
+	// 	user: User;
+	// 	isCheckOut: boolean;
+	// 	user_id: string;
+	// 	order_number: string;
+	// 	esn: string;
+	// 	status: BorrowStatus;
+	// 	expand: { user_id: User };
+	// 	collectionId: string;
+	// 	collectionName: string;
+	// 	id: string;
+	// 	created: string;
+	// 	updated: string;
+	// }
 
-	let openBorrowing: openBorrowingType[] = $state([]);
-	onMount(async () => {
-		isLoading = true;
-		openBorrowing = await getOpenBorrowings();
-		isLoading = false;
-	});
+	// let openBorrowing: openBorrowingType[] = $state([]);
+	// onMount(async () => {
+	// 	isLoading = true;
+	// 	openBorrowing = await getOpenBorrowings();
+	// 	isLoading = false;
+	// });
 </script>
 
 <svelte:head>
@@ -57,13 +57,12 @@
 	</div>
 </div>
 
-<div class="mt-4 grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
+<!-- <div class="mt-4 grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
 	{#if openBorrowing.length === 0}
 		<p class="inline-flex w-fit items-center rounded-md bg-lime-400/20 p-2 text-sm/5 font-bold text-lime-700 group-data-[hover]:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 forced-colors:outline">Currently no active borrowing</p>
 	{/if}
 	{#key confirmDialog}
 		{#each openBorrowing as borrow, index}
-			<!-- <ConfirmDialog title="This action will complete the transaction" open={confirmDialog[index]} onConfirm={() => closeTransaction(borrow.id)} /> -->
 
 			<div class="relative">
 				<hr role="presentation" class="w-full border-t" />
@@ -79,10 +78,6 @@
 							<Pencil class="mr-2 h-4 w-4" />
 							Edit
 						</Button>
-						<!-- <Button variant="outline" class="flex-1" onclick={() => drawerOpenHandler(borrow.id)}>
-							<Eye class="mr-2 h-4 w-4" />
-							Detail
-						</Button> -->
 					</div>
 					<Button variant="outline" disabled={!(borrow.status === 'PENDING') || borrow.isCheckOut} onclick={() => (confirmDialog[index] = !confirmDialog[index])}>
 						{#if borrow.isCheckOut}
@@ -96,4 +91,4 @@
 			</div>
 		{/each}
 	{/key}
-</div>
+</div> -->

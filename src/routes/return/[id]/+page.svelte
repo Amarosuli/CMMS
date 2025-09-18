@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { CalendarPlus, ChevronLeft, Eye, Plus, Minus, LoaderCircle } from '@lucide/svelte';
 	import { ConfirmDialog } from '$lib/components/costum';
-	import { writable } from 'svelte/store';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
@@ -57,13 +56,13 @@
 <div>
 	<Button href={page.url.searchParams.get('fromUrl') || '/return'} variant="outline" class="inline-flex items-center gap-2 text-sm/6">
 		<ChevronLeft class="h-4 w-4" />
-		<span>Return</span>
+		<span>List Transaction</span>
 	</Button>
 </div>
 
 <div class="mt-4 lg:mt-8">
 	<div class="flex items-center gap-4">
-		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Crosscheck <span class="text-foreground/50">Before Checkout</span></h1>
+		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Crosscheck <span class="text-foreground/50">Before Return</span></h1>
 		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 forced-colors:outline"></span>
 	</div>
 	<div class="isolate mt-2.5 flex flex-wrap justify-between gap-x-6 gap-y-4">
@@ -87,7 +86,7 @@
 			</div>
 			<div class="flex flex-1 flex-col">
 				<p class="">Part Number : {item.material.part_number}</p>
-				<p class="">Part Code : {item.material.code}</p>
+				<p class="">Part Description : {item.material.description}</p>
 			</div>
 			<div class="mt-2 flex items-center gap-2 md:justify-center">
 				<p class="p-4">Out : {item.quantity_out} {item.unit.code || ''}</p>
@@ -112,8 +111,11 @@
 			</div>
 		</div>
 	{/each}
+	{#if !arrayQuantityOut.length}
+		<p class="text-primary">No Material Borrowed. Remove this transaction.</p>
+	{/if}
 </div>
 
 <div class="mt-4">
-	<Button variant="outline" class="outline-primary" onclick={() => (open = !open)}>Check Out</Button>
+	<Button variant="outline" class="outline-primary" onclick={() => (open = !open)}>Return</Button>
 </div>

@@ -5,7 +5,7 @@ import { array, nativeEnum, number, object, string } from 'zod';
 
 export const getActiveBorrowing = query(async () => {
 	const { locals } = getRequestEvent();
-	const { status, data, error } = await tryCatch(locals.pb.collection('borrow_movement').getList(1, 20, { filter: 'status = "OPEN"', expand: 'user_id' }));
+	const { status, data, error } = await tryCatch(locals.pb.collection('borrow_movement').getFullList({ filter: 'status = "OPEN"', expand: 'user_id' }));
 
 	return { status, data };
 });
