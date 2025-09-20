@@ -7,6 +7,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { pb } from '$lib/pocketbaseClient';
 	import NumberFlow from '@number-flow/svelte';
+	import { type DropdownMenuTriggerProps } from 'bits-ui';
 
 	let { data } = $props();
 	const { user } = data;
@@ -248,7 +249,7 @@
 			<div class="mt-6 text-lg font-medium sm:text-sm/6">Total Borrow</div>
 			<div class="mt-3 text-3xl/8 font-semibold sm:text-2xl/8">{dashboardData.totalBorrowed}</div>
 			<div class="mt-3 text-sm/6 sm:text-xs/6">
-				<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 sm:text-xs/5 forced-colors:outline">Count since</span> <span class="text-zinc-500">{time(new Date())}</span>
+				<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 forced-colors:outline">Count since</span> <span class="text-zinc-500">{time(new Date())}</span>
 			</div>
 		</div>
 	</div>
@@ -260,7 +261,7 @@
 			<hr role="presentation" class="w-full border-t" />
 			{#if true}
 				<div class="mt-3 text-sm/6 sm:text-xs/6">
-					<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 sm:text-xs/5 forced-colors:outline">You have 1</span> <span class="text-zinc-500">active borrowing !</span>
+					<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 forced-colors:outline">You have 1</span> <span class="text-zinc-500">active borrowing !</span>
 				</div>
 			{/if}
 			<div class="mt-6 flex gap-4 text-lg font-medium sm:text-sm/6">
@@ -279,7 +280,7 @@
 		<div>
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
-					{#snippet child({ props })}
+					{#snippet child({ props }: { props: DropdownMenuTriggerProps })}
 						<Button {...props} variant="outline" class="ml-auto">
 							{checkedRange}
 							<ChevronDown class="ml-2 h-4 w-4" />
@@ -303,7 +304,7 @@
 				<div class="mt-6 text-lg font-medium sm:text-sm/6">{item.title}</div>
 				<div class="mt-3 text-3xl/8 font-semibold sm:text-2xl/8">
 					<NumberFlow value={item.value()} />
-					<span class="text-sm text-foreground/80">
+					<span class="text-foreground/80 text-sm">
 						{item.unit}
 					</span>
 				</div>

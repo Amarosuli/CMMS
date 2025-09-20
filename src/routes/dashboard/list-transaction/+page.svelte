@@ -39,7 +39,7 @@
 </div>
 
 <!-- <SuperTable config={} /> -->
-<div class="mt-3 grid h-full w-full grid-cols-3 gap-2">
+<div class="mt-3 grid h-full w-full gap-2 lg:grid-cols-3">
 	{#await getActiveBorrowing()}
 		<span transition:fade={{ duration: 200 }} class="absolute z-10 ml-4 flex items-center justify-center gap-3">
 			<LoaderCircle class="text-primary animate-spin" /> Loading ...

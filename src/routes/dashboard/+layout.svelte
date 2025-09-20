@@ -14,7 +14,7 @@
 </script>
 
 <div class="h-full w-full">
-	<div class="flex w-full gap-3">
+	<div class="flex w-screen gap-3 overflow-auto pb-3">
 		<Button href="/dashboard" variant="outline" class="{currentPath == '/dashboard' ? 'bg-accent dark:bg-accent-foreground/30' : ''} inline-flex items-center gap-2 text-sm/6">
 			<LayoutDashboard class="h-4 w-4" />
 			<span>Dashboard</span>

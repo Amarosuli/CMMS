@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { type ColumnDef, type VisibilityState, getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
 	import { createSvelteTable, renderComponent, renderSnippet } from '$lib/components/ui/data-table/index.js';
+	import * as ToggleGroup from '$lib/components/ui/toggle-group/index.js';
 	import { DataTableActions, DataTableSortColumn, ExportWidget, SuperTable, ViewBarcode } from '$lib/components/costum';
 	import { createRawSnippet, onMount } from 'svelte';
 	import { createPageFile } from '$lib/PageTable.svelte';
@@ -169,17 +170,14 @@
 		pageFile.load();
 	});
 
-	let activeFilter = $state(0);
+	let toggleFilter = $state('');
 
-	function changeFilter(index: number) {
-		if (index === 1) {
-			activeFilter = 1;
+	function changeFilter() {
+		if (toggleFilter === '1') {
 			pageFile.setFilter('status="INACTIVE"');
-		} else if (index === 2) {
-			activeFilter = 2;
+		} else if (toggleFilter === '2') {
 			pageFile.setFilter('status="ACTIVE"||status="INACTIVE"');
 		} else {
-			activeFilter = 0;
 			pageFile.setFilter('');
 		}
 		pageFile.reload();
@@ -191,27 +189,13 @@
 </svelte:head>
 
 <SuperTable config={{ tableName: 'Stock Available', addUrl: '/movement/stock-in' }} {table} {pageFile} {columns}>
-	<div class="overflow-hidden rounded-md outline">
-		<Button
-			class={activeFilter === 1 ? 'bg-primary/50' : ''}
-			variant="ghost"
-			onclick={() => {
-				if (activeFilter !== 1) {
-					changeFilter(1);
-				} else {
-					changeFilter(0);
-				}
-			}}>Show Inactive</Button>
-		<Button
-			class={activeFilter === 2 ? 'bg-primary/50' : ''}
-			variant="ghost"
-			onclick={() => {
-				if (activeFilter !== 2) {
-					changeFilter(2);
-				} else {
-					changeFilter(0);
-				}
-			}}>Show All</Button>
-	</div>
+	<ToggleGroup.Root class="hidden lg:block" variant="outline" type="single" bind:value={toggleFilter} onValueChange={changeFilter}>
+		<ToggleGroup.Item value="1" aria-label="Toggle bold">
+			<p class="px-5">Inactive</p>
+		</ToggleGroup.Item>
+		<ToggleGroup.Item value="2" aria-label="Toggle italic">
+			<p class="px-5">All</p>
+		</ToggleGroup.Item>
+	</ToggleGroup.Root>
 	<ExportWidget {pageFile} />
 </SuperTable>
