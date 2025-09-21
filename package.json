@@ -54,7 +54,7 @@
 		"tailwindcss": "^4.0.0",
 		"typescript": "^5.5.0",
 		"typescript-eslint": "^8.0.0",
-		"valibot": "^0.42.1",
+		"valibot": "^1.1.0",
 		"vaul-svelte": "^1.0.0-next.7",
 		"vite": "^7.0.4",
 		"yup": "^1.6.1",
