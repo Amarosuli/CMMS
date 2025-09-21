@@ -52,7 +52,7 @@
 		</Dialog.Header>
 		<form action="?/delete" method="post" onsubmit={handleDelete}>
 			<input name="id" type="text" hidden value={id} />
-			<div class="flex justify-between gap-4">
+			<div class="flex w-max justify-between gap-4">
 				<Button type="submit" class="flex w-full  justify-center p-2 text-center">{isLoading ? 'Deleting...' : 'Yes'}</Button>
 				<Button onclick={() => (open = false)} variant="outline" class="flex w-full  justify-center p-2 text-center">Cancel</Button>
 			</div>
