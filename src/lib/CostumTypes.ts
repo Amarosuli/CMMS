@@ -20,9 +20,9 @@ export interface MaterialUnit extends RecordModel {
 	description: string;
 }
 
-export interface MaterialGroup extends RecordModel {
+export interface MaterialType extends RecordModel {
 	name: string;
-	description: string;
+	description?: string;
 }
 
 export interface TransactionType extends RecordModel {
@@ -151,7 +151,7 @@ export interface TypedPocketBase extends PocketBase {
 	collection<K extends keyof CollectionTypeMap>(idOrName: K): RecordService<CollectionTypeMap[K]>;
 	collection(idOrName: 'users'): RecordService<User>;
 	collection(idOrName: 'material_unit'): RecordService<MaterialUnit>;
-	collection(idOrName: 'material_group'): RecordService<MaterialGroup>;
+	collection(idOrName: 'material_type'): RecordService<MaterialType>;
 	collection(idOrName: 'material_master'): RecordService<MaterialMaster>;
 	collection(idOrName: 'stock_master'): RecordService<StockMaster>;
 	collection(idOrName: 'stock_in'): RecordService<StockIn>;
@@ -168,7 +168,7 @@ export type FileUrlOption = {
 export type CollectionTypeMap = {
 	users: User;
 	material_unit: MaterialUnit;
-	material_group: MaterialGroup;
+	material_type: MaterialType;
 	material_master: MaterialMaster;
 	stock_master: StockMaster;
 	stock_in: StockIn;
