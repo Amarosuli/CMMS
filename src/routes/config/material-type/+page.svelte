@@ -1,6 +1,4 @@
 <script lang="ts">
-	import type { RecordModel } from 'pocketbase';
-
 	import { type ColumnDef, type VisibilityState, getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
 	import { createSvelteTable, renderComponent, renderSnippet } from '$lib/components/ui/data-table/index.js';
 	import { DataTableActions, DataTableSortColumn, SuperTable } from '$lib/components/costum';
@@ -14,13 +12,14 @@
 	const { user } = data;
 
 	const pageFile = createPageFile({
-		collectionName: 'material_group',
+		collectionName: 'material_type',
 		perPage: 10
 	});
 
-	export const columns: ColumnDef<RecordModel>[] = [
+	export const columns: ColumnDef<(typeof pageFile)['items'][number]>[] = [
 		{
 			accessorKey: 'name',
+			id: 'Name',
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
 					text: 'Name',
@@ -29,17 +28,18 @@
 					onclick: () => pageFile.sort(column.id)
 				}),
 			cell: ({ row }) => {
-				const Snippet = createRawSnippet<[string]>((getData) => {
-					const name = getData();
+				const Snippet = createRawSnippet<[string]>(() => {
+					const name = row.original.name;
 					return {
-						render: () => `<div class="capitalize">${name}</div>`
+						render: () => `<div class="capitalize">${name.toLowerCase()}</div>`
 					};
 				});
-				return renderSnippet(Snippet, row.getValue('name'));
+				return renderSnippet(Snippet);
 			}
 		},
 		{
 			accessorKey: 'description',
+			id: 'Description',
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
 					text: 'Description',
@@ -47,7 +47,7 @@
 					direction: pageFile.sortBucket === column.id ? pageFile.sortDirection : undefined,
 					onclick: () => pageFile.sort(column.id)
 				}),
-			cell: ({ row }) => row.getValue('description') || '-'
+			cell: ({ row }) => row.original.description || '-'
 		},
 		{
 			id: 'actions',
@@ -88,7 +88,7 @@
 </script>
 
 <svelte:head>
-	<title>CMMS - Material Group</title>
+	<title>CMMS - Material Type</title>
 </svelte:head>
 
 <div>
@@ -98,4 +98,4 @@
 	</Button>
 </div>
 
-<SuperTable config={{ tableName: 'Material Group' }} {table} {pageFile} {columns} />
+<SuperTable config={{ tableName: 'Material Type' }} {table} {pageFile} {columns} />
