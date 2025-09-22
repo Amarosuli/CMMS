@@ -21,10 +21,10 @@
 					url: page.url.pathname + '/material-unit'
 				},
 				{
-					title: 'Material Group',
-					description: 'Type to define the group of material.',
+					title: 'Material Type',
+					description: 'Type to define the type of material.',
 					icon: FileType,
-					url: page.url.pathname + '/material-group'
+					url: page.url.pathname + '/material-type'
 				},
 				{
 					title: 'Transaction Type',
@@ -50,7 +50,7 @@
 
 {#snippet icon(item: typeof IconType)}
 	{@const Icon = item}
-	<Icon class="mb-2 h-6 w-6 text-primary" />
+	<Icon class="text-primary mb-2 h-6 w-6" />
 {/snippet}
 
 <div class="flex w-full flex-col justify-start space-y-2">
