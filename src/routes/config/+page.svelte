@@ -27,6 +27,12 @@
 					url: page.url.pathname + '/material-type'
 				},
 				{
+					title: 'Package Name',
+					description: 'Type to define the name of package.',
+					icon: FileType,
+					url: page.url.pathname + '/package-name'
+				},
+				{
 					title: 'Transaction Type',
 					description: 'Type to define the movement type.',
 					icon: FileType,
