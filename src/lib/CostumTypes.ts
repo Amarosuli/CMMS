@@ -1,4 +1,6 @@
 import PocketBase, { RecordService, type RecordModel } from 'pocketbase';
+import type { MaterialTypeSchema, MaterialUnitSchema } from './valibotSchema';
+import type { InferInput } from 'valibot';
 
 export interface MaterialMaster extends RecordModel {
 	code: string;
@@ -15,15 +17,9 @@ export interface MaterialMaster extends RecordModel {
 	unitCode: MaterialUnit['code'];
 }
 
-export interface MaterialUnit extends RecordModel {
-	code: string;
-	description: string;
-}
+export interface MaterialType extends RecordModel, InferInput<typeof MaterialTypeSchema> {}
 
-export interface MaterialType extends RecordModel {
-	name: string;
-	description?: string;
-}
+export interface MaterialUnit extends RecordModel, InferInput<typeof MaterialUnitSchema> {}
 
 export interface TransactionType extends RecordModel {
 	code: string;
