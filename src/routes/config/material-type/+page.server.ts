@@ -1,5 +1,6 @@
 import { tryCatch } from '$lib/TryCatch.js';
 import { fail } from '@sveltejs/kit';
+
 import type { ClientResponseError } from 'pocketbase';
 
 export const actions = {
@@ -9,9 +10,9 @@ export const actions = {
 
 		if (!id) return fail(401, { message: 'No id provided' });
 
-		const { status, error } = await tryCatch<boolean, ClientResponseError>(locals.pb.collection('material_type').delete(id));
+		const { error } = await tryCatch<Boolean, ClientResponseError>(locals.pb.collection('material_type').delete(id));
 
-		if (status === 'failed') {
+		if (error) {
 			const errorMessage = `${error?.response.message} | PocketBase error.`;
 			return fail(error.status, { message: errorMessage });
 		}

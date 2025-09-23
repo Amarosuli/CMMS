@@ -1,5 +1,5 @@
 import { fail, message, superValidate } from 'sveltekit-superforms';
-import { getMaterialTypeById } from '../../material-type.remove.js';
+import { getMaterialTypeById } from '../../material-type.remote.js';
 import { MaterialTypeSchema } from '$lib/valibotSchema.js';
 import { redirect } from '@sveltejs/kit';
 import { tryCatch } from '$lib/TryCatch';
@@ -13,8 +13,8 @@ export const load = async ({ locals, params }) => {
 
 	return {
 		id: params.id,
-		form: await superValidate(valibot(MaterialTypeSchema)),
-		type: await getMaterialTypeById(params.id)
+		type: await getMaterialTypeById(params.id),
+		form: await superValidate(valibot(MaterialTypeSchema))
 	};
 };
 

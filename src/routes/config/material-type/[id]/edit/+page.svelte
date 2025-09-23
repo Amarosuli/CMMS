@@ -20,14 +20,14 @@
 		}
 	});
 
+	const { form: formData, delayed, message, enhance } = form;
+
 	$effect(() => {
 		const { data: materialType } = data.type;
 		if (materialType) {
 			formData.set(materialType);
 		}
 	});
-
-	const { form: formData, delayed, message, enhance } = form;
 
 	let backUrl = page.url.pathname.replace(/\/[^/]*$/, '');
 </script>

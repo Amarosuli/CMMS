@@ -1,4 +1,4 @@
-import { getMaterialTypeById } from '../material-type.remove.js';
+import { getMaterialTypeById } from '../material-type.remote.js';
 import { redirect } from '@sveltejs/kit';
 
 export const load = async ({ locals, params }) => {
