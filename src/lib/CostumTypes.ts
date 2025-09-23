@@ -1,5 +1,5 @@
 import PocketBase, { RecordService, type RecordModel } from 'pocketbase';
-import type { MaterialTypeSchema, MaterialUnitSchema } from './valibotSchema';
+import type { MaterialTypeSchema, MaterialUnitSchema, PackageNameSchema } from './valibotSchema';
 import type { InferInput } from 'valibot';
 
 export interface MaterialMaster extends RecordModel {
@@ -18,8 +18,8 @@ export interface MaterialMaster extends RecordModel {
 }
 
 export interface MaterialType extends RecordModel, InferInput<typeof MaterialTypeSchema> {}
-
 export interface MaterialUnit extends RecordModel, InferInput<typeof MaterialUnitSchema> {}
+export interface PackageName extends RecordModel, InferInput<typeof PackageNameSchema> {}
 
 export interface TransactionType extends RecordModel {
 	code: string;
@@ -148,6 +148,7 @@ export interface TypedPocketBase extends PocketBase {
 	collection(idOrName: 'users'): RecordService<User>;
 	collection(idOrName: 'material_unit'): RecordService<MaterialUnit>;
 	collection(idOrName: 'material_type'): RecordService<MaterialType>;
+	collection(idOrName: 'package_name'): RecordService<PackageName>;
 	collection(idOrName: 'material_master'): RecordService<MaterialMaster>;
 	collection(idOrName: 'stock_master'): RecordService<StockMaster>;
 	collection(idOrName: 'stock_in'): RecordService<StockIn>;
@@ -165,6 +166,7 @@ export type CollectionTypeMap = {
 	users: User;
 	material_unit: MaterialUnit;
 	material_type: MaterialType;
+	package_name: PackageName;
 	material_master: MaterialMaster;
 	stock_master: StockMaster;
 	stock_in: StockIn;
