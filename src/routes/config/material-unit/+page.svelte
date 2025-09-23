@@ -1,6 +1,4 @@
 <script lang="ts">
-	import type { RecordModel } from 'pocketbase';
-
 	import { type ColumnDef, type VisibilityState, getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
 	import { createSvelteTable, renderComponent, renderSnippet } from '$lib/components/ui/data-table/index.js';
 	import { DataTableActions, DataTableSortColumn, SuperTable } from '$lib/components/costum';
@@ -18,9 +16,10 @@
 		perPage: 10
 	});
 
-	export const columns: ColumnDef<RecordModel>[] = [
+	export const columns: ColumnDef<(typeof pageFile)['items'][number]>[] = [
 		{
 			accessorKey: 'code',
+			id: 'Code',
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
 					text: 'Code',
@@ -29,17 +28,18 @@
 					onclick: () => pageFile.sort(column.id)
 				}),
 			cell: ({ row }) => {
-				const Snippet = createRawSnippet<[string]>((getData) => {
-					const code = getData();
+				const Snippet = createRawSnippet<[string]>(() => {
+					const code = row.original.code;
 					return {
 						render: () => `<div class="capitalize">${code}</div>`
 					};
 				});
-				return renderSnippet(Snippet, row.getValue('code'));
+				return renderSnippet(Snippet);
 			}
 		},
 		{
 			accessorKey: 'description',
+			id: 'Description',
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
 					text: 'Description',
@@ -47,7 +47,7 @@
 					direction: pageFile.sortBucket === column.id ? pageFile.sortDirection : undefined,
 					onclick: () => pageFile.sort(column.id)
 				}),
-			cell: ({ row }) => row.getValue('description')
+			cell: ({ row }) => row.original.description || ''
 		},
 		{
 			id: 'actions',

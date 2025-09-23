@@ -1,4 +1,7 @@
+import { tryCatch } from '$lib/TryCatch';
 import { fail } from '@sveltejs/kit';
+
+import type { ClientResponseError } from 'pocketbase';
 
 export const actions = {
 	delete: async ({ locals, request }) => {
@@ -7,11 +10,11 @@ export const actions = {
 
 		if (!id) return fail(401, { message: 'No id provided' });
 
-		try {
-			await locals.pb.collection('material_unit').delete(id);
-		} catch (er: any) {
-			const errorMessage = `${er?.response.message} | PocketBase error.`;
-			return fail(er?.status, { message: errorMessage });
+		const { error } = await tryCatch<Boolean, ClientResponseError>(locals.pb.collection('material_unit').delete(id));
+
+		if (error) {
+			const errorMessage = `${error.response.message} | PocketBase error.`;
+			return fail(error.status, { message: errorMessage });
 		}
 
 		return { message: 'Delete success' };

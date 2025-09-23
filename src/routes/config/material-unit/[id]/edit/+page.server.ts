@@ -1,36 +1,35 @@
 import { fail, message, superValidate } from 'sveltekit-superforms';
-import { materialUnitSchema } from '$lib/zodSchema';
 import { redirect } from '@sveltejs/kit';
-import { zod } from 'sveltekit-superforms/adapters';
+import { valibot } from 'sveltekit-superforms/adapters';
+import { MaterialUnitSchema } from '$lib/valibotSchema.js';
+import { getMaterialUnitById } from '../material-unit.remote.js';
+import { tryCatch } from '$lib/TryCatch.js';
+
+import type { ClientResponseError } from 'pocketbase';
+import type { MaterialUnit } from '$lib/CostumTypes.js';
 
 export const load = async ({ locals, params }) => {
 	if (!locals.user) throw redirect(302, '/'); // Prevent guest users from accessing this page directly.
 
-	const getUnitById = async () => {
-		let id = params.id;
-		if (id) return await locals.pb.collection('material_unit').getOne(id);
-	};
-
 	return {
 		id: params.id,
-		unit: await getUnitById(),
-		form: await superValidate(zod(materialUnitSchema))
+		unit: await getMaterialUnitById(params.id),
+		form: await superValidate(valibot(MaterialUnitSchema))
 	};
 };
 
 export const actions = {
 	default: async ({ locals, request, params }) => {
-		const form = await superValidate(request, zod(materialUnitSchema));
+		const form = await superValidate(request, valibot(MaterialUnitSchema));
 
 		let id = params.id;
 		if (!id) return message(form, 'id not define', { status: 400 });
 		if (!form.valid) return fail(400, { form });
 
-		try {
-			await locals.pb.collection('material_unit').update(id, form.data);
-		} catch (error: any) {
+		const { error } = await tryCatch<MaterialUnit, ClientResponseError>(locals.pb.collection('material_unit').update(id, form.data));
+		if (error) {
 			const errorMessage = `${error?.response.message} | PocketBase error.`;
-			return message(form, errorMessage, { status: error?.status });
+			return message(form, errorMessage, { status: 500 });
 		}
 
 		return message(form, 'Update Successfully!');

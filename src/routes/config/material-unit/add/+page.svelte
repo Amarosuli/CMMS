@@ -50,8 +50,8 @@
 </div>
 
 <div class="mt-12">
-	<h2 class="text-base/7 font-semibold text-foreground sm:text-sm/6">Form Field</h2>
-	<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
+	<h2 class="text-foreground text-base/7 font-semibold sm:text-sm/6">Form Field</h2>
+	<hr role="presentation" class="border-foreground/10 mt-4 w-full border-t" />
 	<form class="mt-3 flex w-full max-w-80 flex-col text-base/6 sm:text-sm/6" method="post" use:enhance>
 		<Field {form} name="code">
 			<Control>
@@ -79,7 +79,7 @@
 			{/if}
 		</Button>
 		{#if $message}
-			<p class="mt-2 bg-destructive p-2 text-center text-xs font-semibold text-destructive-foreground">{$message}</p>
+			<p class="bg-destructive text-destructive-foreground mt-2 p-2 text-center text-xs font-semibold">{$message}</p>
 		{/if}
 	</form>
 </div>
