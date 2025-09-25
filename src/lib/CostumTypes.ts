@@ -1,5 +1,5 @@
 import PocketBase, { RecordService, type RecordModel } from 'pocketbase';
-import type { MaterialTypeSchema, MaterialUnitSchema, PackageNameSchema } from './valibotSchema';
+import type { MaterialTypeSchema, MaterialUnitSchema, PackageNameSchema, UserSchema } from './valibotSchema';
 import type { InferInput } from 'valibot';
 
 export interface MaterialMaster extends RecordModel {
@@ -26,16 +26,7 @@ export interface TransactionType extends RecordModel {
 	description: string;
 }
 
-export interface User extends RecordModel {
-	username: string; // as employee_id
-	email: string;
-	name: string;
-	avatar: string;
-	verified: boolean;
-	emailVisibility: true;
-	role: UserRole;
-	unit: UserUnit;
-}
+export interface User extends RecordModel, InferInput<typeof UserSchema> {}
 
 enum StockMasterStatus {
 	ACTIVE = 'ACTIVE',
