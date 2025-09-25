@@ -1,6 +1,4 @@
 <script lang="ts">
-	import type { RecordModel } from 'pocketbase';
-
 	import { type ColumnDef, type VisibilityState, getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
 	import { createSvelteTable, renderComponent, renderSnippet } from '$lib/components/ui/data-table/index.js';
 	import { DataTableActions, DataTableSortColumn, SuperTable } from '$lib/components/costum';
@@ -11,32 +9,33 @@
 	import { page } from '$app/state';
 
 	let { data } = $props();
-	// i really want to try the createPageFile is generic, maybe type will work
-	// like --> createPageFile<'user'>({collectionName: 'user'})
-	const pageFile = createPageFile({ collectionName: 'users' });
 
-	export const columns: ColumnDef<RecordModel>[] = [
+	const pageFile = createPageFile({ collectionName: 'users', perPage: 15 });
+
+	export const columns: ColumnDef<(typeof pageFile)['items'][0]>[] = [
 		{
 			accessorKey: 'username',
+			id: 'Employee Id',
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
-					text: 'Username',
+					text: 'Employee Id',
 					direction: pageFile.sortBucket === column.id ? pageFile.sortDirection : undefined,
 					disabled: pageFile.isLoading,
-					onclick: () => pageFile.sort(column.id)
+					onclick: () => pageFile.sort('username')
 				}),
 			cell: ({ row }) => {
-				const Snippet = createRawSnippet<[string]>((getData) => {
-					const username = getData();
+				const Snippet = createRawSnippet<[string]>(() => {
+					const username = row.original.username;
 					return {
 						render: () => `<div class="capitalize">${username}</div>`
 					};
 				});
-				return renderSnippet(Snippet, row.getValue('username'));
+				return renderSnippet(Snippet);
 			}
 		},
 		{
 			accessorKey: 'name',
+			id: 'Name',
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
 					text: 'Name',
@@ -44,10 +43,19 @@
 					direction: pageFile.sortBucket === column.id ? pageFile.sortDirection : undefined,
 					onclick: () => pageFile.sort(column.id)
 				}),
-			cell: ({ row }) => row.getValue('name')
+			cell: ({ row }) => {
+				const Snippet = createRawSnippet<[string]>(() => {
+					const name = row.original.name;
+					return {
+						render: () => `<div class="capitalize">${name.toLowerCase()}</div>`
+					};
+				});
+				return renderSnippet(Snippet);
+			}
 		},
 		{
 			accessorKey: 'role',
+			id: 'Role',
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
 					text: 'Role',
@@ -55,10 +63,11 @@
 					direction: pageFile.sortBucket === column.id ? pageFile.sortDirection : undefined,
 					onclick: () => pageFile.sort(column.id)
 				}),
-			cell: ({ row }) => row.getValue('role')
+			cell: ({ row }) => row.original.role
 		},
 		{
 			accessorKey: 'unit',
+			id: 'Unit',
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
 					text: 'Unit',
@@ -66,7 +75,7 @@
 					direction: pageFile.sortBucket === column.id ? pageFile.sortDirection : undefined,
 					onclick: () => pageFile.sort(column.id)
 				}),
-			cell: ({ row }) => row.getValue('unit')
+			cell: ({ row }) => row.original.unit
 		},
 		{
 			id: 'actions',
