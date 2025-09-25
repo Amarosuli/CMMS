@@ -11,6 +11,8 @@ export const MaterialUnitSchema = object({
 	description: pipe(string(), nonEmpty('Please enter the description'), trim())
 });
 
+export const TransactionTypeSchema = MaterialUnitSchema;
+
 export const PackageNameSchema = object({
 	name: pipe(string(), nonEmpty('Please enter the name'), trim()),
 	description: optional(pipe(string(), trim()))
