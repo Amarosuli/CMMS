@@ -1,27 +1,13 @@
 import PocketBase, { RecordService, type RecordModel } from 'pocketbase';
-import type { MaterialTypeSchema, MaterialUnitSchema, PackageNameSchema, TransactionTypeSchema, UserSchema } from './valibotSchema';
+import type { MaterialMasterSchema, MaterialMasterSchemaView, MaterialTypeSchema, MaterialUnitSchema, PackageNameSchema, TransactionTypeSchema, UserSchema } from './valibotSchema';
 import type { InferInput } from 'valibot';
 
-export interface MaterialMaster extends RecordModel {
-	code: string;
-	description: string;
-	part_number: string;
-	minimum_quantity: number;
-	images: string[];
-	sds: string;
-	remark: string;
-	unit_id: MaterialUnit['id'];
-	expand?: {
-		unit_id: MaterialUnit;
-	};
-	unitCode: MaterialUnit['code'];
-}
-
+export interface MaterialMaster extends RecordModel, InferInput<typeof MaterialMasterSchema> {}
+export interface MaterialMasterView extends RecordModel, InferInput<typeof MaterialMasterSchemaView> {}
 export interface MaterialType extends RecordModel, InferInput<typeof MaterialTypeSchema> {}
 export interface MaterialUnit extends RecordModel, InferInput<typeof MaterialUnitSchema> {}
 export interface PackageName extends RecordModel, InferInput<typeof PackageNameSchema> {}
 export interface TransactionType extends RecordModel, InferInput<typeof TransactionTypeSchema> {}
-
 export interface User extends RecordModel, InferInput<typeof UserSchema> {}
 
 enum StockMasterStatus {

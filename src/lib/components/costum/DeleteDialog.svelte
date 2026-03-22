@@ -2,7 +2,7 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 
 	import { applyAction, deserialize } from '$app/forms';
-	import { Button } from '$lib/components/ui/button';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { toast } from 'svelte-sonner';
 
 	interface Props {
@@ -53,7 +53,7 @@
 		<form action="?/delete" method="post" onsubmit={handleDelete}>
 			<input name="id" type="text" hidden value={id} />
 			<div class="flex w-max justify-between gap-4">
-				<Button type="submit" class="flex w-full  justify-center p-2 text-center">{isLoading ? 'Deleting...' : 'Yes'}</Button>
+				<Button type="submit" class="flex w-full  justify-center p-2 text-center {buttonVariants({ variant: 'destructive' })}">{isLoading ? 'Deleting...' : 'Yes'}</Button>
 				<Button onclick={() => (open = false)} variant="outline" class="flex w-full  justify-center p-2 text-center">Cancel</Button>
 			</div>
 		</form>
