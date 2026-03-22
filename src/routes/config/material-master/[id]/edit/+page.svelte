@@ -5,18 +5,18 @@
 	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
 	import { fileProxy, filesProxy, superForm } from 'sveltekit-superforms';
 	import { ChevronLeft, CalendarPlus } from '@lucide/svelte';
-	import { LoaderCircle, X } from '@lucide/svelte';
-	import { Button } from '$lib/components/ui/button';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { LoaderCircle, X, Eye } from '@lucide/svelte';
+	import { getFileUrl, pb } from '$lib/pocketbaseClient';
 	import { Input } from '$lib/components/ui/input';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
 	import { time } from '$lib/helpers.js';
 	import { page } from '$app/state';
-	import { pb } from '$lib/pocketbaseClient';
 
 	let { data } = $props();
 
-	let materialMaster = $state(data.materialMaster);
+	let materialMaster = $state(data.materialMaster.data);
 	let backUrl = page.url.pathname.replace(/\/[^/]*$/, '');
 	let redirectUrl = backUrl;
 
@@ -30,24 +30,24 @@
 		}
 	});
 	const { form: formData, delayed, message, enhance } = form;
-	const pdfFiles = fileProxy(formData, 'sds');
-	const imgFiles = filesProxy(formData, 'images');
+	const pdfFiles = fileProxy(formData, 'sds+');
+	const imgFiles = filesProxy(formData, 'images+');
 
 	$effect(() => {
 		if (materialMaster) {
 			formData.set({
 				...materialMaster,
-				images: null,
-				sds: null
+				images: undefined,
+				sds: undefined
 			});
 		}
 	});
 
 	let selectedUnit = $derived(
-		$formData.unit_id
+		$formData.material_unit_id
 			? {
-					label: materialUnit.find(({ value }: { value: string }) => value == $formData.unit_id)?.label,
-					value: $formData.unit_id
+					label: materialUnit.find(({ value }: { value: string }) => value == $formData.material_unit_id)?.label,
+					value: $formData.material_unit_id
 				}
 			: undefined
 	);
@@ -59,8 +59,9 @@
 				'images-': [name]
 			})
 			.then(() => {
-				materialMaster = { ...materialMaster!, images: materialMaster!.images.filter((image) => image != name) };
+				materialMaster = { ...materialMaster!, images: (materialMaster!.images || []).filter((image) => image != name) };
 				confirmDialogOpen = false;
+				if (imageDialogOpen) imageDialogOpen = false;
 				confirmDialogFunction = () => {};
 			});
 
@@ -78,7 +79,7 @@
 				'sds-': [name]
 			})
 			.then(() => {
-				materialMaster = { ...materialMaster!, sds: '' };
+				materialMaster = { ...materialMaster!, sds: undefined };
 				confirmDialogOpen = false;
 				confirmDialogFunction = () => {};
 			});
@@ -90,7 +91,13 @@
 		});
 	}
 
+	function viewImage(id: string, name: string) {
+		viewImageUrl = getFileUrl('material_master', id, name);
+	}
+
+	let viewImageUrl: string = $state('');
 	let confirmDialogOpen = $state(false);
+	let imageDialogOpen = $state(false);
 	let confirmDialogFunction = $state(() => {});
 
 	let selectedPDF: string = $state('');
@@ -101,6 +108,24 @@
 	<title>CMMS - Edit Material Master</title>
 </svelte:head>
 
+<AlertDialog.Root bind:open={imageDialogOpen}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+			<AlertDialog.Description>This action cannot be undone. This will permanently delete file.</AlertDialog.Description>
+			<img src={viewImageUrl} alt="Preview" class="max-h-96 object-contain" />
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel>Close</AlertDialog.Cancel>
+			<AlertDialog.Action
+				class={buttonVariants({ variant: 'destructive' })}
+				onclick={() => {
+					confirmDialogOpen = true;
+				}}>Delete</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>
+
 <AlertDialog.Root bind:open={confirmDialogOpen}>
 	<AlertDialog.Content>
 		<AlertDialog.Header>
@@ -109,7 +134,7 @@
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
 			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-			<AlertDialog.Action onclick={() => confirmDialogFunction()}>Continue</AlertDialog.Action>
+			<AlertDialog.Action class={buttonVariants({ variant: 'destructive' })} onclick={() => confirmDialogFunction()}>Continue</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>
@@ -124,13 +149,13 @@
 <div class="mt-4 lg:mt-8">
 	<div class="flex items-center gap-4">
 		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Edit <span class="text-foreground/50">Material Master</span></h1>
-		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 sm:text-xs/5 forced-colors:outline">{data.id}</span>
+		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 forced-colors:outline">{data.id}</span>
 	</div>
 	<div class="isolate mt-2.5 flex flex-wrap justify-between gap-x-6 gap-y-4">
 		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
 			<span class="flex items-center gap-3 text-base/6 sm:text-sm/6">
 				<CalendarPlus class="h-4 w-4" />
-				<span>{time(data.materialMaster?.created)}</span></span>
+				<span>{time(data.materialMaster?.data?.created)}</span></span>
 		</div>
 		<div class="flex gap-4">
 			<Button variant="outline" onclick={() => goto(backUrl)} class="min-w-20 ">Detail</Button>
@@ -139,8 +164,8 @@
 </div>
 
 <div class="mt-12">
-	<h2 class="text-base/7 font-semibold text-foreground sm:text-sm/6">Form Field</h2>
-	<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
+	<h2 class="text-foreground text-base/7 font-semibold sm:text-sm/6">Form Field</h2>
+	<hr role="presentation" class="border-foreground/10 mt-4 w-full border-t" />
 
 	<form class="mt-3 flex w-full max-w-80 flex-col text-base/6 sm:text-sm/6" method="post" enctype="multipart/form-data" use:enhance>
 		<Field {form} name="code">
@@ -188,11 +213,11 @@
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
-		<Field {form} name="unit_id">
+		<Field {form} name="material_unit_id">
 			<Control>
 				{#snippet children({ props })}
 					<Label>Material Unit</Label>
-					<Select.Root type="single" name={props.name} bind:value={$formData.unit_id}>
+					<Select.Root type="single" name={props.name} bind:value={$formData.material_unit_id}>
 						<Select.Trigger {...props}>
 							{selectedUnit?.label || 'Select Unit'}
 						</Select.Trigger>
@@ -208,14 +233,14 @@
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
-		<Field {form} name="images">
+		<Field {form} name="images+">
 			<Control>
 				{#snippet children({ props })}
-					<Label>Images <span class="italic text-foreground/70">*PNG or JPG</span></Label>
+					<Label>Images <span class="text-foreground/70 italic">*PNG or JPG</span></Label>
 					<div class="flex flex-col divide-y">
 						{#each materialMaster!.images as img}
-							<div class="flex items-center justify-between gap-2 px-2">
-								<span class="truncate italic text-destructive">
+							<div class="flex items-center justify-between gap-2 px-2 py-1">
+								<span class="text-destructive truncate italic">
 									{img}
 								</span>
 
@@ -226,6 +251,17 @@
 										confirmDialogFunction = () => removeImage(materialMaster!.id, img);
 									}}>
 									<X class="size-4" />
+								</Button>
+								<Button
+									variant="ghost"
+									onclick={() => {
+										imageDialogOpen = true;
+										viewImage(materialMaster!.id, img);
+										confirmDialogFunction = () => {
+											removeImage(materialMaster!.id, img);
+										};
+									}}>
+									<Eye class="size-4" />
 								</Button>
 							</div>
 						{/each}
@@ -243,19 +279,19 @@
 							selectedImages = file.length == 1 ? file.length + ' Image Selected' : file.length + ' Images Selected';
 						}} />
 					<Label
-						class="flex h-10 w-full cursor-pointer rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+						class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full cursor-pointer rounded-md border px-3 py-2 text-base file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
 						>{selectedImages ? selectedImages : 'Add Image'}</Label>
 				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
-		<Field {form} name="sds">
+		<Field {form} name="sds+">
 			<Control>
 				{#snippet children({ props })}
-					<Label>Safety Data Sheet <span class="italic text-foreground/70">*PDF Only</span></Label>
+					<Label>Safety Data Sheet <span class="text-foreground/70 italic">*PDF Only</span></Label>
 					{#if materialMaster!.sds}
 						<div class="flex items-center justify-between gap-2 px-2">
-							<span class="truncate italic text-destructive">
+							<span class="text-destructive truncate italic">
 								{materialMaster!.sds}
 							</span>
 
@@ -263,7 +299,7 @@
 								variant="ghost"
 								onclick={() => {
 									confirmDialogOpen = true;
-									confirmDialogFunction = () => removeSDS(materialMaster!.id, materialMaster!.sds);
+									confirmDialogFunction = () => removeSDS(materialMaster!.id, materialMaster!.sds!);
 								}}>
 								<X class="size-4" />
 							</Button>
@@ -281,17 +317,17 @@
 						type="file"
 						hidden />
 					<Label
-						class="flex h-10 w-full cursor-pointer rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+						class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full cursor-pointer rounded-md border px-3 py-2 text-base file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
 						>{selectedPDF ? selectedPDF : 'Add SDS'}</Label>
 				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
-		<Field {form} name="url_refference">
+		<Field {form} name="url_reference">
 			<Control>
 				{#snippet children({ props })}
-					<Label>URL Refference</Label>
-					<Input {...props} bind:value={$formData.url_refference} type="text" placeholder="URL Refference" />
+					<Label>URL Reference</Label>
+					<Input {...props} bind:value={$formData.url_reference} type="text" placeholder="URL Reference" />
 				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
@@ -304,7 +340,7 @@
 			{/if}
 		</Button>
 		{#if $message}
-			<p class="mt-2 bg-destructive p-2 text-center text-xs font-semibold text-destructive-foreground">{$message}</p>
+			<p class="bg-destructive text-destructive-foreground mt-2 p-2 text-center text-xs font-semibold">{$message}</p>
 		{/if}
 	</form>
 </div>

@@ -1,35 +1,24 @@
+import { getMaterialMasterById, getMaterialUnitOption } from '../../material-master.remote.js';
 import { fail, message, superValidate, withFiles } from 'sveltekit-superforms';
-import { materialMasterSchema } from '$lib/zodSchema';
+import { MaterialMasterSchemaView } from '$lib/valibotSchema.js';
 import { redirect } from '@sveltejs/kit';
-import { zod } from 'sveltekit-superforms/adapters';
+import { valibot } from 'sveltekit-superforms/adapters';
 
-export const load = async ({ locals, url, params }) => {
+export const load = async ({ locals, params }) => {
 	if (!locals.user) throw redirect(302, '/'); // Prevent guest users from accessing this page directly.
-
-	const getMaterialUnit = async () => {
-		const result = await locals.pb.collection('material_unit').getFullList();
-		return result.map(({ id, code, description }) => {
-			return { label: code + ' - ' + description, value: id };
-		});
-	};
-
-	const getMaterialMasterById = async () => {
-		let id = params.id;
-		if (id) return await locals.pb.collection('material_master').getOne(id, { expand: 'unit_id' });
-	};
 
 	return {
 		id: params.id,
-		materialMaster: await getMaterialMasterById(),
-		materialUnit: await getMaterialUnit(),
-		form: await superValidate(zod(materialMasterSchema))
+		materialMaster: await getMaterialMasterById(params.id),
+		materialUnit: await getMaterialUnitOption(),
+		form: await superValidate(valibot(MaterialMasterSchemaView))
 	};
 };
 
 export const actions = {
 	default: async ({ locals, request, params }) => {
 		const formData = await request.formData();
-		const form = await superValidate(formData, zod(materialMasterSchema));
+		const form = await superValidate(formData, valibot(MaterialMasterSchemaView));
 
 		// due to spec pocketbase sdk, make sure the field is not include to prevent all data removed
 		if (!form.data.images?.length) formData.delete('images');
