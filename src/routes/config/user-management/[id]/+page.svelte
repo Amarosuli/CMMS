@@ -7,13 +7,13 @@
 	import { ChangePasswordSchema } from '$lib/valibotSchema.js';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { changePassword } from '../user-management.remote.js';
+	import { valibot } from 'sveltekit-superforms/adapters';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { toast } from 'svelte-sonner';
 	import { time } from '$lib/helpers.js';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { valibot } from 'sveltekit-superforms/adapters';
 	import { pb } from '$lib/pocketbaseClient.js';
 
 	let { data } = $props();
