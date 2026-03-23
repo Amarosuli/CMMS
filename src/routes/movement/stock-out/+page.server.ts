@@ -8,14 +8,14 @@ export const load = async ({ locals }) => {
 	if (!locals.user) throw redirect(302, '/'); // Prevent guest users from accessing this page directly.
 
 	const getStock = async () => {
-		const result = await locals.pb.collection('stock_master').getFullList({ expand: 'material_id,material_id.unit_id,stock_in_id' });
+		const result = await locals.pb.collection('stock_master').getFullList({ expand: 'material_id,material_id.material_unit_id,stock_in_id' });
 		return result.map(({ id, batch_number, expand, quantity_available }) => {
 			return {
 				value: id,
 				quantity_available,
 				label: batch_number + ' - ' + expand?.material_id.code,
 				detail: expand?.material_id.code + ' - ' + expand?.material_id.part_number + ' - ' + expand?.material_id.description + ' - ' + batch_number,
-				unit: expand?.material_id.expand?.unit_id.code || ''
+				unit: expand?.material_id.expand?.material_unit_id.code || ''
 			};
 		});
 	};
