@@ -1,5 +1,5 @@
 import PocketBase, { RecordService, type RecordModel } from 'pocketbase';
-import type { MaterialMasterSchema, MaterialMasterSchemaView, MaterialTypeSchema, MaterialUnitSchema, PackageNameSchema, TransactionTypeSchema, UserSchema } from './valibotSchema';
+import type { MaterialMasterSchema, MaterialMasterSchemaView, MaterialTypeSchema, MaterialUnitSchema, PackageNameSchema, StockInSchema, StockMasterSchema, StockOutSchema, TransactionTypeSchema, UserSchema } from './valibotSchema';
 import type { InferInput } from 'valibot';
 
 export interface MaterialMaster extends RecordModel, InferInput<typeof MaterialMasterSchema> {}
@@ -9,55 +9,58 @@ export interface MaterialUnit extends RecordModel, InferInput<typeof MaterialUni
 export interface PackageName extends RecordModel, InferInput<typeof PackageNameSchema> {}
 export interface TransactionType extends RecordModel, InferInput<typeof TransactionTypeSchema> {}
 export interface User extends RecordModel, InferInput<typeof UserSchema> {}
+export interface StockIn extends RecordModel, InferInput<typeof StockInSchema> {}
+export interface StockMaster extends RecordModel, InferInput<typeof StockMasterSchema> {}
+export interface StockOut extends RecordModel, InferInput<typeof StockOutSchema> {}
 
-enum StockMasterStatus {
+export enum StockMasterStatus {
 	ACTIVE = 'ACTIVE',
 	INACTIVE = 'INACTIVE'
 }
 
-export interface StockMaster extends RecordModel {
-	batch_number: string;
-	purchase_order: string;
-	quantity_available: number;
-	quantity_borrowed: number;
-	expired_date: string;
-	material_id: MaterialMaster['id'];
-	storage_id: string;
-	status: StockMasterStatus;
-	stock_in_id: StockIn['id'];
-	expand?: {
-		material_id: MaterialMaster;
-		stock_in_id: StockIn;
-	};
-}
+// export interface StockMaster extends RecordModel {
+// 	batch_number: string;
+// 	purchase_order: string;
+// 	quantity_available: number;
+// 	quantity_borrowed: number;
+// 	expired_date: string;
+// 	material_id: MaterialMaster['id'];
+// 	storage_id: string;
+// 	status: StockMasterStatus;
+// 	stock_in_id: StockIn['id'];
+// 	expand?: {
+// 		material_id: MaterialMaster;
+// 		stock_in_id: StockIn;
+// 	};
+// }
 
-export interface StockIn extends RecordModel {
-	transaction_type: TransactionType['code'];
-	material_id: MaterialMaster['id'];
-	purchase_order: string;
-	batch_number: string;
-	quantity: number;
-	expired_date: string;
-	user_id: User['id'];
-	remark: string;
-	expand?: {
-		material_id: MaterialMaster;
-		user_id: User;
-	};
-}
+// export interface StockIn extends` RecordModel {
+// 	transaction_type: TransactionType['code'];
+// 	material_id: MaterialMaster['id'];
+// 	purchase_order: string;
+// 	batch_number: string;
+// 	quantity: number;
+// 	expired_date: string;
+// 	user_id: User['id'];
+// 	remark: string;
+// 	expand?: {
+// 		material_id: MaterialMaster;
+// 		user_id: User;
+// 	};
+// }
 
-export interface StockOut extends RecordModel {
-	transaction_type: TransactionType['code'];
-	stock_id: StockMaster['id'];
-	quantity: number;
-	user_id: User['id'];
-	remark: string;
-	refference_id: string;
-	expand?: {
-		stock_id: StockMaster;
-		user_id: User;
-	};
-}
+// export interface StockOut extends RecordModel {
+// 	transaction_type: TransactionType['code'];
+// 	stock_id: StockMaster['id'];
+// 	quantity: number;
+// 	user_id: User['id'];
+// 	remark: string;
+// 	refference_id: string;
+// 	expand?: {
+// 		stock_id: StockMaster;
+// 		user_id: User;
+// 	};
+// }
 
 export interface BorrowItem extends RecordModel {
 	borrow_id: BorrowMovement['id'];
