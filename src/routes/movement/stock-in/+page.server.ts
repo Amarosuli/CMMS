@@ -1,35 +1,24 @@
+import { GetMaterialMasterOption } from '../movement.remote.js';
 import { fail, message, superValidate } from 'sveltekit-superforms';
-import { stockInSchema } from '$lib/zodSchema';
+import { StockInSchema } from '$lib/valibotSchema.js';
 import { redirect } from '@sveltejs/kit';
-import { zod } from 'sveltekit-superforms/adapters';
-import type { RecordModel } from 'pocketbase';
+import { valibot } from 'sveltekit-superforms/adapters';
 
-export const load = async ({ locals, url, params }) => {
+import type { RecordModel } from 'pocketbase';
+import { getPackageNameOption } from '../../config/material-master/material-master.remote.js';
+
+export const load = async ({ locals }) => {
 	if (!locals.user) throw redirect(302, '/'); // Prevent guest users from accessing this page directly.
 
-	const getMaterialMaster = async () => {
-		const result = await locals.pb.collection('material_master').getFullList();
-		return result.map(({ id, code, description, part_number }) => {
-			return { label: code, value: id, detail: code + ' - ' + part_number + ' - ' + description };
-		});
-	};
-
-	const getTransactionType = async () => {
-		const result = await locals.pb.collection('transaction_type').getFullList();
-		return result.map(({ id, code, description }) => {
-			return { label: code, value: id, description };
-		});
-	};
-
 	return {
-		transactionType: await getTransactionType(),
-		materialMaster: await getMaterialMaster(),
-		form: await superValidate(zod(stockInSchema))
+		packageNameOption: await getPackageNameOption(),
+		materialMasterOption: await GetMaterialMasterOption(),
+		form: await superValidate(valibot(StockInSchema))
 	};
 };
 export const actions = {
 	save: async ({ locals, request }) => {
-		const form = await superValidate(request, zod(stockInSchema));
+		const form = await superValidate(request, valibot(StockInSchema));
 
 		if (!form.valid) return fail(400, { form });
 
@@ -45,7 +34,7 @@ export const actions = {
 	},
 	saveToStockMaster: async ({ locals, request }) => {
 		const form = await request.formData();
-		console.log(form);
+
 		try {
 			await locals.pb.collection('stock_master').create(form);
 		} catch (er: any) {

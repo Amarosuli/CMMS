@@ -166,47 +166,6 @@
 			</Control>
 			<FieldErrors class="text-xs italic" />
 		</Field>
-		<!-- <Field {form} name="isPackaged">
-			<Control>
-				{#snippet children({ props })}
-					<Label>Does it come packaged ?</Label>
-					<div class="flex items-center gap-2">
-						<Switch {...props} bind:checked={$formData.isPackaged} />
-						{$formData.isPackaged ? 'Yes' : 'No'}
-					</div>
-				{/snippet}
-			</Control>
-			<FieldErrors class="text-xs italic" />
-		</Field> -->
-		<!-- {#if $formData.isPackaged}
-			<Field {form} name="package_size">
-				<Control>
-					{#snippet children({ props })}
-						<Label>Package Size (quantity in one package)</Label>
-						<Input {...props} bind:value={$formData.package_size} type="text" placeholder="Package Size" />
-					{/snippet}
-				</Control>
-				<FieldErrors class="text-xs italic" />
-			</Field>
-			<Field {form} name="package_name">
-				<Control>
-					{#snippet children({ props })}
-						<Label>Package Name</Label>
-						<ToggleGroup.Root variant="outline" type="single">
-							{#each packageNameOption as packageName}
-								<ToggleGroup.Item value={packageName.value} aria-label="Toggle bold">
-									<p class="px-1">{packageName.label}</p>
-								</ToggleGroup.Item>
-							{/each}
-
-							<Button variant="ghost" class="rounded-l-none"><Plus class="size-4" /></Button>
-
-						</ToggleGroup.Root>
-					{/snippet}
-				</Control>
-				<FieldErrors class="text-xs italic" />
-			</Field>
-		{/if} -->
 		<Field {form} name="images">
 			<Control>
 				{#snippet children({ props })}
