@@ -8,7 +8,7 @@
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
 	// icons
-	import { SendToBack, Archive, FolderInput, FolderOutput, House, LoaderCircle, Settings, LayoutDashboard } from '@lucide/svelte';
+	import { SendToBack, Archive, FolderInput, FolderOutput, House, LoaderCircle, Settings, LayoutDashboard, FileText } from '@lucide/svelte';
 
 	interface Props {
 		data: any;
@@ -93,6 +93,12 @@
 			title: 'Config',
 			icon: Settings,
 			url: '/config',
+			role: Role.SUPER
+		},
+		{
+			title: 'Report',
+			icon: FileText,
+			url: '/report',
 			role: Role.SUPER
 		}
 	];
