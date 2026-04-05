@@ -1,7 +1,5 @@
 import { getRequestEvent, query } from '$app/server';
 import { tryCatch } from '$lib/TryCatch';
-import { StockMasterSchema } from '$lib/valibotSchema';
-import { omit } from 'valibot';
 
 export interface StockMovement {
 	id: string;
@@ -23,8 +21,8 @@ export const GetMaterialMasterOption = query(async () => {
 		return [{ label: 'No Data Found', value: '', detail: 'No Data Found' }];
 	}
 
-	return data.map(({ id, code, description, part_number }) => {
-		return { label: code, value: id, detail: code + ' - ' + part_number + ' - ' + description };
+	return data.map(({ id, code, description, part_number, remark }) => {
+		return { label: code, value: id, detail: code + ' - ' + part_number + ' - ' + description + (remark ? ' - ' + remark : '') };
 	});
 });
 
@@ -66,15 +64,3 @@ export const getRecentMovements = query(async () => {
 
 	return [...stockInNormalized, ...stockOutNormalized].sort((a, b) => b.created.localeCompare(a.created));
 });
-
-// export const CreateStockMaster = query('unchecked', async (formData: Record<string, any>[]) => {
-// 	const { locals } = getRequestEvent();
-
-// 	const batch = locals.pb.createBatch();
-
-// 	formData.forEach((data) => {
-// 		batch.collection('stock_master').create(data);
-// 	});
-
-// 	return await tryCatch(batch.send());
-// });

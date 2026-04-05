@@ -7,8 +7,6 @@
 	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
 	import { type DateValue, CalendarDate } from '@internationalized/date';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
-	import { StockMasterStatus } from '$lib/CostumTypes.js';
-	import { deserialize } from '$app/forms';
 	import { superForm } from 'sveltekit-superforms';
 	import { Calendar } from '$lib/components/ui/calendar/index.js';
 	import { Input } from '$lib/components/ui/input';
@@ -28,67 +26,11 @@
 	const getDate = toDay[0].split('-');
 	const maxValueDate: DateValue = new CalendarDate(parseInt(getDate[0]), parseInt(getDate[1]), parseInt(getDate[2])).add({ years: 300 });
 
-	const createStockMaster = async (data: Record<string, any>) => {
-		let formData = new FormData();
-		for (let key in data) {
-			formData.append(key, data[key]);
-		}
-
-		const response = await fetch('?/saveToStockMaster', {
-			method: 'POST',
-			body: formData
-		});
-
-		return deserialize(await response.text());
-	};
-
 	const form = superForm((() => data.form)(), {
-		onUpdate({ form, result }) {
+		onUpdate({ form }) {
 			if (form.valid) {
 				toast.success(form.message.text);
-
-				if (result.type === 'success') {
-					const data = form.message.result;
-					const packageSize = data.isPackaged ? data.package_size : 1;
-					const totalRow = Math.ceil(data.quantity / packageSize);
-
-					let remainingItem = data.quantity;
-					const promises = [];
-
-					for (let i = 1; i <= totalRow; i++) {
-						const quantityPerRow = remainingItem >= packageSize ? packageSize : remainingItem;
-
-						const identity = `${data.batch_number}${i.toString().padStart(4, '0')}`;
-
-						const request = createStockMaster({
-							identity: identity,
-							batch_number: data.batch_number,
-							purchase_order: data.purchase_order,
-							quantity: quantityPerRow,
-							quantity_available: quantityPerRow,
-							expired_date: data.expired_date,
-							material_master_id: data.material_master_id,
-							isBorrowed: false,
-							isNew: true,
-							status: StockMasterStatus.ACTIVE,
-							stock_in_id: data.id
-						});
-
-						promises.push(request);
-						remainingItem -= quantityPerRow;
-					}
-
-					Promise.all(promises)
-						.then(() => {
-							toast.success(`${totalRow} stock master records have been created successfully.`);
-							goto('/stock');
-						})
-						.catch((er) => {
-							toast.error(er);
-						});
-				}
-
-				goto('/stock');
+				return goto('/stock');
 			}
 		}
 	});

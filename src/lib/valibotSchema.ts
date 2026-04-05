@@ -1,5 +1,5 @@
-import { boolean, email, enum_, file, forward, mimeType, minLength, nonEmpty, object, omit, optional, partialCheck, pipe, string, trim, fallback, url, number, check, array, minValue, nullable, maxSize, transform, date, isoDateTime, isoTimestamp, union, intersect } from 'valibot';
-import { StockMasterStatus, UserRole, UserUnit } from './CostumTypes';
+import { boolean, email, enum_, file, forward, mimeType, minLength, nonEmpty, object, omit, optional, partialCheck, pipe, string, trim, fallback, url, number, check, array, minValue, nullable, maxSize, isoTimestamp } from 'valibot';
+import { StockItemStatus, StockMasterStatus, UserRole, UserUnit } from './CostumTypes';
 
 export const MaterialTypeSchema = object({
 	name: pipe(string(), nonEmpty('Please enter the name'), trim()),
@@ -92,18 +92,18 @@ export const StockInSchema = pipe(
 );
 
 export const StockMasterSchema = object({
-	identity: pipe(string(), nonEmpty('Identity is required')),
 	purchase_order: optional(pipe(string(), trim())),
 	batch_number: pipe(string(), nonEmpty('Batch Number is required')),
 	stock_in_id: pipe(string(), nonEmpty('Stock In is required'), trim()),
 	material_master_id: pipe(string(), nonEmpty('Material Master is required'), trim()),
 	quantity: pipe(number(), minValue(1, 'Quantity is required, at least 1')),
 	quantity_available: pipe(number()),
-	isBorrowed: pipe(nullable(boolean(), false)),
-	isNew: pipe(nullable(boolean(), true)),
+	quantity_borrowed: pipe(number()),
 	expired_date: pipe(string(), isoTimestamp('The date is badly formatted'), nonEmpty('Expired date is required')),
 	status: enum_(StockMasterStatus, 'Status is required'),
-	storage_id: optional(pipe(string(), trim()))
+	isPackaged: pipe(nullable(boolean(), false)),
+	package_size: optional(pipe(nullable(number()))),
+	package_name: optional(pipe(string(), trim()))
 });
 
 export const StockOutSchema = object({
@@ -112,4 +112,12 @@ export const StockOutSchema = object({
 	user_id: pipe(string(), nonEmpty('User is required')),
 	remark: optional(pipe(string(), trim())),
 	borrow_id: optional(pipe(string(), trim()))
+});
+
+export const StockItemSchema = object({
+	identity: pipe(string(), nonEmpty('Identity is required')),
+	stock_master_id: pipe(string(), nonEmpty('Stock Master is required'), trim()),
+	status: enum_(StockItemStatus, 'Status is required'),
+	quantity: pipe(number(), minValue(1, 'Quantity is required, at least 1')),
+	storage_id: optional(pipe(string(), trim()))
 });
