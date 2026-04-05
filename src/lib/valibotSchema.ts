@@ -1,4 +1,4 @@
-import { boolean, email, enum_, file, forward, mimeType, minLength, nonEmpty, object, omit, optional, partialCheck, pipe, string, trim, fallback, url, number, check, array, minValue, nullable, maxSize, isoTimestamp } from 'valibot';
+import { boolean, email, enum_, file, forward, mimeType, minLength, nonEmpty, object, omit, optional, partialCheck, pipe, string, trim, url, number, check, array, minValue, nullable, maxSize, isoTimestamp } from 'valibot';
 import { StockItemStatus, StockMasterStatus, UserRole, UserUnit } from './CostumTypes';
 
 export const MaterialTypeSchema = object({
@@ -107,11 +107,11 @@ export const StockMasterSchema = object({
 });
 
 export const StockOutSchema = object({
-	stock_master_id: pipe(string(), nonEmpty('Stock Master is required'), trim()),
+	stock_item_id: pipe(string(), nonEmpty('Stock Master is required'), trim()),
 	quantity: pipe(number(), minValue(1, 'Quantity is required, at least 1')),
 	user_id: pipe(string(), nonEmpty('User is required')),
 	remark: optional(pipe(string(), trim())),
-	borrow_id: optional(pipe(string(), trim()))
+	borrow_movement_id: optional(pipe(string(), trim()))
 });
 
 export const StockItemSchema = object({
