@@ -63,9 +63,9 @@
 	"type": "module",
 	"dependencies": {
 		"@number-flow/svelte": "^0.3.3",
-		"@pdfme/common": "^5.4.5",
-		"@pdfme/generator": "^5.4.5",
-		"@pdfme/schemas": "^5.4.5",
+		"@pdfme/common": "^5.5.10",
+		"@pdfme/generator": "^5.5.10",
+		"@pdfme/schemas": "^5.5.10",
 		"@tanstack/table-core": "^8.20.5",
 		"clsx": "^2.1.1",
 		"cmms": "file:",

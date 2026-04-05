@@ -1,32 +1,34 @@
 <script lang="ts">
-	import Papa from 'papaparse';
+	import * as Dialog from '$lib/components/ui/dialog/index.js';
+
 	import type { StockMaster } from '$lib/CostumTypes';
 	import type { PageFile } from '$lib/PageTable.svelte';
-	// import { type Template } from '@pdfme/common';
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import { buttonVariants } from '../ui/button';
-	import { Button } from '../ui/button';
-	import { generate } from '@pdfme/generator';
+
 	import { barcodes, text, rectangle } from '@pdfme/schemas';
-	import { barcodeListTemplate } from './barcodeListTemplate';
+	import { buttonVariants } from '../ui/button';
 	import { LoaderCircle } from '@lucide/svelte';
+	import { generate } from '@pdfme/generator';
+	import { Button } from '../ui/button';
+
+	import barcodeListTemplate from './barcodeListTemplate.json';
+	import Papa from 'papaparse';
 
 	let { pageFile }: { pageFile: PageFile } = $props();
 
 	let infoState = $state('');
 
 	let isLoading = $state(false);
-	const pageFileB = pageFile;
+	const pageFileB = $derived(pageFile);
 
 	async function getCSV() {
 		isLoading = true;
 		infoState = 'Generate CSV ...';
-		const data = (await pageFileB.getAll({ expand: 'material_id' })) as StockMaster[];
+		const data = (await pageFileB.getAll({ expand: 'material_master_id' })) as StockMaster[];
 
 		const mapped = data.map((d) => {
 			return {
-				Description: d.expand?.material_id.description,
-				'Part Number': d.expand?.material_id.part_number,
+				Description: d.expand?.material_master_id.description,
+				'Part Number': d.expand?.material_master_id.part_number,
 				'Batch Number': d.batch_number,
 				'Purchase Order': d.purchase_order,
 				Created: d.created,
@@ -58,7 +60,8 @@
 		isLoading = true;
 		infoState = 'Generate PDF ...';
 
-		const data = (await pageFileB.getAll({ expand: 'material_id', filter: 'quantity_available>0' })) as StockMaster[];
+		const data = (await pageFileB.getAll({ expand: 'material_master_id', filter: 'quantity_available>0' })) as StockMaster[];
+
 		let resultObjectArray: Record<string, string>[] = [];
 		let currentObject: Record<string, string> = {};
 		let keyIndex = 1;
@@ -69,7 +72,8 @@
 
 			for (let m = 0; m < multiplier; m++) {
 				const key = `{${keyIndex}}bn`;
-				currentObject[key] = item.batch_number;
+				currentObject[key] = item.identity || '';
+
 				if (keyIndex === 100) {
 					resultObjectArray.push(currentObject);
 					currentObject = {};
@@ -84,7 +88,8 @@
 			resultObjectArray.push(currentObject);
 		}
 
-		const template = barcodeListTemplate;
+		let template = JSON.parse(JSON.stringify(barcodeListTemplate));
+
 		const inputs = resultObjectArray;
 		const plugins = { code128: barcodes.code128, text: text, rectangle: rectangle };
 
@@ -96,12 +101,15 @@
 
 				link.setAttribute('href', url);
 				link.setAttribute('download', 'Stock Barcode List.pdf');
-				document.body.appendChild(link); // Append to the body temporarily
+				document.body.appendChild(link);
 
 				link.click();
 
-				document.body.removeChild(link); // Remove the link after clicking
-				URL.revokeObjectURL(url); // Free up the temporary URL resource
+				document.body.removeChild(link);
+				URL.revokeObjectURL(url);
+			})
+			.catch((error) => {
+				console.error('Error generating PDF:', error);
 			})
 			.finally(() => {
 				infoState = '';
@@ -118,14 +126,14 @@
 		onclick={() => {
 			open = !open;
 		}}>Export</Dialog.Trigger>
-	<Dialog.Content class="sm:max-w-[425px]">
+	<Dialog.Content class="sm:max-w-425px">
 		<Dialog.Header>
 			<Dialog.Title>Export</Dialog.Title>
 			<Dialog.Description>Currently available for export to CSV and PDF</Dialog.Description>
 		</Dialog.Header>
 		<div class="flex h-3 gap-4 pb-4">
 			{#if isLoading}
-				<LoaderCircle class="text-primary h-5 w-5 animate-spin" />
+				<LoaderCircle class="h-5 w-5 animate-spin text-primary" />
 			{/if}
 			<p class="ml-2 h-3 text-sm font-semibold tracking-wider">
 				{infoState}
