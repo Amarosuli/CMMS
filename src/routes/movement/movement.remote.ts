@@ -1,4 +1,5 @@
 import { getRequestEvent, query } from '$app/server';
+import { optional, string } from 'valibot';
 import { tryCatch } from '$lib/TryCatch';
 
 export interface StockMovement {
@@ -63,4 +64,46 @@ export const getRecentMovements = query(async () => {
 	}
 
 	return [...stockInNormalized, ...stockOutNormalized].sort((a, b) => b.created.localeCompare(a.created));
+});
+
+export const GetStockOption = query(optional(string()), async (filter) => {
+	const { locals } = getRequestEvent();
+
+	const searchFilter = filter ? `(stock_master_id.material_master_id.code ~ "${filter}" || stock_master_id.material_master_id.description ~ "${filter}" || stock_master_id.batch_number ~ "${filter}" || stock_master_id.material_master_id.part_number ~ "${filter}" || identity ~ "${filter}")` : '';
+	const { error, data } = await tryCatch(locals.pb.collection('stock_item').getList(1, 6, { filter: `(status="NEW" || status ="USED") ${searchFilter ? '&&' + searchFilter : ''}`, expand: 'stock_master_id.material_master_id.material_unit_id' }));
+
+	if (error || data.items.length === 0) {
+		return [
+			{
+				label: 'No Data Found',
+				value: '',
+				detail: {} as {
+					identity: string;
+					quantity: number;
+					code: any;
+					part_number: any;
+					description: any;
+					remark: any;
+					unit: string;
+				}
+			}
+		];
+	}
+
+	return data.items.map(({ id, identity, quantity, expand }) => {
+		const code = expand?.stock_master_id.expand.material_master_id.code || '';
+		const description = expand?.stock_master_id.expand.material_master_id.description || '';
+		const part_number = expand?.stock_master_id.expand.material_master_id.part_number || '';
+		const remark = expand?.stock_master_id.expand.material_master_id.remark || '';
+		const unit = expand?.stock_master_id.expand.material_master_id.expand.material_unit_id.code || '';
+
+		return { label: code, value: id, detail: { identity, quantity, code, part_number, description, remark, unit } };
+	});
+});
+
+export const UpdateStockMaster = query(async () => {
+	// setelah create data into stock_out
+	// update status in stock_item to DISPOSED, storage_id to N/A
+	// update quantity_available in stock_master to sync actual quantity
+	// if quantity_available in stock_master 0 after sync, update status to INACTIVE
 });
