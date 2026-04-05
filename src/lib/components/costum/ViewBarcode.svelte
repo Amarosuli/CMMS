@@ -26,7 +26,7 @@
 <Dialog.Root bind:open>
 	<Dialog.Content class="p-10">
 		<Dialog.Header>
-			<Dialog.Title><p class="text-center capitalize">{data.expand.material_id.description.toLowerCase()}</p></Dialog.Title>
+			<Dialog.Title><p class="text-center capitalize">{data.expand.material_master_id.description.toLowerCase()}</p></Dialog.Title>
 		</Dialog.Header>
 		<div class="flex items-center justify-center">
 			<canvas use:renderBarcode></canvas>

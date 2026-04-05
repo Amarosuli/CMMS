@@ -79,7 +79,7 @@
 <div class="mt-4 lg:mt-8">
 	<div class="flex items-center gap-4">
 		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Detail <span class="text-foreground/50">User</span></h1>
-		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 forced-colors:outline">{data.id}</span>
+		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-hover:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-hover:bg-lime-400/15 forced-colors:outline">{data.id}</span>
 	</div>
 	<div class="isolate mt-2.5 flex flex-wrap justify-between gap-x-6 gap-y-4">
 		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
@@ -90,26 +90,26 @@
 		<div class="flex gap-4">
 			<Button variant="outline" onclick={() => goto(page.url.pathname + '/edit')} class="min-w-20 ">Edit</Button>
 			<Button variant="outline" onclick={() => (changePasswordDialogOpen = true)} class="min-w-20 ">Change Password</Button>
-			<Button variant="outline" onclick={() => (confirmDialogOpen = true)} class="border-destructive text-destructive hover:text-destructive min-w-20 font-semibold">Delete User <TriangleAlert class="size-4" /></Button>
+			<Button variant="outline" onclick={() => (confirmDialogOpen = true)} class="min-w-20 border-destructive font-semibold text-destructive hover:text-destructive">Delete User <TriangleAlert class="size-4" /></Button>
 		</div>
 	</div>
 </div>
 
 {#if data.userData.data}
 	<div class="mt-12">
-		<h2 class="text-foreground text-base/7 font-semibold sm:text-sm/6">Detail of User</h2>
-		<hr role="presentation" class="border-foreground/10 mt-4 w-full border-t" />
-		<dl class="grid grid-cols-1 text-base/6 sm:grid-cols-[min(50%,theme(spacing.80))_auto] sm:text-sm/6">
-			<dt class="border-foreground/5 text-foreground/50 col-start-1 border-t pt-3 first:border-none sm:py-3">Username / Employee Id</dt>
-			<dd class="text-foreground sm:border-foreground/5 pt-1 pb-3 sm:border-t sm:py-3 sm:[&:nth-child(2)]:border-none">{data.userData.data.username}</dd>
-			<dt class="border-foreground/5 text-foreground/50 col-start-1 border-t pt-3 first:border-none sm:py-3">Name</dt>
-			<dd class="text-foreground sm:border-foreground/5 pt-1 pb-3 capitalize sm:border-t sm:py-3 sm:[&:nth-child(2)]:border-none">{data.userData.data.name.toLowerCase()}</dd>
-			<dt class="border-foreground/5 text-foreground/50 col-start-1 border-t pt-3 first:border-none sm:py-3">Email</dt>
-			<dd class="text-foreground sm:border-foreground/5 pt-1 pb-3 sm:border-t sm:py-3 sm:[&:nth-child(2)]:border-none">{data.userData.data.email || '-'}</dd>
-			<dt class="border-foreground/5 text-foreground/50 col-start-1 border-t pt-3 first:border-none sm:py-3">Unit</dt>
-			<dd class="text-foreground sm:border-foreground/5 pt-1 pb-3 sm:border-t sm:py-3 sm:[&:nth-child(2)]:border-none">{data.userData.data.unit}</dd>
-			<dt class="border-foreground/5 text-foreground/50 col-start-1 border-t pt-3 first:border-none sm:py-3">Role</dt>
-			<dd class="text-foreground sm:border-foreground/5 pt-1 pb-3 sm:border-t sm:py-3 sm:[&:nth-child(2)]:border-none">{data.userData.data.role}</dd>
+		<h2 class="text-base/7 font-semibold text-foreground sm:text-sm/6">Detail of User</h2>
+		<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
+		<dl class="grid grid-cols-1 text-base/6 sm:grid-cols-[min(50%,--spacing(80))_auto] sm:text-sm/6">
+			<dt class="col-start-1 border-t border-foreground/5 pt-3 text-foreground/50 first:border-none sm:py-3">Username / Employee Id</dt>
+			<dd class="pt-1 pb-3 text-foreground sm:border-t sm:border-foreground/5 sm:py-3 sm:nth-2:border-none">{data.userData.data.username}</dd>
+			<dt class="col-start-1 border-t border-foreground/5 pt-3 text-foreground/50 first:border-none sm:py-3">Name</dt>
+			<dd class="pt-1 pb-3 text-foreground capitalize sm:border-t sm:border-foreground/5 sm:py-3 sm:nth-2:border-none">{data.userData.data.name.toLowerCase()}</dd>
+			<dt class="col-start-1 border-t border-foreground/5 pt-3 text-foreground/50 first:border-none sm:py-3">Email</dt>
+			<dd class="pt-1 pb-3 text-foreground sm:border-t sm:border-foreground/5 sm:py-3 sm:nth-2:border-none">{data.userData.data.email || '-'}</dd>
+			<dt class="col-start-1 border-t border-foreground/5 pt-3 text-foreground/50 first:border-none sm:py-3">Unit</dt>
+			<dd class="pt-1 pb-3 text-foreground sm:border-t sm:border-foreground/5 sm:py-3 sm:nth-2:border-none">{data.userData.data.unit}</dd>
+			<dt class="col-start-1 border-t border-foreground/5 pt-3 text-foreground/50 first:border-none sm:py-3">Role</dt>
+			<dd class="pt-1 pb-3 text-foreground sm:border-t sm:border-foreground/5 sm:py-3 sm:nth-2:border-none">{data.userData.data.role}</dd>
 		</dl>
 	</div>
 {/if}
@@ -162,7 +162,7 @@
 					{/if}
 				</Button>
 				{#if errorMessage}
-					<p class="bg-destructive/50 text-destructive-foreground mt-2 p-2 text-center text-xs font-semibold">{errorMessage}</p>
+					<p class="text-destructive-foreground mt-2 bg-destructive/50 p-2 text-center text-xs font-semibold">{errorMessage}</p>
 				{/if}
 			</form>
 		</div>

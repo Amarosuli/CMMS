@@ -7,8 +7,9 @@
 	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
 	import { type DateValue, CalendarDate } from '@internationalized/date';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { StockMasterStatus } from '$lib/CostumTypes.js';
 	import { deserialize } from '$app/forms';
-	import SuperDebug, { superForm } from 'sveltekit-superforms';
+	import { superForm } from 'sveltekit-superforms';
 	import { Calendar } from '$lib/components/ui/calendar/index.js';
 	import { Input } from '$lib/components/ui/input';
 	import { Switch } from '$lib/components/ui/switch/index.js';
@@ -18,11 +19,10 @@
 	import { time } from '$lib/helpers.js';
 	import { tick } from 'svelte';
 	import { cn } from '$lib/utils.js';
-	import { StockMasterStatus } from '$lib/CostumTypes.js';
 
 	let { data } = $props();
 
-	const { user, packageNameOption, materialMasterOption } = data;
+	const { user, packageNameOption, materialMasterOption } = $derived(data);
 
 	const toDay = new Date().toISOString().split('T');
 	const getDate = toDay[0].split('-');
@@ -42,7 +42,7 @@
 		return deserialize(await response.text());
 	};
 
-	const form = superForm(data.form, {
+	const form = superForm((() => data.form)(), {
 		onUpdate({ form, result }) {
 			if (form.valid) {
 				toast.success(form.message.text);
@@ -124,7 +124,7 @@
 <div class="mt-4 lg:mt-8">
 	<div class="flex items-center gap-4">
 		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Create <span class="text-foreground/50">Stock In</span></h1>
-		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 forced-colors:outline"> SIN </span>
+		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-hover:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-hover:bg-lime-400/15 forced-colors:outline"> SIN </span>
 	</div>
 	<div class="isolate mt-2.5 flex flex-wrap justify-between gap-x-6 gap-y-4">
 		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
@@ -136,8 +136,8 @@
 </div>
 
 <div class="mt-12">
-	<h2 class="text-foreground text-base/7 font-semibold sm:text-sm/6">Stock In Form Field</h2>
-	<hr role="presentation" class="border-foreground/10 mt-4 w-full border-t" />
+	<h2 class="text-base/7 font-semibold text-foreground sm:text-sm/6">Stock In Form Field</h2>
+	<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
 	<form class="mt-3 flex w-full max-w-80 flex-col text-base/6 sm:text-sm/6" action="?/save" method="post" use:enhance>
 		<Field {form} name="material_master_id" class="flex flex-col">
 			<Popover.Root bind:open>
@@ -303,10 +303,10 @@
 			{/if}
 		</Button>
 		{#if $errors['_errors']}
-			<p class="bg-destructive text-destructive-foreground mt-2 p-2 text-center text-xs font-semibold">{$errors._errors[0]}</p>
+			<p class="text-destructive-foreground mt-2 bg-destructive p-2 text-center text-xs font-semibold">{$errors._errors[0]}</p>
 		{/if}
 		{#if $message}
-			<p class="bg-destructive text-destructive-foreground mt-2 p-2 text-center text-xs font-semibold">{$message}</p>
+			<p class="text-destructive-foreground mt-2 bg-destructive p-2 text-center text-xs font-semibold">{$message}</p>
 		{/if}
 	</form>
 </div>

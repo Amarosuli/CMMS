@@ -1,43 +1,46 @@
 <script lang="ts">
-	import { type ColumnDef, type VisibilityState, getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
-	import { createSvelteTable, renderComponent, renderSnippet } from '$lib/components/ui/data-table/index.js';
 	import * as ToggleGroup from '$lib/components/ui/toggle-group/index.js';
+	import { type ColumnDef, type VisibilityState, getCoreRowModel, getSortedRowModel } from '@tanstack/table-core';
 	import { DataTableActions, DataTableSortColumn, ExportWidget, SuperTable, ViewBarcode } from '$lib/components/costum';
+	import { createSvelteTable, renderComponent, renderSnippet } from '$lib/components/ui/data-table/index.js';
 	import { createRawSnippet, onMount } from 'svelte';
 	import { createPageFile } from '$lib/PageTable.svelte';
 	import { page } from '$app/state';
-	import { Button } from '$lib/components/ui/button/index.js';
 
 	let { data } = $props();
-	const { user } = data;
+	const { user } = $derived(data);
 
 	const pageFile = createPageFile({
 		collectionName: 'stock_master',
 		perPage: 10,
 		// svelte-ignore state_referenced_locally
-		options: { expand: 'material_id,material_id.unit_id', filter: 'status="ACTIVE"' }
+		options: { expand: 'material_master_id.material_unit_id', filter: 'status="ACTIVE"' }
 	});
 
 	pageFile.addModifier((items: any[]) => {
 		return items.map((val) => {
-			return { ...val, materialData: val.expand ? val.expand.material_id : 'N/A' };
+			return { ...val, materialData: val.expand ? val.expand.material_master_id : 'N/A' };
 		});
+	});
+
+	$effect(() => {
+		console.log('Page file items updated:', pageFile.items);
 	});
 
 	export const columns: ColumnDef<(typeof pageFile)['items'][number]>[] = [
 		{
-			accessorKey: 'material_id.description',
+			accessorKey: 'material_master_id.description',
 			id: 'Description',
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
 					text: 'Material Description',
 					disabled: pageFile.isLoading,
-					direction: pageFile.sortBucket === 'material_id.description' ? pageFile.sortDirection : undefined,
-					onclick: () => pageFile.sort('material_id.description')
+					direction: pageFile.sortBucket === 'material_master_id.description' ? pageFile.sortDirection : undefined,
+					onclick: () => pageFile.sort('material_master_id.description')
 				}),
 			cell: ({ row }) => {
 				const Snippet = createRawSnippet<[string]>(() => {
-					const data = row.original.expand?.material_id.description.toLowerCase();
+					const data = row.original.expand?.material_master_id.description.toLowerCase();
 					return {
 						render: () => `<div class="capitalize">${data}</div>`
 					};
@@ -46,18 +49,18 @@
 			}
 		},
 		{
-			accessorKey: 'material_id.part_number',
+			accessorKey: 'material_master_id.part_number',
 			id: 'Part Number',
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
 					text: 'Part Number',
 					disabled: pageFile.isLoading,
-					direction: pageFile.sortBucket === 'material_id.part_number' ? pageFile.sortDirection : undefined,
-					onclick: () => pageFile.sort('material_id.part_number')
+					direction: pageFile.sortBucket === 'material_master_id.part_number' ? pageFile.sortDirection : undefined,
+					onclick: () => pageFile.sort('material_master_id.part_number')
 				}),
 			cell: ({ row }) => {
 				const Snippet = createRawSnippet<[string]>(() => {
-					const data = row.original.expand?.material_id.part_number.toLowerCase();
+					const data = row.original.expand?.material_master_id.part_number.toLowerCase();
 					return {
 						render: () => `<div class="uppercase">${data}</div>`
 					};
@@ -122,14 +125,14 @@
 			}
 		},
 		{
-			accessorKey: 'material_id.code',
+			accessorKey: 'material_master_id.code',
 			id: 'Code',
 			header: ({ column }) =>
 				renderComponent(DataTableSortColumn, {
 					text: 'Code',
 					disabled: pageFile.isLoading,
-					direction: pageFile.sortBucket === 'material_id.code' ? pageFile.sortDirection : undefined,
-					onclick: () => pageFile.sort('material_id.code')
+					direction: pageFile.sortBucket === 'material_master_id.code' ? pageFile.sortDirection : undefined,
+					onclick: () => pageFile.sort('material_master_id.code')
 				}),
 			cell: ({ row }) => {
 				return row.original.materialData.code;

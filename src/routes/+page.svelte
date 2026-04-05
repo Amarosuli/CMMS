@@ -1,16 +1,16 @@
 <script lang="ts">
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+	import { type DropdownMenuTriggerProps } from 'bits-ui';
 	import { ChevronDown, Plus, CircleDot } from '@lucide/svelte';
-	import { RecentTransaction } from '$lib/components/page';
+	// import { RecentTransaction } from '$lib/components/page';
 	import { time, timeOfDay } from '$lib/helpers';
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { pb } from '$lib/pocketbaseClient';
 	import NumberFlow from '@number-flow/svelte';
-	import { type DropdownMenuTriggerProps } from 'bits-ui';
 
 	let { data } = $props();
-	const { user } = data;
+	const { user } = $derived(data);
 
 	const ranges = [
 		{ value: '', label: 'Weekly', isChecked: true },
@@ -34,7 +34,7 @@
 		}
 
 		async function getUsedStock() {
-			totalUsedStock = (await pb.collection('stock_out').getFullList({ filter: 'refference_id != ""' })).length;
+			totalUsedStock = (await pb.collection('total_stock_used').getOne('1')).total;
 		}
 
 		async function getWastedStock() {
@@ -42,12 +42,7 @@
 		}
 
 		async function getStockUnderMinimum() {
-			totalStockUnderMinimum = (
-				await pb.collection('stock_master').getFullList({
-					expand: 'material_id',
-					filter: 'quantity_available < material_id.minimum_quantity'
-				})
-			).length;
+			totalStockUnderMinimum = (await pb.collection('total_stock_under_minimum').getFullList()).length;
 		}
 
 		async function getActiveBorrowing() {
@@ -55,75 +50,18 @@
 		}
 
 		async function getMaterialMaintain() {
-			let groupMap = new Map();
-			let allItems = await pb.collection('stock_master').getFullList({ sort: 'material_id' });
-
-			for (let { material_id } of allItems) {
-				if (!groupMap.has(material_id)) groupMap.set(material_id, []);
-				groupMap.get(material_id).push(material_id);
-			}
-
-			materialMaintain = groupMap.size;
+			materialMaintain = (await pb.collection('total_material_maintained').getOne('1')).total;
 		}
 
 		async function getFrequentlyUsed() {
-			let groupMap = new Map();
-			let allUsed = await pb.collection('stock_out').getFullList({ expand: 'stock_id' });
+			let frequentlyUsedItems = await pb.collection('frequently_used').getList(1, 5, { sort: 'total_count', expand: 'stock_id.material_master_id' });
 
-			for (let { stock_id, quantity, expand } of allUsed) {
-				if (!groupMap.has(stock_id)) groupMap.set(stock_id, []);
-				groupMap.get(stock_id).push({ quantity, stock_id, material_id: expand?.stock_id.material_id });
-			}
-
-			let newx = [...groupMap.values()].map((conditions: { quantity: number; material_id: string }[]) => {
-				const merged = Object.values(
-					conditions.reduce<{ [key: string]: { quantity: number; material_id: string } }>((acc, { material_id, quantity }) => {
-						if (!acc[material_id]) {
-							acc[material_id] = { material_id, quantity: 0 };
-						}
-						acc[material_id].quantity += quantity;
-						return acc;
-					}, {})
-				);
-
-				return merged[0];
-			});
-			// Find the max quantity
-			const maxQuantity = Math.max(...newx.map((item) => item.quantity));
-
-			// Filter the items that have the max quantity
-			const result = newx.filter((item) => item.quantity === maxQuantity);
-			frequentlyUsed = result.length;
+			frequentlyUsed = frequentlyUsedItems.items.length;
 		}
 
 		async function getFrequentlyBorrowed() {
-			let groupMap = new Map();
-			let allBorrowed = await pb.collection('borrow_item').getFullList({ expand: 'stock_id' });
-
-			for (let { stock_id, quantity_out, expand } of allBorrowed) {
-				if (!groupMap.has(stock_id)) groupMap.set(stock_id, []);
-				groupMap.get(stock_id).push({ quantity_out, stock_id, material_id: expand?.stock_id.material_id });
-			}
-
-			let newx = [...groupMap.values()].map((conditions: { quantity_out: number; material_id: string }[]) => {
-				const merged = Object.values(
-					conditions.reduce<{ [key: string]: { quantity_out: number; material_id: string } }>((acc, { material_id, quantity_out }) => {
-						if (!acc[material_id]) {
-							acc[material_id] = { material_id, quantity_out: 0 };
-						}
-						acc[material_id].quantity_out += quantity_out;
-						return acc;
-					}, {})
-				);
-
-				return merged[0];
-			});
-			// Find the max quantity
-			const maxQuantityOut = Math.max(...newx.map((item) => item.quantity_out));
-
-			// Filter the items that have the max quantity
-			const result = newx.filter((item) => item.quantity_out === maxQuantityOut);
-			frequentlyBorrowed = result.length;
+			let frequentlyBorrowedItems = await pb.collection('frequently_borrowed').getList(1, 5, { sort: 'total_count', expand: 'stock_id.material_master_id' });
+			frequentlyBorrowed = frequentlyBorrowedItems.items.length;
 		}
 
 		let overviewItems = [
@@ -249,7 +187,7 @@
 			<div class="mt-6 text-lg font-medium sm:text-sm/6">Total Borrow</div>
 			<div class="mt-3 text-3xl/8 font-semibold sm:text-2xl/8">{dashboardData.totalBorrowed}</div>
 			<div class="mt-3 text-sm/6 sm:text-xs/6">
-				<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 forced-colors:outline">Count since</span> <span class="text-zinc-500">{time(new Date())}</span>
+				<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-hover:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-hover:bg-lime-400/15 forced-colors:outline">Count since</span> <span class="text-zinc-500">{time(new Date())}</span>
 			</div>
 		</div>
 	</div>
@@ -261,7 +199,7 @@
 			<hr role="presentation" class="w-full border-t" />
 			{#if true}
 				<div class="mt-3 text-sm/6 sm:text-xs/6">
-					<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 forced-colors:outline">You have 1</span> <span class="text-zinc-500">active borrowing !</span>
+					<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-hover:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-hover:bg-lime-400/15 forced-colors:outline">You have 1</span> <span class="text-zinc-500">active borrowing !</span>
 				</div>
 			{/if}
 			<div class="mt-6 flex gap-4 text-lg font-medium sm:text-sm/6">
@@ -304,7 +242,7 @@
 				<div class="mt-6 text-lg font-medium sm:text-sm/6">{item.title}</div>
 				<div class="mt-3 text-3xl/8 font-semibold sm:text-2xl/8">
 					<NumberFlow value={item.value()} />
-					<span class="text-foreground/80 text-sm">
+					<span class="text-sm text-foreground/80">
 						{item.unit}
 					</span>
 				</div>
