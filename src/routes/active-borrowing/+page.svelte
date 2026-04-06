@@ -1,7 +1,11 @@
 <script lang="ts">
 	import * as Drawer from '$lib/components/ui/drawer';
+	import type { BorrowStatus, StockMaster, User } from '$lib/CostumTypes.js';
+	import type { BorrowMovementExtended } from './+page.server.js';
+	import type { RecordModel } from 'pocketbase';
 	import { CalendarPlus, ChevronLeft, Eye, Pencil, LoaderCircle, SquareUser } from '@lucide/svelte';
 	import { goto, invalidateAll } from '$app/navigation';
+	import { ConfirmDialog } from '$lib/components/costum';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import { deserialize } from '$app/forms';
 	import { Button } from '$lib/components/ui/button';
@@ -9,11 +13,6 @@
 	import { fade } from 'svelte/transition';
 	import { time } from '$lib/helpers.js';
 	import { pb } from '$lib/pocketbaseClient';
-
-	import type { RecordModel } from 'pocketbase';
-	import type { BorrowStatus, StockMaster, User } from '$lib/CostumTypes.js';
-	import { ConfirmDialog } from '$lib/components/costum';
-	import type { BorrowMovementExtended } from './+page.server.js';
 
 	let { data } = $props();
 
@@ -151,7 +150,7 @@
 			<ScrollArea class="h-96 max-h-96">
 				<div class="flex w-full flex-col gap-2">
 					{#if isDrawerOpen}
-						<div transition:fade class="bg-secondary/50 absolute inset-0 flex w-full items-center justify-center gap-2 border-t p-2 pt-4 text-xs md:flex-row md:items-center md:gap-3 lg:w-full">
+						<div transition:fade class="absolute inset-0 flex w-full items-center justify-center gap-2 border-t bg-secondary/50 p-2 pt-4 text-xs md:flex-row md:items-center md:gap-3 lg:w-full">
 							<LoaderCircle class="h-4 w-4 animate-spin" />
 							<p>Loading...</p>
 						</div>
@@ -186,7 +185,7 @@
 <div class="mt-4 lg:mt-8">
 	<div class="flex items-center gap-4">
 		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Active <span class="text-foreground/50">Borrowing</span></h1>
-		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 forced-colors:outline"></span>
+		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-hover:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-hover:bg-lime-400/15 forced-colors:outline"></span>
 	</div>
 	<div class="isolate mt-2.5 flex flex-wrap justify-between gap-x-6 gap-y-4">
 		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
@@ -199,7 +198,7 @@
 
 <div class="mt-4 grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
 	{#if openBorrowing.length === 0}
-		<p class="inline-flex w-fit items-center rounded-md bg-lime-400/20 p-2 text-sm/5 font-bold text-lime-700 group-data-[hover]:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 forced-colors:outline">Currently no active borrowing</p>
+		<p class="inline-flex w-fit items-center rounded-md bg-lime-400/20 p-2 text-sm/5 font-bold text-lime-700 group-data-hover:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-hover:bg-lime-400/15 forced-colors:outline">Currently no active borrowing</p>
 	{/if}
 	{#key confirmDialog}
 		{#each openBorrowing as borrow, index}
@@ -209,9 +208,9 @@
 				<hr role="presentation" class="w-full border-t" />
 				<div class="mt-6 font-mono text-sm/3 font-light text-lime-500 sm:text-xs/3">{time(borrow.created, { format: 'ddd, DD MMM YYYY - h:mm A' })}</div>
 				<div class=" flex items-center text-lg font-medium sm:text-sm/6"><SquareUser class="mr-2 h-4 w-4" /> {borrow.user?.username} - {borrow.user?.name}</div>
-				<div class="text-foreground/80 mt-3 text-2xl/8 font-extrabold sm:text-xl/8" class:text-lime-500={borrow.status === 'OPEN'} class:text-yellow-500={borrow.status === 'PENDING'}>{borrow.status}</div>
+				<div class="mt-3 text-2xl/8 font-extrabold text-foreground/80 sm:text-xl/8" class:text-lime-500={borrow.status === 'OPEN'} class:text-yellow-500={borrow.status === 'PENDING'}>{borrow.status}</div>
 				<div class="mt-3 text-sm/6 sm:text-xs/6">
-					<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 forced-colors:outline">{borrow.esn || 'No ESN'}</span> <span class="text-zinc-500">{borrow.order_number || 'No Order Number'}</span>
+					<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-hover:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-hover:bg-lime-400/15 forced-colors:outline">{borrow.esn || 'No ESN'}</span> <span class="text-zinc-500">{borrow.order_number || 'No Order Number'}</span>
 				</div>
 				<div class="mt-3 flex flex-col gap-2">
 					<div class="flex gap-2">
