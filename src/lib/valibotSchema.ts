@@ -77,6 +77,7 @@ export const StockInSchema = pipe(
 		expired_date: pipe(string(), isoTimestamp('The date is badly formatted'), nonEmpty('Expired date is required')),
 		user_id: pipe(string(), nonEmpty('User is required')),
 		remark: optional(pipe(string(), trim())),
+		isTrackingPerUnit: nullable(boolean(), false),
 		isPackaged: pipe(nullable(boolean(), false)),
 		package_size: optional(pipe(nullable(number()))),
 		package_name: optional(pipe(string(), trim()))
@@ -101,6 +102,7 @@ export const StockMasterSchema = object({
 	quantity_borrowed: pipe(number()),
 	expired_date: pipe(string(), isoTimestamp('The date is badly formatted'), nonEmpty('Expired date is required')),
 	status: enum_(StockMasterStatus, 'Status is required'),
+	isTrackingPerUnit: nullable(boolean(), false),
 	isPackaged: pipe(nullable(boolean(), false)),
 	package_size: optional(pipe(nullable(number()))),
 	package_name: optional(pipe(string(), trim()))
