@@ -72,6 +72,7 @@
 		"dayjs": "^1.11.13",
 		"exceljs": "^4.4.0",
 		"jsbarcode": "^3.12.1",
+		"nanoid": "^5.1.9",
 		"papaparse": "^5.5.3",
 		"pocketbase": "^0.26.8",
 		"tailwind-merge": "^3.3.1",
