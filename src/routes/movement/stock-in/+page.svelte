@@ -7,6 +7,7 @@
 	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
 	import { type DateValue, CalendarDate } from '@internationalized/date';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { onMount, tick } from 'svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { Calendar } from '$lib/components/ui/calendar/index.js';
 	import { Input } from '$lib/components/ui/input';
@@ -15,7 +16,6 @@
 	import { useId } from 'bits-ui';
 	import { goto } from '$app/navigation';
 	import { time } from '$lib/helpers.js';
-	import { tick } from 'svelte';
 	import { cn } from '$lib/utils.js';
 
 	let { data } = $props();
@@ -42,6 +42,10 @@
 
 	$effect(() => {
 		$formData.user_id = user ? user.id : '';
+	});
+
+	onMount(() => {
+		$formData.isTrackingPerUnit = true;
 	});
 
 	function closeAndFocusTrigger(triggerId: string) {
@@ -174,7 +178,7 @@
 			<Control>
 				{#snippet children({ props })}
 					<Label>Quantity</Label>
-					<Input {...props} bind:value={$formData.quantity} type="number" placeholder="Quantity" />
+					<Input {...props} bind:value={$formData.quantity} type="number" placeholder="Quantity" min="0" />
 				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
@@ -233,6 +237,18 @@
 				{#snippet children({ props })}
 					<Label>User</Label>
 					<Input {...props} bind:value={$formData.user_id} type="text" placeholder="Material Description" />
+				{/snippet}
+			</Control>
+			<FieldErrors class="text-xs italic" />
+		</Field>
+		<Field {form} name="isTrackingPerUnit">
+			<Control>
+				{#snippet children({ props })}
+					<Label>Tracking per Unit ?</Label>
+					<div class="flex items-center gap-2">
+						<Switch {...props} bind:checked={$formData.isTrackingPerUnit} />
+						{$formData.isTrackingPerUnit ? 'Yes' : 'No'}
+					</div>
 				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />
