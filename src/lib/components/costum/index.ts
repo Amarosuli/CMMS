@@ -13,6 +13,8 @@ export { default as BorrowDataEdit } from './BorrowDataEdit.svelte';
 export { default as BorrowItemAdd } from './BorrowItemAdd.svelte';
 export { default as QRScanner } from './QRScanner.svelte';
 export { default as ViewBarcode } from './ViewBarcode.svelte';
+export { default as ViewAllStockQuantity } from './ViewAllStockQuantity.svelte';
+export { default as AddToLabelCart } from './AddToLabelCart.svelte';
 
 export { default as DataTableFilterDropdown } from './DataTableFilterDropdown.svelte';
 export { default as DataTableFilterOperator } from './DataTableFilterOperator.svelte';
