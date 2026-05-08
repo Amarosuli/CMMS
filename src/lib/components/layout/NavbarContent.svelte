@@ -2,10 +2,24 @@
 	import { toggleMode } from 'mode-watcher';
 	import { Button } from '$lib/components/ui/button';
 	// icons
-	import { ChevronRight, MoveRight, Moon, Sun, type Icon as IconType } from '@lucide/svelte';
+	import { ChevronRight, MoveRight, Moon, Sun, type Icon as IconType, type IconProps } from '@lucide/svelte';
+	import type { Component } from 'svelte';
+
+	type SideBarMenu = {
+		title: string;
+		icon: Component<IconProps, object, ''>;
+		url: string;
+		role?: string;
+		sub?: {
+			title: string;
+			url: string;
+			role: string;
+		}[];
+		notification?: () => number;
+	};
 
 	interface Props {
-		sidebarMenu: any;
+		sidebarMenu: SideBarMenu[];
 		currentHash: string;
 		currentPath: string;
 		currentRole: string;
@@ -32,12 +46,17 @@
 </div>
 <div class="flex flex-1 flex-col overflow-y-auto p-4 [&>[data-slot=section]+[data-slot=section]]:mt-8">
 	<div class="flex flex-col">
-		{#each sidebarMenu as menu}
+		{#each sidebarMenu as menu (menu.title)}
 			<span class="relative" class:hidden={currentRole === undefined ? menu.role !== undefined : currentRole === 'super' ? false : currentRole === 'admin' ? menu.role === 'super' : currentRole === 'general' ? menu.role === 'super' || menu.role === 'admin' : false}>
 				<span class="absolute inset-y-2 -left-4 w-0.5 rounded-full bg-primary {currentPath === menu.url ? '' : 'hidden'}"></span>
 				<Button variant="ghost" class="flex w-full justify-start font-semibold text-secondary-foreground" href={menu.url}>
 					{@render icon(menu.icon)}
 					<span class="truncate">{menu.title}</span>
+					{#if menu.notification}
+						<span class="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[0.6rem] text-primary-foreground">
+							{menu.notification()}
+						</span>
+					{/if}
 				</Button>
 			</span>
 			{#if menu.sub}
@@ -60,8 +79,8 @@
 			<MoveRight class="h w-4" />
 		</span>
 		<Button onclick={toggleMode} variant="outline" size="icon" class="text-primary">
-			<Sun class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-			<Moon class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+			<Sun class="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+			<Moon class="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
 			<span class="sr-only">Toggle theme</span>
 		</Button>
 	</span>
