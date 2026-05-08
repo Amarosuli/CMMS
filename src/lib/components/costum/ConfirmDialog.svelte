@@ -12,21 +12,23 @@
 			<Dialog.Description>Are you sure ?</Dialog.Description>
 		</Dialog.Header>
 
-		<div class="flex w-fit justify-between gap-4">
+		<div class="relative flex w-full justify-around gap-2">
 			<Button
+				size="lg"
 				type="submit"
-				class="flex w-full  justify-center p-2 text-center"
+				class="w-1/2 justify-center p-2 text-center"
 				onclick={() => {
 					onConfirm();
 					open = false;
 				}}>Yes</Button>
 			<Button
+				size="lg"
 				onclick={() => {
 					onCancel();
 					open = false;
 				}}
 				variant="outline"
-				class="flex w-full  justify-center p-2 text-center">Cancel</Button>
+				class="w-1/2 justify-center p-2 text-center">Cancel</Button>
 		</div>
 	</Dialog.Content>
 </Dialog.Root>
