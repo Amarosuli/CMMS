@@ -82,6 +82,16 @@ export interface BorrowMovement extends RecordModel {
 	};
 }
 
+export interface StockOverview extends RecordModel {
+	part_number: string;
+	description: string;
+	batches: string;
+	identities: string;
+	total_quantity: number;
+	material_unit_id: string;
+	stock_master_ids: string;
+}
+
 export interface TypedPocketBase extends PocketBase {
 	collection(idOrName: string): RecordService;
 	collection<K extends keyof CollectionTypeMap>(idOrName: K): RecordService<CollectionTypeMap[K]>;
@@ -97,6 +107,7 @@ export interface TypedPocketBase extends PocketBase {
 	collection(idOrName: 'stock_out'): RecordService<StockOut>;
 	collection(idOrName: 'borrow_item'): RecordService<BorrowItem>;
 	collection(idOrName: 'borrow_movement'): RecordService<BorrowMovement>;
+	collection(idOrName: 'stock_overview'): RecordService<StockOverview>;
 }
 
 export type FileUrlOption = {
@@ -112,10 +123,12 @@ export type CollectionTypeMap = {
 	package_name: PackageName;
 	material_master: MaterialMaster;
 	stock_master: StockMaster;
+	stock_item: StockItem;
 	stock_in: StockIn;
 	stock_out: StockOut;
 	borrow_item: BorrowItem;
 	borrow_movement: BorrowMovement;
+	stock_overview: StockOverview;
 };
 
 export type CollectionParam = keyof CollectionTypeMap;
