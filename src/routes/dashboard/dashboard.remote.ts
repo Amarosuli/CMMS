@@ -1,6 +1,8 @@
 import { getRequestEvent, query } from '$app/server';
+import type { BorrowMovement } from '$lib/CostumTypes';
 import { tryCatch } from '$lib/TryCatch';
 import { toast } from 'svelte-sonner';
+import { optional, string } from 'valibot';
 
 export const getOpenBorrowings = query(async () => {
 	const { locals } = getRequestEvent();
@@ -9,7 +11,7 @@ export const getOpenBorrowings = query(async () => {
 
 	if (error) {
 		toast.error('Failed to fetch open borrowings');
-		return [];
+		return [] as BorrowMovement[];
 	}
 
 	return data.map((r) => {
@@ -17,11 +19,20 @@ export const getOpenBorrowings = query(async () => {
 	});
 });
 
-export const getFrequentlyUsed = query(async () => {
-	const { locals } = getRequestEvent();
-
-	const { data, status } = await tryCatch(locals.pb.collection('stock_out').getFullList({ expand: 'stock_id' }));
-});
+export const getFrequentlyUsed = query(async () => {});
 export const getMaterialMaintain = query(async () => {});
 export const getFrequentlyBorrowed = query(async () => {});
 export const getStockUnderMinimum = query(async () => {});
+
+export const getTotalBorrowedToday = query(optional(string()), async (status) => {
+	const { locals } = getRequestEvent();
+	const filter = status == 'OPEN' ? 'status="OPEN" || status="PENDING"' : `status="CLOSED"`;
+
+	const { data, error } = await tryCatch(locals.pb.collection('borrow_movement').getFullList({ filter, expand: 'user_id' }));
+
+	if (error) {
+		return 0;
+	}
+
+	return data.length;
+});
