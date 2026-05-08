@@ -1,16 +1,15 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { ConfirmDialog } from '$lib/components/costum';
-	import { Button } from '$lib/components/ui/button';
-	import { time } from '$lib/helpers';
-	import { CalendarPlus, ChevronLeft, Eye, LoaderCircle, Pencil, SquareUser } from '@lucide/svelte';
+	import { CalendarPlus, LoaderCircle } from '@lucide/svelte';
+	import { getTotalBorrowedToday } from './dashboard.remote';
 	import { fade } from 'svelte/transition';
-	import { getOpenBorrowings } from './dashboard.remote';
-	import type { BorrowStatus, User } from '$lib/CostumTypes';
-	import { onMount } from 'svelte';
+	import { time } from '$lib/helpers';
 
 	let isLoading = $state(false);
-	let confirmDialog: boolean[] = $state([]);
+
+	let totalClosedBorrowings = $derived(await getTotalBorrowedToday());
+	let totalOpenBorrowings = $derived(await getTotalBorrowedToday('OPEN'));
+
+	$inspect(totalOpenBorrowings);
 </script>
 
 <svelte:head>
@@ -22,7 +21,7 @@
 		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Borrowing <span class="text-foreground/50">Dashboard</span></h1>
 		{#if isLoading}
 			<span transition:fade={{ duration: 200 }} class="ml-4 flex items-center justify-center gap-3">
-				<LoaderCircle class="text-primary animate-spin" />
+				<LoaderCircle class="animate-spin text-primary" />
 			</span>
 		{/if}
 	</div>
@@ -33,4 +32,16 @@
 				<span>{time(new Date())}</span></span>
 		</div>
 	</div>
+</div>
+<div class="mt-4 lg:mt-8">
+	<h2 class="text-base/7 font-semibold text-foreground sm:text-sm/6">Summary</h2>
+	<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
+	<dl class="grid grid-cols-1 text-base/6 sm:grid-cols-[min(50%,--spacing(80))_auto] sm:text-sm/6">
+		<dt class="col-start-1 border-t border-foreground/5 pt-3 text-foreground/50 first:border-none sm:py-3">Total Borrowings (Today)</dt>
+		<dd class="pt-1 pb-3 text-foreground sm:border-t sm:border-foreground/5 sm:py-3 sm:nth-2:border-none">{totalOpenBorrowings}</dd>
+		<dt class="col-start-1 border-t border-foreground/5 pt-3 text-foreground/50 first:border-none sm:py-3">Total Open Borrowings (Today)</dt>
+		<dd class="pt-1 pb-3 text-foreground sm:border-t sm:border-foreground/5 sm:py-3 sm:nth-2:border-none">{totalOpenBorrowings}</dd>
+		<dt class="col-start-1 border-t border-foreground/5 pt-3 text-foreground/50 first:border-none sm:py-3">Total Closed Borrowings (Today)</dt>
+		<dd class="pt-1 pb-3 text-foreground sm:border-t sm:border-foreground/5 sm:py-3 sm:nth-2:border-none">{totalClosedBorrowings}</dd>
+	</dl>
 </div>
