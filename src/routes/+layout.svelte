@@ -1,22 +1,26 @@
 <script lang="ts">
 	import '../app.css';
 
+	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
+	import { SendToBack, Archive, House, LoaderCircle, Settings, LayoutDashboard, FileText, Barcode, type IconProps } from '@lucide/svelte';
 	import { Navbar, NavbarSmall, LoginDialog } from '$lib/components/layout';
 	import { afterNavigate, beforeNavigate } from '$app/navigation';
+	import { labelCartLength } from '$lib/labelCart.svelte';
 	import { ModeWatcher } from 'mode-watcher';
 	import { Toaster } from '$lib/components/ui/sonner/index.js';
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
-	// icons
-	import { SendToBack, Archive, FolderInput, FolderOutput, House, LoaderCircle, Settings, LayoutDashboard, FileText } from '@lucide/svelte';
+	// type
+	import type { Component } from 'svelte';
+	import type { AuthRecord } from 'pocketbase';
 
 	interface Props {
-		data: any;
+		data: { user: AuthRecord };
 		children?: import('svelte').Snippet;
 	}
 
 	let { data, children }: Props = $props();
-	const { user } = data;
+	const { user } = $derived(data);
 
 	let openLoginDialog: boolean = $state(false);
 	let isLogOut: boolean = $state(false);
@@ -35,7 +39,20 @@
 		SUPER: 'super'
 	};
 
-	const sidebarMenu = [
+	type SideBarMenu = {
+		title: string;
+		icon: Component<IconProps, object, ''>;
+		url: string;
+		role?: string;
+		sub?: {
+			title: string;
+			url: string;
+			role: string;
+		}[];
+		notification?: number | string | object;
+	};
+
+	const sidebarMenu: SideBarMenu[] = [
 		{
 			title: 'Home',
 			icon: House,
@@ -47,18 +64,6 @@
 			url: '/dashboard',
 			role: Role.GENERAL
 		},
-		// {
-		// 	title: 'Borrow',
-		// 	icon: FolderOutput,
-		// 	url: '/borrow_onsite',
-		// 	role: Role.GENERAL
-		// },
-		// {
-		// 	title: 'Return',
-		// 	icon: FolderInput,
-		// 	url: '/return',
-		// 	role: Role.GENERAL
-		// },
 		{
 			title: 'Stock',
 			icon: Archive,
@@ -100,6 +105,13 @@
 			icon: FileText,
 			url: '/report',
 			role: Role.SUPER
+		},
+		{
+			title: 'Label',
+			icon: Barcode,
+			url: '/label',
+			role: Role.SUPER,
+			notification: labelCartLength
 		}
 	];
 
@@ -118,18 +130,20 @@
 
 <Toaster position="top-right" />
 <ModeWatcher />
-<div class="bg-secondary-foreground/5 relative isolate flex min-h-svh w-full max-lg:flex-col">
+<div class="relative isolate flex min-h-svh w-full bg-secondary-foreground/5 max-lg:flex-col">
 	<Navbar bind:currentHash bind:currentPath {sidebarMenu} {user} {currentRole} bind:openLoginDialog {logOut} />
 	<NavbarSmall bind:currentHash bind:currentPath {sidebarMenu} {user} {currentRole} bind:openLoginDialog {logOut} />
 	<main class="flex flex-1 flex-col pb-2 lg:min-w-0 lg:pt-2 lg:pr-2 lg:pl-64">
 		<LoginDialog bind:open={openLoginDialog} />
-		<div class="bg-background text-foreground lg:ring-secondary-foreground/10 relative grow overflow-hidden p-6 lg:rounded-lg lg:p-10 lg:shadow-sm lg:ring-1">
+		<div class="relative grow overflow-hidden bg-background p-6 text-foreground lg:rounded-lg lg:p-10 lg:shadow-sm lg:ring-1 lg:ring-secondary-foreground/10">
 			<div class="mx-auto max-w-6xl">
-				{@render children?.()}
+				<Tooltip.Provider delayDuration={0}>
+					{@render children?.()}
+				</Tooltip.Provider>
 			</div>
 			{#if isLogOut || loadingPage}
-				<div transition:fade={{ duration: 200 }} class="bg-foreground/10 absolute inset-0 z-40 flex h-full w-full items-center justify-center backdrop-blur-sm">
-					<LoaderCircle class="text-primary h-5 w-5 animate-spin" />
+				<div transition:fade={{ duration: 200 }} class="absolute inset-0 z-40 flex h-full w-full items-center justify-center bg-foreground/10 backdrop-blur-sm">
+					<LoaderCircle class="h-5 w-5 animate-spin text-primary" />
 					<p class="ml-2 text-sm font-semibold tracking-wider">Loading...</p>
 				</div>
 			{/if}
