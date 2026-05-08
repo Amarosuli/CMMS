@@ -38,7 +38,7 @@
 		}
 
 		async function getWastedStock() {
-			totalWastedStock = (await pb.collection('stock_out').getFullList({ filter: 'refference_id = ""' })).length;
+			totalWastedStock = (await pb.collection('stock_out').getFullList({ filter: 'borrow_item_id = ""' })).length;
 		}
 
 		async function getStockUnderMinimum() {
