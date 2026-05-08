@@ -4,7 +4,7 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"dev": "vite dev --host",
+		"dev": "start \"PocketBase\" \"C:/Users/582091/Documents/Projects/backend/yoyo/cmms/pocketbase.exe\" serve --dev && vite dev --host",
 		"build": "vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -66,6 +66,7 @@
 		"@pdfme/common": "^5.5.10",
 		"@pdfme/generator": "^5.5.10",
 		"@pdfme/schemas": "^5.5.10",
+		"@pdfme/ui": "^5.5.10",
 		"@tanstack/table-core": "^8.20.5",
 		"clsx": "^2.1.1",
 		"cmms": "file:",
