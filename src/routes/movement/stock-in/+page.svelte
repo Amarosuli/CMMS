@@ -72,17 +72,10 @@
 		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Create <span class="text-foreground/50">Stock In</span></h1>
 		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-hover:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-hover:bg-lime-400/15 forced-colors:outline"> SIN </span>
 	</div>
-	<div class="isolate mt-2.5 flex flex-wrap justify-between gap-x-6 gap-y-4">
-		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
-			<span class="flex items-center gap-3 text-base/6 sm:text-sm/6">
-				<CalendarPlus class="h-4 w-4" />
-				<span>{time(new Date())}</span></span>
-		</div>
-	</div>
 </div>
 
 <div class="mt-12">
-	<h2 class="text-base/7 font-semibold text-foreground sm:text-sm/6">Stock In Form Field</h2>
+	<h2 class="text-base/7 font-semibold text-foreground sm:text-sm/6">This process will record new stock into system. Material define as individual by default.</h2>
 	<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
 	<form class="mt-3 flex w-full max-w-80 flex-col text-base/6 sm:text-sm/6" action="?/save" method="post" use:enhance>
 		<Field {form} name="material_master_id" class="flex flex-col">
