@@ -3,19 +3,18 @@
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import * as Command from '$lib/components/ui/command/index.js';
 
-	import { LoaderCircle, ChevronLeft, CalendarPlus, CalendarIcon, ChevronsUpDown, Check, Plus } from '@lucide/svelte';
+	import { LoaderCircle, ChevronLeft, CalendarIcon, ChevronsUpDown, Check, Plus } from '@lucide/svelte';
 	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
 	import { type DateValue, CalendarDate } from '@internationalized/date';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { onMount, tick } from 'svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { Calendar } from '$lib/components/ui/calendar/index.js';
-	import { Input } from '$lib/components/ui/input';
 	import { Switch } from '$lib/components/ui/switch/index.js';
+	import { Input } from '$lib/components/ui/input';
 	import { toast } from 'svelte-sonner';
 	import { useId } from 'bits-ui';
 	import { goto } from '$app/navigation';
-	import { time } from '$lib/helpers.js';
 	import { cn } from '$lib/utils.js';
 
 	let { data } = $props();
