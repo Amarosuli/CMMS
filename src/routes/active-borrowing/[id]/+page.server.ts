@@ -1,14 +1,14 @@
 import type { BorrowItem, BorrowMovement } from '$lib/CostumTypes.js';
-import { materialMasterSchema } from '$lib/zodSchema';
+import { MaterialMasterSchema } from '$lib/valibotSchema';
 import { superValidate } from 'sveltekit-superforms';
 import { redirect } from '@sveltejs/kit';
-import { zod } from 'sveltekit-superforms/adapters';
+import { valibot } from 'sveltekit-superforms/adapters';
 
-export const load = async ({ locals, url, params }) => {
+export const load = async ({ locals, params }) => {
 	if (!locals.user) throw redirect(302, '/'); // Prevent guest users from accessing this page directly.
 
 	const getBorrowingById = async () => {
-		let id = params.id;
+		const id = params.id;
 		if (!id) return {} as BorrowMovement;
 		const result = await locals.pb.collection('borrow_movement').getOne(id, {
 			expand: 'user_id'
@@ -18,14 +18,14 @@ export const load = async ({ locals, url, params }) => {
 	};
 
 	const getBorrowItemById = async () => {
-		let id = params.id;
+		const id = params.id;
 		if (!id) return [] as BorrowItem[];
 		const result = await locals.pb.collection('borrow_item').getFullList({
-			filter: 'borrow_id="' + id + '"',
-			expand: 'stock_id.material_id.unit_id'
+			filter: 'borrow_movement_id="' + id + '"',
+			expand: 'stock_item_id.stock_master_id.material_master_id.material_unit_id'
 		});
 		return result.map((res) => {
-			return { ...res, stock: res.expand?.stock_id || {}, material: res.expand?.stock_id.expand?.material_id || {} };
+			return { ...res, stock: res.expand?.stock_item_id || {}, material: res.expand?.stock_item_id.expand.stock_master_id.expand.material_master_id || {} };
 		});
 	};
 
@@ -33,6 +33,6 @@ export const load = async ({ locals, url, params }) => {
 		id: params.id,
 		borrowItems: await getBorrowItemById(),
 		borrowData: await getBorrowingById(),
-		form: await superValidate(zod(materialMasterSchema))
+		form: await superValidate(valibot(MaterialMasterSchema))
 	};
 };

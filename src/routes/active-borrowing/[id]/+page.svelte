@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { BorrowDataView, BorrowItemView, BorrowDataDelete, BorrowDataEdit, BorrowItemAdd } from '$lib/components/costum';
-	import { ChevronLeft, CalendarPlus, Plus, Pencil, Trash, LoaderCircle } from '@lucide/svelte';
+	import { ChevronLeft, CalendarPlus, Plus, Pencil, Trash, LoaderCircle, Info } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { time } from '$lib/helpers.js';
+	import { clock } from '$lib/clock.svelte.js';
 	import { page } from '$app/state';
 
 	let { data } = $props();
@@ -38,13 +38,13 @@
 <div class="mt-4 lg:mt-8">
 	<div class="flex items-center gap-4">
 		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Detail <span class="text-foreground/50">Borrowing</span></h1>
-		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 sm:text-xs/5 forced-colors:outline">{data.borrowData.id}</span>
+		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-hover:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 forced-colors:outline">{data.borrowData.id}</span>
 	</div>
 	<div class="isolate mt-2.5 flex flex-wrap justify-between gap-x-6 gap-y-4">
 		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
 			<span class="flex items-center gap-3 text-base/6 sm:text-sm/6">
-				<CalendarPlus class="h-4 w-4" />
-				<span>{time(data.borrowData.created)}</span></span>
+				<Info class="size-4" />
+				<span>Manage the borrowing data</span></span>
 		</div>
 	</div>
 </div>
@@ -55,7 +55,7 @@
 
 <div class="relative mt-12">
 	<h2 class="flex-1 text-base/7 font-semibold text-foreground sm:text-sm/6">Borrowing Data</h2>
-	<div class="absolute right-0 top-0 flex gap-2">
+	<div class="absolute top-0 right-0 flex gap-2">
 		<Button size="icon" onclick={() => (isEditDataOpen = !isEditDataOpen)} variant="outline">
 			<Pencil class="h-4 w-4 text-lime-500" />
 		</Button>
