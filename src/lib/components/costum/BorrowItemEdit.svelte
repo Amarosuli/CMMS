@@ -96,7 +96,7 @@
 		console.log(data);
 
 		const { stock_id, quantity_out } = data;
-		const stock = await pb.collection('stock_master').getOne(stock_id);
+		const stock = await pb.collection('stock_item').getOne(stock_id);
 		let finalQty: number = 0;
 
 		if (stock_id === item.stock_id) {
@@ -165,7 +165,7 @@
 		<div class="mt-2 flex w-full flex-col gap-4">
 			<form class="flex w-full flex-col" method="post" onsubmit={(e) => e.preventDefault()}>
 				<div class="flex flex-col gap-2">
-					<p class="mb-[0.15rem] mt-[0.2rem] flex w-fit items-center gap-2 rounded bg-lime-100/30 px-2 py-[0.15rem] text-xs">
+					<p class="mt-[0.2rem] mb-[0.15rem] flex w-fit items-center gap-2 rounded bg-lime-100/30 px-2 py-[0.15rem] text-xs">
 						Stock
 						{#if selectedStock}
 							- Available Qty : {selectedStock} {stockUnit}
