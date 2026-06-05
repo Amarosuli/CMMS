@@ -117,7 +117,7 @@ export const StockOutSchema = object({
 });
 
 export const StockItemSchema = object({
-	identity: pipe(string(), nonEmpty('Identity is required')),
+	label: pipe(string(), nonEmpty('Label is required')),
 	stock_master_id: pipe(string(), nonEmpty('Stock Master is required'), trim()),
 	status: enum_(StockItemStatus, 'Status is required'),
 	quantity: pipe(number(), minValue(1, 'Quantity is required, at least 1')),
