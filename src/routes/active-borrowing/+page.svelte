@@ -1,15 +1,16 @@
 <script lang="ts">
 	import * as Drawer from '$lib/components/ui/drawer';
-	import type { BorrowStatus, StockMaster, User } from '$lib/CostumTypes.js';
+	import type { BorrowMovementStatus, StockMaster, User } from '$lib/CostumTypes.js';
 	import type { BorrowMovementExtended } from './+page.server.js';
 	import type { RecordModel } from 'pocketbase';
 	import { CalendarPlus, ChevronLeft, Eye, Pencil, LoaderCircle, SquareUser } from '@lucide/svelte';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { ConfirmDialog } from '$lib/components/costum';
-	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import { deserialize } from '$app/forms';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import { Button } from '$lib/components/ui/button';
 	import { toast } from 'svelte-sonner';
+	import { clock } from '$lib/clock.svelte.js';
 	import { fade } from 'svelte/transition';
 	import { time } from '$lib/helpers.js';
 	import { pb } from '$lib/pocketbaseClient';
@@ -191,7 +192,7 @@
 		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
 			<span class="flex items-center gap-3 text-base/6 sm:text-sm/6">
 				<CalendarPlus class="h-4 w-4" />
-				<span>{time(new Date())}</span></span>
+				<span>{clock.realtime}</span></span>
 		</div>
 	</div>
 </div>
