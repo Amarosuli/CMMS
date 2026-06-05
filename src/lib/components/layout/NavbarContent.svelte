@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { toggleMode } from 'mode-watcher';
 	import { Button } from '$lib/components/ui/button';
+	import { clock } from '$lib/clock.svelte';
 	// icons
 	import { ChevronRight, MoveRight, Moon, Sun, type Icon as IconType, type IconProps } from '@lucide/svelte';
 	import type { Component } from 'svelte';
@@ -72,12 +73,10 @@
 		{/each}
 	</div>
 </div>
+<p class="p-2 text-center text-sm">{clock.realtime}</p>
 <div class="flex flex-col justify-end overflow-y-auto border-t p-4 [&>[data-slot=section]+[data-slot=section]]:mt-8">
 	<span class="relative flex items-center justify-between">
-		<span class="inline-flex items-center gap-4 text-xs"
-			>Switch Theme
-			<MoveRight class="h w-4" />
-		</span>
+		<span class="inline-flex items-center gap-4 text-xs">Switch Theme <MoveRight class="h w-4" /> </span>
 		<Button onclick={toggleMode} variant="outline" size="icon" class="text-primary">
 			<Sun class="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
 			<Moon class="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
