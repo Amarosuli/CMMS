@@ -35,7 +35,7 @@ export interface BorrowItem extends RecordModel {
 	date_return: string;
 }
 
-export enum BorrowStatus {
+export enum BorrowMovementStatus {
 	OPEN = 'OPEN',
 	PENDING = 'PENDING',
 	CLOSED = 'CLOSED'
@@ -76,7 +76,7 @@ export interface BorrowMovement extends RecordModel {
 	user_id: User['id'];
 	order_number: string;
 	esn: string;
-	status: BorrowStatus;
+	status: BorrowMovementStatus;
 	expand?: {
 		user_id: User;
 	};
