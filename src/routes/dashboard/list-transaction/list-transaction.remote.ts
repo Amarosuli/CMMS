@@ -1,38 +1,41 @@
+import { BorrowMovementStatus, type BorrowItem } from '$lib/CostumTypes';
 import { getRequestEvent, query } from '$app/server';
-import { BorrowStatus, type BorrowItem } from '$lib/CostumTypes';
+import { optional, enum_ } from 'valibot';
 import { tryCatch } from '$lib/TryCatch';
-import { array, nativeEnum, number, object, string } from 'zod';
+import { string } from 'zod';
 
-export const getActiveBorrowing = query(async () => {
+export const getActiveBorrowing = query(optional(enum_(BorrowMovementStatus)), async (borrowMovementStatus) => {
 	const { locals } = getRequestEvent();
-	const { status, data, error } = await tryCatch(locals.pb.collection('borrow_movement').getFullList({ filter: 'status = "OPEN"', expand: 'user_id' }));
+	let filter = '';
+	if (borrowMovementStatus) {
+		filter = `'status = "${borrowMovementStatus}"'`;
+	} else {
+		filter = 'status = "OPEN"';
+	}
+	const { data, error } = await tryCatch(locals.pb.collection('borrow_movement').getFullList({ filter: filter, expand: 'user_id' }));
 
-	return { status, data };
+	if (error) {
+		return null;
+	}
+
+	if (data) {
+		return data;
+	} else {
+		return null;
+	}
 });
 
-export const getItemFromActiveBorrowing = query(string(), async (borrowId) => {
+export const getItemFromActiveBorrowing = query(string(), async (borrowMovementId) => {
 	const { locals } = getRequestEvent();
-	const { status, data } = await tryCatch(locals.pb.collection('borrow_item').getFullList({ filter: 'borrow_id = "' + borrowId + '"' }));
-	// locals.pb.collection('borrow_item').getList(1, 20, {filter: 'borrow_id.status = "OPEN"'})
-	return { status, data };
+	const { data, error } = await tryCatch(locals.pb.collection('borrow_item').getFullList({ filter: 'borrow_movement_id = "' + borrowMovementId + '"', expand: 'stock_item_id.stock_master_id.material_master_id.material_unit_id' }));
+
+	if (error) {
+		return [] as BorrowItem[];
+	}
+
+	if (data) {
+		return data;
+	} else {
+		return [] as BorrowItem[];
+	}
 });
-
-// export const getListActiveBorrowing = query(async() => {
-//    const {locals} = getRequestEvent()
-//    const {status, data} = await getActiveBorrowing();
-
-//    if (status === 'failed') return {status}
-
-//    let bucket = []
-//    if (data && data.items) {
-//       for (let index = 0; index < data.items.length; index++) {
-//          let item = data.items[index]
-//          const {status: itemStatus, data: itemData} = await getItemFromActiveBorrowing(item.id )
-
-//          if (status === 'success') {
-//             bucket.push()
-//          }
-//       }
-//    }
-
-// })
