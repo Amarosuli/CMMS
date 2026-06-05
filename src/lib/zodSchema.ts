@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { BorrowStatus, UserUnit, UserRole } from './CostumTypes';
+import { BorrowMovementStatus, UserUnit, UserRole } from './CostumTypes';
 
 export const loginSchema = z.object({
 	employeeId: z.string().trim().min(6, 'Employee Id is required, Minimal 6 Characters'),
@@ -72,7 +72,7 @@ export const borrowingSchema = z.object({
 	user_id: z.string().trim().min(1, 'User is required'),
 	order_number: z.string().trim().optional(),
 	esn: z.string().trim().optional(),
-	status: z.nativeEnum(BorrowStatus)
+	status: z.nativeEnum(BorrowMovementStatus)
 });
 
 export const borrowItemSchema = z.object({
