@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { CalendarPlus, ChevronLeft, LoaderCircle } from '@lucide/svelte';
+	import { ChevronLeft, LoaderCircle } from '@lucide/svelte';
 	import { getRecentStockIn, getRecentStockOut } from './movement.remote.js';
-	import { getLocalTimeZone, today } from '@internationalized/date';
+	// import { getLocalTimeZone, today } from '@internationalized/date';
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { toast } from 'svelte-sonner';
@@ -19,12 +19,12 @@
 		created: string;
 	};
 
-	let now = today(getLocalTimeZone());
+	// let now = today(getLocalTimeZone());
 
-	const lastDayTime = '23:59:59.999Z';
-	const firstDayTime = '00:00:00.000Z';
+	// const lastDayTime = '23:59:59.999Z';
+	// const firstDayTime = '00:00:00.000Z';
 
-	let filter = `created >= "${now.subtract({ days: 1 })} ${firstDayTime}" && created <= "${now} ${lastDayTime}"`;
+	// let filter = `created >= "${now.subtract({ days: 1 })} ${firstDayTime}" && created <= "${now} ${lastDayTime}"`;
 	let isLoading = $state(false);
 	let movementData = $state<MovementData[]>();
 
@@ -59,9 +59,7 @@
 	</div>
 	<div class="isolate mt-2.5 flex flex-wrap justify-between gap-x-6 gap-y-4">
 		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
-			<span class="flex items-center gap-3 text-base/6 sm:text-sm/6">
-				<CalendarPlus class="h-4 w-4" />
-				<span>{time(new Date())}</span></span>
+			<span class="flex items-center gap-3 text-base/6 sm:text-sm/6"> Only show 10 latest stock {movementType.toLowerCase()} movements </span>
 		</div>
 	</div>
 </div>
@@ -118,6 +116,7 @@
 						<p class="flex justify-between border-b pt-1">Purchase Order <span class="font-semibold text-primary transition-colors ease-out dark:text-foreground">{stock.purchaseOrder}</span></p>
 						<p class="flex justify-between border-b pt-1">Quantity <span class="font-semibold text-primary transition-colors ease-out dark:text-foreground">{stock.quantity}</span></p>
 						<p class="flex justify-between border-b pt-1">Remark <span class="max-w-50 font-semibold text-primary capitalize transition-colors ease-out dark:text-foreground">{stock.remark?.toLowerCase() || ''}</span></p>
+						<Button class="mt-3" variant="outline">Cancel Movement</Button>
 					</div>
 				</li>
 			{/each}
@@ -126,7 +125,7 @@
 		{#if isLoading}
 			<p class="text-center text-sm/6 text-foreground/50 italic">Loading History ...</p>
 		{:else if movementData?.length === 0}
-			<p class="text-center text-sm/6 text-foreground/50 italic">No stock movement today</p>
+			<p class="text-center text-sm/6 text-foreground/50 italic">No stock {movementType.toLowerCase()} movements found</p>
 		{/if}
 	</ul>
 </div>
