@@ -8,10 +8,11 @@
 	import { labelCartLength } from '$lib/labelCart.svelte';
 	import { ModeWatcher } from 'mode-watcher';
 	import { Toaster } from '$lib/components/ui/sonner/index.js';
+	import { onMount, type Component } from 'svelte';
+	import { clock } from '$lib/clock.svelte';
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
 	// type
-	import type { Component } from 'svelte';
 	import type { AuthRecord } from 'pocketbase';
 
 	interface Props {
@@ -125,6 +126,10 @@
 	$effect(() => {
 		currentHash = page.url.hash;
 		currentPath = page.url.pathname;
+	});
+
+	onMount(() => {
+		clock.start();
 	});
 </script>
 

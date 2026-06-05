@@ -1,15 +1,13 @@
 <script lang="ts">
 	import { CalendarPlus, LoaderCircle } from '@lucide/svelte';
 	import { getTotalBorrowedToday } from './dashboard.remote';
+	import { clock } from '$lib/clock.svelte';
 	import { fade } from 'svelte/transition';
-	import { time } from '$lib/helpers';
 
 	let isLoading = $state(false);
 
-	let totalClosedBorrowings = $derived(await getTotalBorrowedToday());
-	let totalOpenBorrowings = $derived(await getTotalBorrowedToday('OPEN'));
-
-	$inspect(totalOpenBorrowings);
+	const totalClosedBorrowings = $derived(await getTotalBorrowedToday());
+	const totalOpenBorrowings = $derived(await getTotalBorrowedToday('OPEN'));
 </script>
 
 <svelte:head>
@@ -29,7 +27,8 @@
 		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
 			<span class="flex items-center gap-3 text-base/6 sm:text-sm/6">
 				<CalendarPlus class="h-4 w-4" />
-				<span>{time(new Date())}</span></span>
+				<span>{clock.realtime}</span>
+			</span>
 		</div>
 	</div>
 </div>

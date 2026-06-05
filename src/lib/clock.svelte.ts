@@ -1,19 +1,20 @@
 import { time } from './helpers';
 
-export const clock = () => {
-	let realtime = $state(time(new Date()));
+let realtime = $state(new Date());
+let interval: ReturnType<typeof setInterval> | undefined;
 
-	function start() {
-		const interval = setInterval(() => {
-			realtime = time(new Date());
-		}, 1000);
-		return () => clearInterval(interval);
-	}
-
-	return {
-		start,
-		get realtime() {
-			return realtime;
+export const clock = {
+	start() {
+		if (!interval) {
+			interval = setInterval(() => {
+				realtime = new Date();
+			}, 1000);
 		}
-	};
+		// Return the object itself to allow chaining
+		return this;
+	},
+
+	get realtime() {
+		return time(realtime, { format: 'dddd, DD MMMM YYYY - h:mm:ss A' });
+	}
 };
