@@ -1,8 +1,8 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import { addToLabelCart, removeFromLabelCart } from '$lib/labelCart.svelte';
 	import { getStockItemByStockMasterId } from '../../../routes/stock/stock.remote';
 	import { Minus, Plus, ShoppingBasket } from '@lucide/svelte';
-	import { addToLabelCart, removeFromLabelCart } from '$lib/labelCart.svelte';
 	import { onMount } from 'svelte';
 	import { Button } from '../ui/button';
 
@@ -40,10 +40,10 @@
 				<div class="flex w-full flex-col gap-4">
 					{#each stockItems as stockItem (stockItem.id)}
 						<div class="flex w-full justify-around">
-							<span>{stockItem.identity}</span>
+							<span>{stockItem.label}</span>
 							<div class="flex gap-2">
 								<Button size="sm" variant="outline" onclick={() => addToLabelCart([stockItem])}><Plus class="size-4" /></Button>
-								<Button size="sm" variant="outline" onclick={() => removeFromLabelCart(stockItem.identity)}><Minus class="size-4" /></Button>
+								<Button size="sm" variant="outline" onclick={() => removeFromLabelCart(stockItem.label)}><Minus class="size-4" /></Button>
 							</div>
 						</div>
 					{/each}

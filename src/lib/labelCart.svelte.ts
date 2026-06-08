@@ -4,8 +4,15 @@ import type { StockItem } from './CostumTypes';
 export const labelCarts = $state({ data: [] as StockItem[] });
 
 export const addToLabelCart = (items: StockItem[]) => {
-	labelCarts.data = [...labelCarts.data, ...items];
-	toast(`${items.length} Label added to cart`);
+	const newItems = items.filter((newItem) => !labelCarts.data.some((cartItem) => cartItem.label === newItem.label));
+
+	if (newItems.length === 0) {
+		toast(`All label are already in the cart.`);
+		return;
+	}
+
+	labelCarts.data = [...labelCarts.data, ...newItems];
+	toast(`${newItems.length} Label added to cart`);
 };
 
 export const clearLabelCart = () => {
@@ -13,8 +20,8 @@ export const clearLabelCart = () => {
 	toast('Label cart cleared');
 };
 
-export const removeFromLabelCart = (identity: StockItem['identity']) => {
-	const index = labelCarts.data.findIndex((i) => i.identity === identity);
+export const removeFromLabelCart = (label: StockItem['label']) => {
+	const index = labelCarts.data.findIndex((i) => i.label === label);
 
 	if (index !== -1) {
 		labelCarts.data.splice(index, 1);
