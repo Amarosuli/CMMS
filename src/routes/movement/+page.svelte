@@ -1,23 +1,13 @@
 <script lang="ts">
+	import { CancelStockIn, CancelStockOut, getRecentStockIn, getRecentStockOut, type MovementData } from './movement.remote.js';
 	import { ChevronLeft, LoaderCircle } from '@lucide/svelte';
-	import { getRecentStockIn, getRecentStockOut } from './movement.remote.js';
 	// import { getLocalTimeZone, today } from '@internationalized/date';
+	import { ConfirmDialog } from '$lib/components/costum';
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { toast } from 'svelte-sonner';
 	import { fade } from 'svelte/transition';
 	import { time } from '$lib/helpers.js';
-
-	type MovementData = {
-		id: string;
-		partNumber: string;
-		description: string;
-		batchNumber: string;
-		purchaseOrder?: string;
-		quantity: number;
-		remark?: string;
-		created: string;
-	};
 
 	// let now = today(getLocalTimeZone());
 
@@ -25,12 +15,45 @@
 	// const firstDayTime = '00:00:00.000Z';
 
 	// let filter = `created >= "${now.subtract({ days: 1 })} ${firstDayTime}" && created <= "${now} ${lastDayTime}"`;
-	let isLoading = $state(false);
-	let movementData = $state<MovementData[]>();
 
-	onMount(async () => {
+	let open = $state(false);
+	let targetId = $state('');
+	let isLoading = $state(false);
+	let movementData = $state<MovementData[]>([]);
+
+	function runGetRecentStockOut() {
+		getRecentStockOut().refresh();
 		isLoading = true;
-		movementData = await getRecentStockOut();
+		movementType = 'OUT';
+		getRecentStockOut()
+			.then((res) => {
+				movementData = res;
+			})
+			.catch((er) => {
+				toast.error(er);
+			})
+			.finally(() => {
+				isLoading = false;
+			});
+	}
+	function runGetRecentStockIn() {
+		isLoading = true;
+		movementType = 'IN';
+		getRecentStockIn()
+			.then((res) => {
+				movementData = res;
+			})
+			.catch((er) => {
+				toast.error(er);
+			})
+			.finally(() => {
+				isLoading = false;
+			});
+	}
+
+	onMount(() => {
+		isLoading = true;
+		runGetRecentStockOut();
 		isLoading = false;
 	});
 
@@ -40,6 +63,21 @@
 <svelte:head>
 	<title>CMMS - Movement</title>
 </svelte:head>
+
+<ConfirmDialog
+	title={movementType === 'IN' ? 'Confirm Cancel Stock In' : 'Confirm Cancel Stock Out'}
+	bind:open
+	onConfirm={async () => {
+		if (movementType === 'IN') {
+			const res = await CancelStockIn(targetId);
+			if (res.status === 'success') runGetRecentStockIn();
+			toast.info(res.message);
+		} else {
+			const res = await CancelStockOut(targetId);
+			if (res.status === 'success') runGetRecentStockOut();
+			toast.info(res.message);
+		}
+	}} />
 
 <div>
 	<Button href="/" variant="outline" class="inline-flex items-center gap-2 text-sm/6">
@@ -65,58 +103,32 @@
 </div>
 
 <div class="mt-4 flex gap-4">
-	<Button
-		variant="outline"
-		class={movementType === 'OUT' ? 'bg-primary hover:bg-primary dark:bg-primary/50 dark:hover:bg-primary/70' : ''}
-		onclick={() => {
-			isLoading = true;
-			movementType = 'OUT';
-			getRecentStockOut()
-				.then((res) => {
-					movementData = res;
-				})
-				.catch((er) => {
-					toast.error(er);
-				})
-				.finally(() => {
-					isLoading = false;
-				});
-		}}>Stock Out</Button>
-	<Button
-		variant="outline"
-		class={movementType === 'IN' ? 'bg-primary hover:bg-primary dark:bg-primary/50 dark:hover:bg-primary/70' : ''}
-		onclick={() => {
-			isLoading = true;
-			movementType = 'IN';
-			getRecentStockIn()
-				.then((res) => {
-					movementData = res;
-				})
-				.catch((er) => {
-					toast.error(er);
-				})
-				.finally(() => {
-					isLoading = false;
-				});
-		}}>Stock In</Button>
+	<Button variant="outline" class={movementType === 'OUT' ? 'bg-primary hover:bg-primary dark:bg-primary/50 dark:hover:bg-primary/70' : ''} onclick={runGetRecentStockOut}>Stock Out</Button>
+	<Button variant="outline" class={movementType === 'IN' ? 'bg-primary hover:bg-primary dark:bg-primary/50 dark:hover:bg-primary/70' : ''} onclick={runGetRecentStockIn}>Stock In</Button>
 </div>
 
 <div class="mt-12">
 	<ul role="list" class="">
 		<ol class="relative border-s border-primary/50">
-			{#each movementData as stock (stock.id)}
+			{#each movementData as stockMovement (stockMovement.id)}
 				<li class="ms-4 mb-7" in:fade>
 					<div class="absolute -inset-s-1.5 mt-1.5 h-3 w-3 rounded-full border border-primary bg-primary"></div>
-					<time class="mb-1 text-sm leading-none font-normal">{time(stock.created)}</time>
+					<time class="mb-1 text-sm leading-none font-normal">{time(stockMovement.created)}</time>
 					<h3 class="text-md font-bold capitalize">Stock {movementType.toLowerCase()}</h3>
 					<div class="flex w-75 flex-col text-xs font-normal text-gray-700 dark:text-gray-400">
-						<p class="flex justify-between border-b pt-1">Part Number <span class="font-semibold text-primary transition-colors ease-out dark:text-foreground">{stock.partNumber}</span></p>
-						<p class="flex justify-between border-b pt-1">Description <span class="font-semibold break-normal text-primary transition-colors ease-out dark:text-foreground">{stock.description}</span></p>
-						<p class="flex justify-between border-b pt-1">Batch Number <span class="font-semibold text-primary transition-colors ease-out dark:text-foreground">{stock.batchNumber}</span></p>
-						<p class="flex justify-between border-b pt-1">Purchase Order <span class="font-semibold text-primary transition-colors ease-out dark:text-foreground">{stock.purchaseOrder}</span></p>
-						<p class="flex justify-between border-b pt-1">Quantity <span class="font-semibold text-primary transition-colors ease-out dark:text-foreground">{stock.quantity}</span></p>
-						<p class="flex justify-between border-b pt-1">Remark <span class="max-w-50 font-semibold text-primary capitalize transition-colors ease-out dark:text-foreground">{stock.remark?.toLowerCase() || ''}</span></p>
-						<Button class="mt-3" variant="outline">Cancel Movement</Button>
+						<p class="flex justify-between border-b pt-1">Part Number <span class="font-semibold text-primary transition-colors ease-out dark:text-foreground">{stockMovement.partNumber}</span></p>
+						<p class="flex justify-between border-b pt-1">Description <span class="font-semibold break-normal text-primary transition-colors ease-out dark:text-foreground">{stockMovement.description}</span></p>
+						<p class="flex justify-between border-b pt-1">Batch Number <span class="font-semibold text-primary transition-colors ease-out dark:text-foreground">{stockMovement.batchNumber}</span></p>
+						<p class="flex justify-between border-b pt-1">Purchase Order <span class="font-semibold text-primary transition-colors ease-out dark:text-foreground">{stockMovement.purchaseOrder}</span></p>
+						<p class="flex justify-between border-b pt-1">Quantity <span class="font-semibold text-primary transition-colors ease-out dark:text-foreground">{stockMovement.quantity}</span></p>
+						<p class="flex justify-between border-b pt-1">Remark <span class="max-w-50 font-semibold text-primary capitalize transition-colors ease-out dark:text-foreground">{stockMovement.remark?.toLowerCase() || ''}</span></p>
+						<Button
+							class="mt-3"
+							variant="outline"
+							onclick={() => {
+								open = true;
+								targetId = stockMovement.id;
+							}}>Cancel {movementType === 'IN' ? 'Stock In' : 'Stock Out'} Movement</Button>
 					</div>
 				</li>
 			{/each}

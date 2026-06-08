@@ -30,6 +30,8 @@
 			if (form.valid) {
 				toast.success(form.message.text);
 				return goto('/stock');
+			} else {
+				toast.error(form.message.text);
 			}
 		}
 	});
@@ -40,12 +42,13 @@
 	let filterStock = $state('');
 	const foundStock = $derived(await GetStockOption(filterStock));
 	let selectedStock = $derived(foundStock.find((f) => f.value === $formData.stock_item_id));
-	let remainingStock = $derived(selectedStock?.detail?.quantity?.toString() ?? '0');
+	let remainingStock = $derived(selectedStock?.detail?.size?.toString() ?? '0');
 
 	const triggerId = useId();
 
 	$effect(() => {
 		$formData.user_id = user ? user.id : '';
+		$formData.quantity = parseInt(remainingStock);
 	});
 
 	function closeAndFocusTrigger(triggerId: string) {
@@ -89,7 +92,8 @@
 			<Popover.Root bind:open>
 				<Control id={triggerId}>
 					{#snippet children({ props })}
-						<Label>Stock <span class="rounded-sm bg-yellow-200 px-2 text-xs text-foreground dark:text-background">{remainingStock ? `Available Qty : ${(Number(remainingStock) - $formData.quantity).toString()} ${selectedStock?.detail.unit || ''}` : ''}</span></Label>
+						<Label>Stock <span class="rounded-sm bg-yellow-200 px-2 text-xs text-foreground dark:text-background">{remainingStock ? `Available Qty : ${Number(remainingStock)} ${selectedStock?.detail.unit || ''}` : ''}</span></Label>
+						<!-- <Label>Stock <span class="rounded-sm bg-yellow-200 px-2 text-xs text-foreground dark:text-background">{remainingStock ? `Available Qty : ${(Number(remainingStock) - $formData.quantity).toString()} ${selectedStock?.detail.unit || ''}` : ''}</span></Label> -->
 						<Popover.Trigger class={cn(buttonVariants({ variant: 'outline' }), ' justify-between overflow-hidden', !$formData.stock_item_id && 'text-muted-foreground')} role="combobox" {...props}>
 							<p class="truncate">{foundStock.find((f) => f.value === $formData.stock_item_id)?.detail.description ?? 'Select Material'}</p>
 							<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -109,7 +113,7 @@
 							class="h-9" />
 						<Command.Empty>No stock found.</Command.Empty>
 						<Command.Group class="max-h-56 overflow-y-auto">
-							{#each foundStock as stock (stock.detail.identity)}
+							{#each foundStock as stock (stock.detail.label)}
 								<Command.Item
 									value={stock.value}
 									onSelect={() => {
@@ -120,7 +124,7 @@
 										<p class="block w-full text-xs">{stock.detail?.code}</p>
 										<p class="block w-full text-xs">{stock.detail?.description}</p>
 										<p class="block w-full text-xs capitalize">{stock.detail?.part_number}</p>
-										<p class="block w-full text-xs text-primary">{stock.detail.identity}</p>
+										<p class="block w-full text-xs text-primary">{stock.detail.label}</p>
 									</div>
 									<Check class={cn('ml-auto h-4 w-4', stock.value !== $formData.stock_item_id && 'text-transparent')} />
 								</Command.Item>
@@ -131,11 +135,11 @@
 			</Popover.Root>
 			<FieldErrors class="text-xs italic" />
 		</Field>
-		<Field {form} name="quantity">
+		<Field {form} name="quantity" class="hidden">
 			<Control>
 				{#snippet children({ props })}
 					<Label>Quantity</Label>
-					<Input {...props} bind:value={$formData.quantity} min="0" bind:max={remainingStock} type="number" placeholder="Quantity" />
+					<Input {...props} bind:value={$formData.quantity} min="0" max={remainingStock} type="number" placeholder="Quantity" />
 				{/snippet}
 			</Control>
 			<FieldErrors class="text-xs italic" />

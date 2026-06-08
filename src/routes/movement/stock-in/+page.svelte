@@ -113,7 +113,7 @@
 					</Command.Root>
 				</Popover.Content>
 			</Popover.Root>
-			<FieldErrors class="text-xs italic" />
+			<FieldErrors class="text-end text-xs italic" />
 		</Field>
 		<Field {form} name="purchase_order">
 			<Control>
@@ -131,7 +131,7 @@
 					<Input {...props} bind:value={$formData.batch_number} type="text" placeholder="Batch Number" />
 				{/snippet}
 			</Control>
-			<FieldErrors class="text-xs italic" />
+			<FieldErrors class="text-end text-xs italic" />
 		</Field>
 		<Field {form} name="expired_date">
 			<Control>
@@ -164,7 +164,7 @@
 					<input hidden value={$formData.expired_date} name={props.name} />
 				{/snippet}
 			</Control>
-			<FieldErrors class="text-xs italic" />
+			<FieldErrors class="text-end text-xs italic" />
 		</Field>
 		<Field {form} name="quantity">
 			<Control>
@@ -173,7 +173,7 @@
 					<Input {...props} bind:value={$formData.quantity} type="number" placeholder="Quantity" min="0" />
 				{/snippet}
 			</Control>
-			<FieldErrors class="text-xs italic" />
+			<FieldErrors class="text-end text-xs italic" />
 		</Field>
 		<Field {form} name="isPackaged">
 			<Control>

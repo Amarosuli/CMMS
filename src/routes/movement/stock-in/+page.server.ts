@@ -24,6 +24,14 @@ export const actions = {
 
 		if (!form.valid) return fail(400, { form });
 
+		const batch_number = form.data.batch_number;
+
+		const isBatchNumberExist = await tryCatch(locals.pb.collection('stock_master').getFirstListItem(`batch_number = "${batch_number}"`));
+
+		if (isBatchNumberExist.data) {
+			return fail(400, { form: { ...form, valid: false, errors: { batch_number: ['Batch Number already exists'] } } });
+		}
+
 		// generate id
 		const stockInId = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 15)();
 
@@ -40,6 +48,7 @@ export const actions = {
 		const { data, error } = await tryCatch(batch.send());
 
 		if (error) {
+			// logger error?.response?.data
 			const errorMessage = `${error?.message} | PocketBase error (Stock In)`;
 			return message(form, errorMessage, { status: 500 });
 		}
