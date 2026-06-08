@@ -113,13 +113,14 @@ export const StockOutSchema = object({
 	quantity: pipe(number(), minValue(1, 'Quantity is required, at least 1')),
 	user_id: pipe(string(), nonEmpty('User is required')),
 	remark: optional(pipe(string(), trim())),
-	borrow_movement_id: optional(pipe(string(), trim()))
+	borrow_item_id: optional(pipe(string(), trim()))
 });
 
 export const StockItemSchema = object({
 	label: pipe(string(), nonEmpty('Label is required')),
 	stock_master_id: pipe(string(), nonEmpty('Stock Master is required'), trim()),
 	status: enum_(StockItemStatus, 'Status is required'),
-	quantity: pipe(number(), minValue(1, 'Quantity is required, at least 1')),
-	storage_id: optional(pipe(string(), trim()))
+	size: pipe(number(), minValue(1, 'Size is required, at least 1')),
+	storage_id: optional(pipe(string(), trim())),
+	isBorrowed: nullable(boolean(), false)
 });

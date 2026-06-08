@@ -27,8 +27,8 @@ export enum StockItemStatus {
 }
 
 export interface BorrowItem extends RecordModel {
-	borrow_id: BorrowMovement['id'];
-	stock_id: StockMaster['id'];
+	borrow_movement_id: BorrowMovement['id'];
+	stock_item_id: StockItem['id'];
 	quantity_out: number;
 	quantity_return: number;
 	date_out: string;
