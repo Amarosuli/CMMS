@@ -1,8 +1,9 @@
 <script lang="ts">
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import type { Snippet } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
+	import * as Dialog from '$lib/components/ui/dialog/index.js';
 
-	let { open = $bindable(false), title = 'Confirmation', onConfirm = () => {}, onCancel = () => {} } = $props();
+	let { open = $bindable(false), title = 'Confirmation', onConfirm = () => {}, onCancel = () => {}, children }: { open?: boolean; title?: string; onConfirm?: () => void; onCancel?: () => void; children?: Snippet } = $props();
 </script>
 
 <Dialog.Root bind:open>
@@ -11,6 +12,8 @@
 			<Dialog.Title>{title}</Dialog.Title>
 			<Dialog.Description>Are you sure ?</Dialog.Description>
 		</Dialog.Header>
+
+		{@render children?.()}
 
 		<div class="relative flex w-full justify-around gap-2">
 			<Button
