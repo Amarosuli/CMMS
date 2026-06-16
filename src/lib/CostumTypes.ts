@@ -1,5 +1,5 @@
 import PocketBase, { RecordService, type RecordModel } from 'pocketbase';
-import type { MaterialMasterSchema, MaterialMasterSchemaView, MaterialTypeSchema, MaterialUnitSchema, PackageNameSchema, StockInSchema, StockItemSchema, StockMasterSchema, StockOutSchema, TransactionTypeSchema, UserSchema } from './valibotSchema';
+import type { BorrowItemSchema, BorrowMovementSchema, MaterialMasterSchema, MaterialMasterSchemaView, MaterialTypeSchema, MaterialUnitSchema, PackageNameSchema, StockInSchema, StockItemSchema, StockMasterSchema, StockOutSchema, TransactionTypeSchema, UserSchema } from './valibotSchema';
 import type { InferInput } from 'valibot';
 
 export interface MaterialMaster extends RecordModel, InferInput<typeof MaterialMasterSchema> {}
@@ -13,6 +13,12 @@ export interface StockIn extends RecordModel, InferInput<typeof StockInSchema> {
 export interface StockMaster extends RecordModel, InferInput<typeof StockMasterSchema> {}
 export interface StockOut extends RecordModel, InferInput<typeof StockOutSchema> {}
 export interface StockItem extends RecordModel, InferInput<typeof StockItemSchema> {}
+export interface BorrowItem extends RecordModel, InferInput<typeof BorrowItemSchema> {}
+export interface BorrowMovement extends RecordModel, InferInput<typeof BorrowMovementSchema> {
+	expand?: {
+		user_id: User;
+	};
+}
 
 export enum StockMasterStatus {
 	ACTIVE = 'ACTIVE',
@@ -24,15 +30,6 @@ export enum StockItemStatus {
 	BORROWED = 'BORROWED',
 	USED = 'USED',
 	DISPOSED = 'DISPOSED'
-}
-
-export interface BorrowItem extends RecordModel {
-	borrow_movement_id: BorrowMovement['id'];
-	stock_item_id: StockItem['id'];
-	quantity_out: number;
-	quantity_return: number;
-	date_out: string;
-	date_return: string;
 }
 
 export enum BorrowMovementStatus {
@@ -70,16 +67,6 @@ export enum UserRole {
 	General = 'General',
 	Admin = 'Admin',
 	Super = 'Super'
-}
-
-export interface BorrowMovement extends RecordModel {
-	user_id: User['id'];
-	order_number: string;
-	esn: string;
-	status: BorrowMovementStatus;
-	expand?: {
-		user_id: User;
-	};
 }
 
 export interface StockOverview extends RecordModel {
