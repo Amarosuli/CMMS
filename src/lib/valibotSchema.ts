@@ -1,5 +1,5 @@
 import { boolean, email, enum_, file, forward, mimeType, minLength, nonEmpty, object, omit, optional, partialCheck, pipe, string, trim, url, number, check, array, minValue, nullable, maxSize, isoTimestamp } from 'valibot';
-import { StockItemStatus, StockMasterStatus, UserRole, UserUnit } from './CostumTypes';
+import { BorrowMovementStatus, StockItemStatus, StockMasterStatus, UserRole, UserUnit } from './CostumTypes';
 
 export const MaterialTypeSchema = object({
 	name: pipe(string(), nonEmpty('Please enter the name'), trim()),
@@ -123,4 +123,34 @@ export const StockItemSchema = object({
 	size: pipe(number(), minValue(1, 'Size is required, at least 1')),
 	storage_id: optional(pipe(string(), trim())),
 	isBorrowed: nullable(boolean(), false)
+});
+
+export const BorrowMovementSchema = object({
+	user_id: pipe(string(), nonEmpty('User is required')),
+	order_number: optional(pipe(string(), trim())),
+	esn: optional(pipe(string(), trim())),
+	status: enum_(BorrowMovementStatus, 'Status is required')
+});
+
+export const BorrowItemSchema = object({
+	borrow_movement_id: pipe(string(), nonEmpty('Borrow movement is required')),
+	stock_item_id: pipe(string(), nonEmpty('Stock item is required')),
+	quantity_out: pipe(number(), minValue(1, 'Quantity out is required, at least 1')),
+	quantity_return: optional(number(), 0),
+	date_out: pipe(string(), isoTimestamp('The date is badly formatted'), nonEmpty('Date out is required')),
+	date_return: optional(pipe(string(), isoTimestamp('The date is badly formatted')))
+});
+
+export const BorrowStartSchema = object({
+	movement: BorrowMovementSchema,
+	items: optional(array(omit(BorrowItemSchema, ['quantity_return', 'date_return'])), [])
+});
+
+export const RecordModelSchema = object({
+	id: string()
+});
+
+export const LoginSchema = object({
+	employeeId: pipe(string(), trim(), minLength(6, 'Employee Id is required, minimal 6 characters')),
+	password: pipe(string(), trim(), minLength(8, 'Minimal password is 8 characters'))
 });
