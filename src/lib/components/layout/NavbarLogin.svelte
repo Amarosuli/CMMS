@@ -1,9 +1,8 @@
-<script>
+<script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { LogIn } from '@lucide/svelte';
 
-	/** @type {{openLoginDialog?: boolean}} */
-	let { openLoginDialog = $bindable(false) } = $props();
+	let { openLoginDialog = $bindable(false) }: { openLoginDialog: boolean } = $props();
 </script>
 
 <span class="relative">

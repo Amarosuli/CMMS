@@ -2,13 +2,13 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
 	import { defaults, superForm } from 'sveltekit-superforms';
-	import { loginSchema } from '$lib/zodSchema';
+	import { LoaderCircle } from '@lucide/svelte';
+	import { LoginSchema } from '$lib/valibotSchema';
+	import { valibot } from 'sveltekit-superforms/adapters';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import { logIn } from '$lib/remote-function/auth.remote';
 	import { Input } from '$lib/components/ui/input';
 	import { toast } from 'svelte-sonner';
-	import { zod } from 'sveltekit-superforms/adapters';
-	// icons
-	import { LoaderCircle } from '@lucide/svelte';
 
 	interface Props {
 		open?: boolean;
@@ -16,40 +16,27 @@
 
 	let { open = $bindable(false) }: Props = $props();
 
-	let errorMessage = $state('');
-
-	const form = superForm(defaults(zod(loginSchema)), {
+	const form = superForm(defaults(valibot(LoginSchema)), {
+		id: 'login',
 		SPA: true,
-		validators: zod(loginSchema),
+		validators: valibot(LoginSchema),
 		resetForm: false,
-		onChange() {
-			errorMessage = '';
-		},
 		async onUpdate({ form }) {
 			if (form.valid) {
-				const response = await fetch('/auth', {
-					method: 'POST',
-					body: JSON.stringify(form.data),
-					headers: {
-						'Content-Type': 'application/json'
+				logIn(form.data).then(({ status, message }) => {
+					if (status === 'failed') {
+						toast.error(`Authentication error ${message}`);
+					} else {
+						toast.success(message);
+						location.reload();
+						open = false;
+						reset();
 					}
 				});
-				const { message, status } = await response.json();
-				if (status === 400) {
-					errorMessage = message;
-					toast.error('Authentication Error');
-				} else if (status === 200) location.reload();
 			}
 		}
 	});
 	const { form: formData, delayed, enhance, reset } = form;
-
-	$effect(() => {
-		if (open) {
-			reset();
-			errorMessage = '';
-		}
-	});
 </script>
 
 <Dialog.Root bind:open>
@@ -86,9 +73,6 @@
 						Let's go!
 					{/if}
 				</Button>
-				{#if errorMessage}
-					<p class="mt-2 bg-destructive/50 p-2 text-center text-xs font-semibold text-destructive-foreground">{errorMessage}</p>
-				{/if}
 			</form>
 		</div>
 	</Dialog.Content>

@@ -1,13 +1,22 @@
-<script>
+<script lang="ts">
 	import * as Sheet from '$lib/components/ui/sheet';
 	import { NavbarDD, NavbarContent, NavbarLogin } from '.';
-	import { afterNavigate } from '$app/navigation';
 	import { buttonVariants } from '$lib/components/ui/button';
-	// icons
-	import { AlignLeft } from '@lucide/svelte';
+	import { TextAlignStart } from '@lucide/svelte';
+	import { afterNavigate } from '$app/navigation';
+	import type { SideBarMenu } from './NavbarContent.svelte';
+	import type { AuthRecord } from 'pocketbase';
 
-	/** @type {{sidebarMenu: any, currentRole: any, currentPath: any, currentHash: any, user: any, openLoginDialog?: boolean, logOut: any}} */
-	let { sidebarMenu, currentRole, currentPath = $bindable(), currentHash = $bindable(), user, openLoginDialog = $bindable(false), logOut } = $props();
+	interface Props {
+		sidebarMenu: SideBarMenu[];
+		currentRole: string;
+		currentPath: string;
+		currentHash: string;
+		user: AuthRecord;
+		openLoginDialog?: boolean;
+	}
+
+	let { sidebarMenu, currentRole, currentPath = $bindable(), currentHash = $bindable(), user, openLoginDialog = $bindable(false) }: Props = $props();
 
 	let open = $state(false);
 	afterNavigate(() => {
@@ -20,7 +29,7 @@
 		<span class="relative">
 			<Sheet.Root bind:open>
 				<Sheet.Trigger class={buttonVariants({ variant: 'outline' })}>
-					<AlignLeft class="h-4 w-4" />
+					<TextAlignStart class="h-4 w-4" />
 				</Sheet.Trigger>
 
 				<Sheet.Content side="left" class="p-0">
@@ -34,7 +43,7 @@
 			<div aria-hidden="true" class="-ml-4 flex-1"></div>
 			<div class="flex items-center gap-3">
 				{#if user}
-					<NavbarDD {logOut} {user} />
+					<NavbarDD {user} />
 				{:else}
 					<NavbarLogin bind:openLoginDialog />
 				{/if}

@@ -2,17 +2,18 @@
 	import '../app.css';
 
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
-	import { SendToBack, Archive, House, LoaderCircle, Settings, LayoutDashboard, FileText, Barcode, type IconProps } from '@lucide/svelte';
+	import { SendToBack, Archive, House, LoaderCircle, Settings, LayoutDashboard, FileText, Barcode } from '@lucide/svelte';
 	import { Navbar, NavbarSmall, LoginDialog } from '$lib/components/layout';
 	import { afterNavigate, beforeNavigate } from '$app/navigation';
 	import { labelCartLength } from '$lib/labelCart.svelte';
 	import { ModeWatcher } from 'mode-watcher';
 	import { Toaster } from '$lib/components/ui/sonner/index.js';
-	import { onMount, type Component } from 'svelte';
+	import { onMount } from 'svelte';
 	import { clock } from '$lib/clock.svelte';
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
 	// type
+	import type { SideBarMenu } from '$lib/components/layout/NavbarContent.svelte';
 	import type { AuthRecord } from 'pocketbase';
 
 	interface Props {
@@ -27,30 +28,10 @@
 	let isLogOut: boolean = $state(false);
 	let loadingPage: boolean = $state(false);
 
-	async function logOut() {
-		isLogOut = true;
-		const response = await fetch('/auth', { method: 'GET' });
-		const { message } = await response.json();
-		if (message === 'success') location.reload();
-	}
-
 	const Role = {
 		GENERAL: 'general',
 		ADMIN: 'admin',
 		SUPER: 'super'
-	};
-
-	type SideBarMenu = {
-		title: string;
-		icon: Component<IconProps, object, ''>;
-		url: string;
-		role?: string;
-		sub?: {
-			title: string;
-			url: string;
-			role: string;
-		}[];
-		notification?: number | string | object;
 	};
 
 	const sidebarMenu: SideBarMenu[] = [
@@ -120,8 +101,8 @@
 	afterNavigate(() => (loadingPage = false));
 
 	let currentRole = $derived(user ? user.role.toLowerCase() : undefined);
-	let currentHash: string | undefined = $state();
-	let currentPath: string | undefined = $state();
+	let currentHash: string = $state('');
+	let currentPath: string = $state('');
 
 	$effect(() => {
 		currentHash = page.url.hash;
@@ -136,8 +117,8 @@
 <Toaster position="top-right" />
 <ModeWatcher />
 <div class="relative isolate flex min-h-svh w-full bg-secondary-foreground/5 max-lg:flex-col">
-	<Navbar bind:currentHash bind:currentPath {sidebarMenu} {user} {currentRole} bind:openLoginDialog {logOut} />
-	<NavbarSmall bind:currentHash bind:currentPath {sidebarMenu} {user} {currentRole} bind:openLoginDialog {logOut} />
+	<Navbar bind:currentHash bind:currentPath {sidebarMenu} {user} {currentRole} bind:openLoginDialog />
+	<NavbarSmall bind:currentHash bind:currentPath {sidebarMenu} {user} {currentRole} bind:openLoginDialog />
 	<main class="flex flex-1 flex-col pb-2 lg:min-w-0 lg:pt-2 lg:pr-2 lg:pl-64">
 		<LoginDialog bind:open={openLoginDialog} />
 		<div class="relative grow overflow-hidden bg-background p-6 text-foreground lg:rounded-lg lg:p-10 lg:shadow-sm lg:ring-1 lg:ring-secondary-foreground/10">

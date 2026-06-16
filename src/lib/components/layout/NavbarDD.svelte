@@ -1,12 +1,13 @@
-<script>
+<script lang="ts">
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
-	// icons
 	import { Lightbulb, LogOut } from '@lucide/svelte';
+	import { logOut } from '$lib/remote-function/auth.remote';
+	import { toast } from 'svelte-sonner';
+	import type { AuthRecord } from 'pocketbase';
 
-	/** @type {{user: any, logOut: any}} */
-	let { user, logOut } = $props();
+	let { user }: { user: AuthRecord } = $props();
 </script>
 
 <span class="relative">
@@ -18,8 +19,8 @@
 					<Avatar.Fallback>CN</Avatar.Fallback>
 				</Avatar.Root>
 				<div class="flex flex-1 flex-col items-start justify-center max-lg:hidden">
-					<span>{user.name}</span>
-					<span class="font-light">{user.username} as {user.role}</span>
+					<span>{user?.name}</span>
+					<span class="font-light">{user?.username} as {user?.role}</span>
 				</div>
 			</div>
 		</DropdownMenu.Trigger>
@@ -31,7 +32,15 @@
 				</DropdownMenu.Item>
 				<DropdownMenu.Separator />
 				<DropdownMenu.Item>
-					<Button variant="ghost" onclick={logOut} class="w-full ">
+					<Button
+						variant="ghost"
+						onclick={() => {
+							logOut().then((res) => {
+								toast.info(res.message);
+								location.reload();
+							});
+						}}
+						class="w-full ">
 						<LogOut class="mr-2 h-4 w-4" />
 						<span>Log out</span>
 					</Button>

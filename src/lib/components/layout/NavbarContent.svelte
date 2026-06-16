@@ -1,12 +1,11 @@
 <script lang="ts">
+	import { ChevronRight, MoveRight, Moon, Sun, type Icon as IconType, type IconProps } from '@lucide/svelte';
 	import { toggleMode } from 'mode-watcher';
 	import { Button } from '$lib/components/ui/button';
 	import { clock } from '$lib/clock.svelte';
-	// icons
-	import { ChevronRight, MoveRight, Moon, Sun, type Icon as IconType, type IconProps } from '@lucide/svelte';
 	import type { Component } from 'svelte';
 
-	type SideBarMenu = {
+	export type SideBarMenu = {
 		title: string;
 		icon: Component<IconProps, object, ''>;
 		url: string;
