@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { BookmarkCheck, BookmarkX, CalendarPlus, LoaderCircle, ScanBarcode } from '@lucide/svelte';
-	import { checkOut, getStockItemByLabel, getStockItemById, getUserDetail } from './transaction.remote';
+	import { BookmarkCheck, BookmarkX, CalendarPlus, LoaderCircle, Save, ScanBarcode } from '@lucide/svelte';
+	import { getUserByUsername, getStockItemByLabel, getStockItemById, borrowStart } from '$lib/remote-function/borrow.remote';
+	import { BorrowMovementStatus, StockItemStatus, type User } from '$lib/CostumTypes';
+	import { BorrowItemViewTemporary } from '$lib/components/costum';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -10,10 +12,8 @@
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 
-	import { BorrowMovementStatus, type User } from '$lib/CostumTypes';
-
 	let borrowingData = $state({
-		basicData: {
+		movement: {
 			user_id: '',
 			order_number: '',
 			esn: '',
@@ -32,15 +32,10 @@
 	async function doneTyping() {
 		isTyping = false;
 		getUserLoading = true;
-		const res = await getUserDetail(employeeId);
-		if (res.status === 'failed') {
-			userData = null;
-			getUserLoading = false;
-			return;
-		} else {
-			userData = res.data as User;
-			getUserLoading = false;
-		}
+		const { message, data } = await getUserByUsername(employeeId);
+		toast.info(message);
+		userData = data;
+		getUserLoading = false;
 	}
 
 	let stockLabel = $state('');
@@ -48,9 +43,9 @@
 
 	$effect(() => {
 		if (userData) {
-			borrowingData.basicData.user_id = userData.id;
+			borrowingData.movement.user_id = userData.id;
 		} else {
-			borrowingData.basicData.user_id = '';
+			borrowingData.movement.user_id = '';
 		}
 	});
 
@@ -59,60 +54,66 @@
 			isQuering = true;
 
 			let result = await getStockItemByLabel(stockLabel); // check availability in system
-			if (!result) {
-				toast('Stock Item not found');
+
+			if (!result.data) {
+				toast.info('Item not found');
+				isQuering = false;
 				return;
 			}
 
-			const existingItem = borrowingData.items.find((stock) => stock.label === result.label);
+			if (result.data.status === StockItemStatus.DISPOSED) {
+				toast.info('Disposed item should not be able to borrow');
+				isQuering = false;
+				return;
+			}
+
+			if (result.data.isBorrowed) {
+				toast.info('Item already borrowed by other user');
+				isQuering = false;
+				return;
+			}
+
+			const existingItem = borrowingData.items.find((stock) => stock.label === result.data.label);
 
 			if (existingItem) {
-				if (result.quantity === existingItem.quantity_out) {
-					toast('Max allowed quantity for this material to borrow reached');
-				} else {
-					existingItem.quantity_out += 1;
-				}
+				toast.info('Item already in tray');
+				isQuering = false;
+				return;
 			} else {
-				borrowingData.items.push({ label: result.label, stock_item_id: result.id, quantity_out: 1 });
+				toast.success('Item added');
+				borrowingData.items.push({ label: result.data.label, stock_item_id: result.data.id, quantity_out: result.data.size });
 			}
 		} catch (error) {
 			console.error(error);
-			toast('An unexpected error occurred');
+			toast.error('An unexpected error occurred');
 		} finally {
 			isQuering = false;
 		}
 	}
 
 	async function save() {
-		if (borrowingData.basicData.user_id === '') {
+		if (borrowingData.movement.user_id === '') {
 			toast.error('Employee ID is required');
 			return;
 		}
 
 		delayedItem = true;
-		await checkOut({
-			basicData: borrowingData.basicData,
-			itemData: borrowingData.items
+		await borrowStart({
+			movement: borrowingData.movement,
+			items: borrowingData.items
 		})
 			.then((result) => {
-				result.forEach((res) => {
-					if (res.message) {
-						toast.info(res.message);
-					} else {
-						toast.info(res.status);
-					}
-				});
+				toast.info(`${result.message}, ${result.data}`);
 			})
 			.catch((err) => {
-				toast.error(err);
+				console.error(err);
+				toast.error('An unexpected error occured');
 			})
 			.finally(() => {
 				delayedItem = false;
-				goto('/dashboard');
+				goto('list-transaction');
 			});
 	}
-
-	$inspect(borrowingData);
 </script>
 
 <svelte:head>
@@ -168,20 +169,20 @@
 	</div>
 	<div class="flex w-full max-w-sm flex-col gap-1.5">
 		<Label for="order_number">Order Number</Label>
-		<Input id="order_number" name="order_number" bind:value={borrowingData.basicData.order_number} type="text" placeholder="Order Number" />
+		<Input id="order_number" name="order_number" bind:value={borrowingData.movement.order_number} type="text" placeholder="Order Number" />
 	</div>
 	<div class="flex w-full max-w-sm flex-col gap-1.5">
 		<Label for="esn">ESN or A/C Register</Label>
-		<Input id="esn" name="esn" bind:value={borrowingData.basicData.esn} type="text" placeholder="ESN or A/C Register" />
+		<Input id="esn" name="esn" bind:value={borrowingData.movement.esn} type="text" placeholder="ESN or A/C Register" />
 	</div>
 </div>
 
-<div class="mt-6" class:hidden={borrowingData.basicData.user_id === 'x'}>
+<div class="mt-6" class:hidden={borrowingData.movement.user_id === 'x'}>
 	<h2 class="text-base/7 font-semibold text-foreground sm:text-sm/6">Borrowing Items</h2>
 	<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
-	<div class="mt-3 flex w-full flex-col text-base/6 sm:text-sm/6">
-		<div class="mb-3 flex w-fit flex-col justify-start gap-2">
-			<Label for="label">Label <ScanBarcode class="size-5" /></Label>
+	<div class="mt-3 overflow-x-auto text-base/6 sm:text-sm/6">
+		<div class="my-3 flex w-fit justify-start">
+			<Label for="label" class="w-full">Add New Item <ScanBarcode class="size-5" /></Label>
 			<Input
 				id="label"
 				name="label"
@@ -197,22 +198,15 @@
 		</div>
 
 		{#each borrowingData.items as item (item.stock_item_id)}
-			<div class="mb-3 flex w-full flex-row items-center justify-start gap-2">
+			<div class="">
 				{#await getStockItemById(item.stock_item_id)}
 					<div class="flex gap-3">
 						<Skeleton class="h-9 w-75" />
 						<Skeleton class="h-9 w-32" />
 					</div>
 				{:then result}
-					{#if result && result.status === 'success'}
-						<div class="flex h-9 items-center gap-3 rounded-md border border-foreground/70 px-3 text-xs">
-							<p>{result.data.expand?.stock_master_id.expand.material_master_id.part_number}</p>
-							<p class="border-l border-foreground/70 pl-3">{result.data.expand?.stock_master_id.expand.material_master_id.description}</p>
-							<p class="border-l border-foreground/70 pl-3">Available Quantity - {result.data.quantity} {result.data.expand?.stock_master_id.expand.material_master_id.expand.material_unit_id.code}</p>
-						</div>
-						<div class="flex h-9 items-center gap-3 rounded-md border border-foreground/70 bg-lime-300 px-3 text-xs">
-							<p>Borrowed Quantity - {item.quantity_out}</p>
-						</div>
+					{#if result.status === 'success'}
+						<BorrowItemViewTemporary stockItem={result.data} bind:items={borrowingData.items} />
 					{/if}
 				{/await}
 			</div>
@@ -224,11 +218,12 @@
 			</div>
 		{/if}
 
-		<Button class="mt-14 max-w-80 cursor-pointer" disabled={borrowingData.items.length || delayedItem ? false : true} onclick={save}>
+		<Button class="mt-14 max-w-80 cursor-pointer bg-lime-400 hover:bg-lime-300 dark:bg-lime-600 dark:hover:bg-lime-500" disabled={borrowingData.items.length || delayedItem ? false : true} onclick={save}>
 			{#if delayedItem}
 				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" /> Saving...
 			{:else}
-				Save {borrowingData.items.length}
+				<Save class="h-4 w-4" />
+				Save
 			{/if}
 		</Button>
 	</div>
