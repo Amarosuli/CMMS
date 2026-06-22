@@ -1,7 +1,8 @@
 <script lang="ts">
-	import * as Drawer from '$lib/components/ui/drawer';
+	import * as Sheet from '$lib/components/ui/sheet';
+
 	import { BanknoteArrowUp, CalendarPlus, CircleUserRound, Eye, LoaderCircle, Pencil } from '@lucide/svelte';
-	import { getActiveBorrowing, getItemFromActiveBorrowing } from './list-transaction.remote';
+	import { getActiveBorrowing, getItemFromActiveBorrowing } from '$lib/remote-function/borrow.remote';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import { Button } from '$lib/components/ui/button';
 	import { clock } from '$lib/clock.svelte';
@@ -39,9 +40,9 @@
 		<span transition:fade={{ duration: 200 }} class="absolute z-10 ml-4 flex items-center justify-center gap-3">
 			<LoaderCircle class="animate-spin text-primary" /> Loading ...
 		</span>
-	{:then data}
-		{#if data}
-			{#each data as item (item.id)}
+	{:then result}
+		{#if result.status === 'success'}
+			{#each result.data as item (item.id)}
 				<div class="relative flex w-full items-center justify-between border border-foreground/30 p-4 pb-16 md:pb-4">
 					<div class="flex gap-4 pl-2 text-sm tracking-wider">
 						<CircleUserRound class="size-14 text-foreground" />
@@ -54,15 +55,15 @@
 					</div>
 					<div class="absolute top-4 right-7 text-2xl/8 font-extrabold text-foreground/80 sm:text-xl/8" class:text-lime-500={item.status === 'OPEN'} class:text-yellow-500={item.status === 'PENDING'}>{item.status}</div>
 					<div class="absolute right-7 bottom-4 flex items-center gap-3 md:relative md:right-0 md:bottom-0 md:self-end md:pr-3">
-						<Drawer.Root>
-							<Drawer.Trigger>
+						<Sheet.Root>
+							<Sheet.Trigger>
 								<Button variant="outline" class="cursor-pointer"><Eye class="size-4 text-green-500" /> Detail</Button>
-							</Drawer.Trigger>
-							<Drawer.Content class="flex w-full  sm:justify-start lg:justify-center">
-								<Drawer.Header>
-									<Drawer.Title>Borrowed Items</Drawer.Title>
-									<Drawer.Description>Please do crosscheck each item when return.</Drawer.Description>
-								</Drawer.Header>
+							</Sheet.Trigger>
+							<Sheet.Content side="right" class="sm:min-w-2/3 xl:min-w-3/5 2xl:min-w-2/5">
+								<Sheet.Header>
+									<Sheet.Title>Borrowed Items</Sheet.Title>
+									<Sheet.Description>Please do crosscheck for each item return.</Sheet.Description>
+								</Sheet.Header>
 								<div class="h-ful w-full p-4 pb-6">
 									<ScrollArea class="h-96 max-h-96">
 										<div class="flex w-full flex-col gap-2">
@@ -72,30 +73,34 @@
 													<p>Loading...</p>
 												</div>
 											{:then borrowedItems}
-												{#each borrowedItems as item}
-													{#if borrowedItems.length}
-														<div class="flex w-full flex-col border-t p-2 pt-4 text-xs md:flex-row md:items-center md:gap-3 lg:w-full">
-															<p class="w-full flex-1">Label : {item.expand?.stock_item_id.label}</p>
-															<p class="w-full flex-1">Code : {item.expand?.stock_item_id.expand.stock_master_id.expand.material_master_id.code}</p>
-															<p class="w-full flex-1 truncate">Description : {item.expand?.stock_item_id.expand.stock_master_id.expand.material_master_id.description}</p>
-															<p class="w-full flex-1 max-sm:hidden">Batch Number : {item.expand?.stock_item_id.expand.stock_master_id.batch_number}</p>
-															<p class="w-full flex-1">Purchase Order : {item.expand?.stock_item_id.expand.stock_master_id.purchase_order}</p>
-															<p class="w-full max-w-32 truncate">Out Quantity : {item.quantity_out} {item.expand?.stock_item_id.expand.stock_master_id.expand.material_master_id.expand.material_unit_id.unit || 'EA'}</p>
-															<p class="mb-3 w-full max-w-32 truncate md:mb-0">Return Quantity : {item.quantity_return}</p>
+												{#if borrowedItems.status === 'success'}
+													{#each borrowedItems.data as item (item.id)}
+														<div class="flex items-center justify-between">
+															<div class="flex w-full flex-col border-t p-2 pt-4 text-xs lg:w-full">
+																<p class="w-full font-semibold">Label : <span class="text-primary">{item.expand?.stock_item_id.label}</span></p>
+																<p class="w-full">Code : {item.expand?.stock_item_id.expand.stock_master_id.expand.material_master_id.code}</p>
+																<p class="w-full">Part Number : {item.expand?.stock_item_id.expand.stock_master_id.expand.material_master_id.part_number}</p>
+																<p class="w-full truncate">Description : {item.expand?.stock_item_id.expand.stock_master_id.expand.material_master_id.description}</p>
+																<p class="w-full">Batch Number : {item.expand?.stock_item_id.expand.stock_master_id.batch_number}</p>
+																<p class="w-full">Purchase Order : {item.expand?.stock_item_id.expand.stock_master_id.purchase_order}</p>
+																<p class="w-full">Size : {item.quantity_out} {item.expand?.stock_item_id.expand.stock_master_id.expand.material_master_id.expand.material_unit_id.unit || 'EA'}</p>
+															</div>
+															<img class="size-28 max-md:hidden" src="https://picsum.photos/seed/picsum/400/400" alt="material_image" />
 														</div>
-													{:else}
-														<p>No item borrowed in this transaction</p>
-													{/if}
-												{/each}
+													{/each}
+												{:else}
+													<p>No item borrowed in this transaction</p>
+												{/if}
 											{/await}
 										</div>
 									</ScrollArea>
 								</div>
-								<Drawer.Footer class="flex w-full items-center justify-center space-y-2">
-									<Drawer.Close>Close</Drawer.Close>
-								</Drawer.Footer>
-							</Drawer.Content>
-						</Drawer.Root>
+								<Sheet.Footer>
+									<Sheet.Close>Close</Sheet.Close>
+								</Sheet.Footer>
+							</Sheet.Content>
+						</Sheet.Root>
+
 						<Button variant="outline" class="cursor-pointer " onclick={() => goto(`/active-borrowing/${item.id}?fromUrl=/dashboard/list-transaction`)}><Pencil class="size-4 text-amber-300" /> Edit</Button>
 						<Button variant="outline" class="cursor-pointer" onclick={() => goto(`/return/${item.id}?fromUrl=/dashboard/list-transaction`)}><BanknoteArrowUp class="size-4 text-primary" /> Return</Button>
 					</div>

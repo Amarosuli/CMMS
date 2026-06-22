@@ -131,7 +131,7 @@ export const GetStockOption = query(optional(string()), async (filter) => {
 	});
 });
 
-export const CancelStockIn = query(string(), async (stockInId) => {
+export const cancelStockIn = query(string(), async (stockInId) => {
 	const { locals } = getRequestEvent();
 
 	const stockMaster = await tryCatch(locals.pb.collection('stock_master').getFirstListItem(`stock_in_id="${stockInId}"`));
@@ -162,7 +162,7 @@ export const CancelStockIn = query(string(), async (stockInId) => {
 	return { status: 'success', message: 'Stock in cancelled successfully' };
 });
 
-export const CancelStockOut = query(string(), async (stockOutId) => {
+export const cancelStockOut = query(string(), async (stockOutId) => {
 	const { locals } = getRequestEvent();
 
 	const stockOut = await tryCatch(locals.pb.collection('stock_out').getOne(stockOutId, { expand: 'stock_item_id.stock_master_id' }));
@@ -196,13 +196,13 @@ export const CancelStockOut = query(string(), async (stockOutId) => {
 	// delete stock out
 	batch.collection('stock_out').delete(stockOut.data.id);
 
-	const { error } = await tryCatch(batch.send());
+	const { status, data, error } = await tryCatch(batch.send());
 
 	if (error) {
 		// logger here
 		console.error(error);
-		return { status: 'failed', message: 'Error after batch send' };
+		return { status, message: 'Error after batch send', data };
 	} else {
-		return { status: 'success', message: 'Stock out cancelled successfully' };
+		return { status, message: 'Stock out cancelled successfully', data };
 	}
 });

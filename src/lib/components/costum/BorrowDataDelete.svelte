@@ -1,10 +1,11 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import { deleteOpenBorrowMovement, updateAllStockItemOnDeleteOpenBorrowMovement } from '$lib/remote-function/borrow.remote';
 	import { LoaderCircle } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
-	import { pb } from '$lib/pocketbaseClient';
+	import { page } from '$app/state';
 
 	import type { BorrowItem, BorrowMovement } from '$lib/CostumTypes';
 
@@ -18,47 +19,43 @@
 
 	let isDeleting: boolean = $state(false);
 
-	function balanceQuantityBorrowed(id: string, quantity_out: number) {
-		pb.collection('stock_master')
-			.getOne(id)
-			.then((res) => {
-				let currentQtyBorrowed = res.quantity_borrowed;
-				pb.collection('stock_master')
-					.update(id, { quantity_borrowed: currentQtyBorrowed - quantity_out })
-					.then(() => {
-						toast.success('Balancing quantity successfully!');
-					})
-					.catch((error) => {
-						toast.error(error.message);
-					});
-			})
-			.catch((error) => {
-				toast.error(error.message);
-			});
-	}
-
-	function deleteBorrowData() {
-		pb.collection('borrow_movement')
-			.delete(borrowData.id)
-			.then(() => {
-				toast.success('Delete borrow data successfully!');
-				goto('/active-borrowing');
-				open = false;
-			})
-			.catch((error) => {
-				toast.error(error.message);
-				isDeleting = false;
-			});
-	}
 	function deleteHandler() {
 		isDeleting = true;
 		if (borrowItems.length) {
-			borrowItems.forEach((item) => {
-				balanceQuantityBorrowed(item.stock_id, item.quantity_out);
-			});
-			deleteBorrowData();
+			updateAllStockItemOnDeleteOpenBorrowMovement(borrowItems)
+				.then((res) => {
+					toast.info(res.message);
+					deleteOpenBorrowMovement(borrowData.id)
+						.then((res) => {
+							toast.info(res.message);
+							goto(page.url.searchParams.get('fromUrl') || '/active-borrowing');
+							open = false;
+						})
+						.catch((error) => {
+							toast.error(error.message);
+							isDeleting = false;
+						});
+				})
+				.catch((error) => {
+					toast.error(error.message);
+					isDeleting = false;
+				})
+				.finally(() => {
+					isDeleting = false;
+				});
 		} else {
-			deleteBorrowData();
+			deleteOpenBorrowMovement(borrowData.id)
+				.then((res) => {
+					toast.info(res.message);
+					goto(page.url.searchParams.get('fromUrl') || '/active-borrowing');
+					open = false;
+				})
+				.catch((error) => {
+					toast.error(error.message);
+				})
+				.finally(() => {
+					isDeleting = false;
+				});
 		}
 	}
 </script>

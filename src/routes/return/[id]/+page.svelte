@@ -1,53 +1,43 @@
 <script lang="ts">
-	import { CalendarPlus, ChevronLeft, Eye, Plus, Minus, LoaderCircle } from '@lucide/svelte';
+	import { CalendarPlus, ChevronLeft } from '@lucide/svelte';
 	import { ConfirmDialog } from '$lib/components/costum';
+	import { borrowEnd } from '$lib/remote-function/borrow.remote';
+	import { Switch } from '$lib/components/ui/switch/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
 	import { time } from '$lib/helpers';
-	import { pb } from '$lib/pocketbaseClient.js';
 	import { page } from '$app/state';
-
-	import type { StockMaster } from '$lib/CostumTypes.js';
 
 	let { data } = $props();
 	let open: boolean = $state(false);
 
-	// let arrayQuantityOut = writable(data.detail);
-	let arrayQuantityOut = $state(data.detail);
+	const { detail, borrowMovementData } = $derived(data);
 
-	async function updateQtyReturn(id: string, stock: StockMaster, quantity_out: number, quantity_return: number) {
-		pb.collection('borrow_item')
-			.update(id, { quantity_return: quantity_return, date_return: new Date().toUTCString() })
-			.then(() => {})
-			.catch((error) => {
-				toast.error(error.message);
-			});
-	}
-	async function updateBorrowMovement() {
-		pb.collection('borrow_movement')
-			.update(data.borrowId, { status: 'PENDING' })
-			.then(() => {
-				toast.success('Checkout successfully');
+	let arrayQuantityOut = $state(structuredClone(detail));
+
+	async function checkOut() {
+		const items = arrayQuantityOut.map((item) => {
+			if (item.quantity_out === 0) {
+				return { ...item, quantity_return: item.quantity_return, date_return: new Date().toISOString() };
+			}
+			return { ...item, quantity_return: item.quantity_return, date_return: new Date().toISOString() };
+		});
+
+		if (borrowMovementData.status === 'failed') {
+			return toast.info('No user id recorded in borrow movement');
+		}
+
+		borrowEnd({ movementId: data.borrowMovementId, userId: borrowMovementData.data.user_id, items })
+			.then((result) => {
+				toast.info(result.message);
 			})
 			.catch((error) => {
 				toast.error(error.message);
+			})
+			.finally(() => {
+				goto('/dashboard/list-transaction');
 			});
-	}
-
-	// checkOut will update quantity_return as production input and status of borrow_movement to PENDING
-	async function checkOut() {
-		let chainedPromise = Promise.resolve();
-		const promiseArr = arrayQuantityOut.map((item) => {
-			return (chainedPromise = chainedPromise.then(() => {
-				return updateQtyReturn(item.id, item.stock, item.quantity_out, item.quantity_return);
-			}));
-		});
-
-		const result = await Promise.all(promiseArr);
-		Promise.resolve(result)
-			.then(() => updateBorrowMovement())
-			.finally(() => goto('/return'));
 	}
 </script>
 
@@ -63,7 +53,7 @@
 <div class="mt-4 lg:mt-8">
 	<div class="flex items-center gap-4">
 		<h1 class="text-2xl/8 font-semibold sm:text-xl/8">Crosscheck <span class="text-foreground/50">Before Return</span></h1>
-		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-[hover]:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15 forced-colors:outline"></span>
+		<span class="inline-flex items-center gap-x-1.5 rounded-md bg-lime-400/20 px-1.5 py-0.5 text-sm/5 font-medium text-lime-700 group-data-hover:bg-lime-400/30 sm:text-xs/5 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-hover:bg-lime-400/15 forced-colors:outline"></span>
 	</div>
 	<div class="isolate mt-2.5 flex flex-wrap justify-between gap-x-6 gap-y-4">
 		<div class="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
@@ -78,36 +68,24 @@
 	<div>
 		<p>Make sure the return quantity of each material is correct before Check Out.</p>
 	</div>
-	{#each arrayQuantityOut as item}
+	{#each arrayQuantityOut as item (item.id)}
 		<div class="flex flex-col rounded border p-4 text-sm md:flex-row md:items-center">
 			<div class="flex flex-1 flex-col">
-				<p class="">Purchase Order : {item.stock.purchase_order}</p>
-				<p class="">Batch Number : {item.stock.batch_number}</p>
+				<p class="">Label : {item.stockItem.label}</p>
+				<p class="">Batch Number : {item.stockMaster.batch_number}</p>
 			</div>
 			<div class="flex flex-1 flex-col">
-				<p class="">Part Number : {item.material.part_number}</p>
-				<p class="">Part Description : {item.material.description}</p>
+				<p class="">Part Number : {item.materialMaster.part_number}</p>
+				<p class="">Part Description : {item.materialMaster.description}</p>
 			</div>
 			<div class="mt-2 flex items-center gap-2 md:justify-center">
-				<p class="p-4">Out : {item.quantity_out} {item.unit.code || ''}</p>
-				<Button
-					variant="outline"
-					size="icon"
-					onclick={() => {
-						if (item.quantity_return != 0) item.quantity_return--;
-					}}><Minus class="h-4 w-4" /></Button>
-				<Button class={item.quantity_out === item.quantity_return ? 'bg-lime-500 dark:bg-lime-800' : 'bg-red-500'}>
-					Return : {item.quantity_return}
-					<span class="w-4">
-						{item.unit.code || ''}
-					</span>
-				</Button>
-				<Button
-					variant="outline"
-					size="icon"
-					onclick={() => {
-						if (item.quantity_return < item.quantity_out) item.quantity_return++;
-					}}><Plus class="h-4 w-4" /></Button>
+				<p class="p-4">Size : {item.quantity_out} {item.materialUnit.code || ''}</p>
+				<label for={item.id} class="flex items-center gap-2">Material Return ? </label>
+				<Switch id={item.id} bind:checked={item.isReturn} />
+
+				<span class={`${item.isReturn ? 'bg-lime-500 dark:bg-lime-800' : 'bg-red-500 dark:bg-red-800'} flex h-8 w-14 items-center justify-center rounded-md font-semibold text-foreground `}>
+					{item.isReturn ? 'Yes' : 'No'}
+				</span>
 			</div>
 		</div>
 	{/each}

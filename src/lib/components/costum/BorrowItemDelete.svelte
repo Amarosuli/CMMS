@@ -1,11 +1,11 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 
+	import { removeBorrowedItem } from '$lib/remote-function/borrow.remote';
 	import { invalidateAll } from '$app/navigation';
 	import { LoaderCircle } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { toast } from 'svelte-sonner';
-	import { pb } from '$lib/pocketbaseClient';
 
 	import type { BorrowItem } from '$lib/CostumTypes';
 
@@ -22,34 +22,20 @@
 	async function deleteItem() {
 		isDeleting = true;
 
-		const { id, stock_id, quantity_out } = item;
-		const stock = await pb.collection('stock_master').getOne(stock_id);
-		if (stock.id) {
-			pb.collection('stock_master')
-				.update(stock_id, { quantity_borrowed: stock.quantity_borrowed - quantity_out })
-				.then(() => {
-					toast.success('Balancing quantity successfully!');
-				})
-				.catch((error) => {
-					toast.error(error.message);
-				});
+		const result = await removeBorrowedItem(item);
+
+		if (result.status === 'failed') {
+			toast.error(result.message);
+		} else {
+			toast.success('Delete item successfully!');
 		}
-		pb.collection('borrow_item')
-			.delete(id)
-			.then((val) => {
-				toast.success('Delete item successfully!');
-			})
-			.catch((error) => {
-				toast.error(error.message);
-			})
-			.finally(() => {
-				onState(true);
-				invalidateAll().then(() => {
-					onState(false);
-				});
-				isDeleting = false;
-				open = false;
-			});
+		isDeleting = false;
+		open = false;
+
+		onState(true);
+		invalidateAll().then(() => {
+			onState(false);
+		});
 	}
 </script>
 

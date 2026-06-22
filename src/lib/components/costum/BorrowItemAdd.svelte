@@ -21,7 +21,7 @@
 	interface Props {
 		open?: boolean;
 		borrowData: BorrowMovement;
-		stockIds: { stock_id: string }[];
+		stockIds: { stock_item_id: string }[];
 		onState: (e: boolean) => void;
 	}
 
@@ -139,7 +139,7 @@
 			<form class="flex w-full flex-col" method="post" onsubmit={(e) => e.preventDefault()}>
 				<div class="flex flex-col gap-2">
 					<Popover.Root bind:open={openStock}>
-						<Label class="mb-[0.15rem] mt-[0.2rem] py-[0.15rem]">Stock {selectedStock ? `- Available Qty : ${selectedStock} ${stockUnit}` : ''}</Label>
+						<Label class="mt-[0.2rem] mb-[0.15rem] py-[0.15rem]">Stock {selectedStock ? `- Available Qty : ${selectedStock} ${stockUnit}` : ''}</Label>
 						<Popover.Trigger id={triggerId} class={cn(buttonVariants({ variant: 'outline' }), 'justify-between truncate', !$formData.stock_id && 'text-muted-foreground')} role="combobox">
 							{stock.find((f) => f.value === $formData.stock_id)?.detail ?? 'Select Material'}
 							<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />

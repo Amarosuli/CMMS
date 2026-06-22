@@ -6,6 +6,7 @@ export { default as ConfirmDialog } from './ConfirmDialog.svelte';
 export { default as BorrowItemInput } from './BorrowItemInput.svelte';
 export { default as BorrowDataView } from './BorrowDataView.svelte';
 export { default as BorrowItemView } from './BorrowItemView.svelte';
+export { default as BorrowItemViewTemporary } from './BorrowItemViewTemporary.svelte';
 export { default as BorrowItemEdit } from './BorrowItemEdit.svelte';
 export { default as BorrowItemDelete } from './BorrowItemDelete.svelte';
 export { default as BorrowDataDelete } from './BorrowDataDelete.svelte';

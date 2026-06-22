@@ -5,7 +5,7 @@
 	import { LoaderCircle, ChevronLeft, CalendarPlus, ChevronsUpDown, Check } from '@lucide/svelte';
 	import { FieldErrors, Control, Field, Label } from '$lib/components/ui/form';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
-	import { GetStockOption } from '../movement.remote.js';
+	import { GetStockOption } from '$lib/remote-function/movement.remote';
 	import { superForm } from 'sveltekit-superforms';
 	import { Input } from '$lib/components/ui/input';
 	import { toast } from 'svelte-sonner';

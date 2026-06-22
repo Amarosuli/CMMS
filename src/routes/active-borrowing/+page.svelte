@@ -1,7 +1,7 @@
 <script lang="ts">
-	import * as Drawer from '$lib/components/ui/drawer';
-	import type { BorrowMovementStatus, StockMaster, User } from '$lib/CostumTypes.js';
+	import * as Sheet from '$lib/components/ui/sheet';
 	import type { BorrowMovementExtended } from './+page.server.js';
+	import type { StockMaster } from '$lib/CostumTypes.js';
 	import type { RecordModel } from 'pocketbase';
 	import { CalendarPlus, ChevronLeft, Eye, Pencil, LoaderCircle, SquareUser } from '@lucide/svelte';
 	import { goto, invalidateAll } from '$app/navigation';
@@ -25,18 +25,18 @@
 
 	let borrowedItems: RecordModel[] = $state([]);
 	let open: boolean = $state(false);
-	let isDrawerOpen: boolean = $state(false);
+	let isSheetOpen: boolean = $state(false);
 
-	async function getBorrowedItems(borrowId: string) {
-		let result = await pb.collection('borrow_item').getFullList({ filter: 'borrow_id="' + borrowId + '"', expand: 'stock_id.material_id.unit_id' });
+	async function getBorrowedItems(borrowMovementId: string) {
+		let result = await pb.collection('borrow_item').getFullList({ filter: 'borrow_movement_id="' + borrowMovementId + '"', expand: 'stock_item_id.stock_master_id.material_master_id.material_unit_id' });
 		borrowedItems = result.map((item) => {
-			return { ...item, stock: item.expand?.stock_id, material: item.expand?.stock_id.expand.material_id, unit: item.expand?.stock_id.expand?.material_id.expand?.unit_id.code };
+			return { ...item, stock: item.expand?.stock_item_id, material: item.expand?.stock_item_id.expand.stock_master_id.expand.material_master_id, unit: item.expand?.stock_item_id.expand?.stock_master_id.expand.material_master_id.expand?.material_unit_id.code };
 		});
-		isDrawerOpen = false;
+		isSheetOpen = false;
 	}
 
 	async function drawerOpenHandler(borrowId: string) {
-		isDrawerOpen = true;
+		isSheetOpen = true;
 		getBorrowedItems(borrowId);
 		open = !open;
 	}
@@ -141,40 +141,44 @@
 	});
 </script>
 
-<Drawer.Root bind:open>
-	<Drawer.Content class="flex w-full  sm:justify-start lg:justify-center">
-		<Drawer.Header>
-			<Drawer.Title>Borrowed Items</Drawer.Title>
-			<Drawer.Description>Please do crosscheck for each item return.</Drawer.Description>
-		</Drawer.Header>
-		<div class="h-ful w-full p-4 pb-6">
+<Sheet.Root bind:open>
+	<Sheet.Content side="right" class="sm:min-w-2/3 xl:min-w-3/5 2xl:min-w-2/5">
+		<Sheet.Header>
+			<Sheet.Title>Borrowed Items</Sheet.Title>
+			<Sheet.Description>Please do crosscheck for each item return.</Sheet.Description>
+		</Sheet.Header>
+		<div class="h-full w-full p-4 pb-6">
 			<ScrollArea class="h-96 max-h-96">
 				<div class="flex w-full flex-col gap-2">
-					{#if isDrawerOpen}
+					{#if isSheetOpen}
 						<div transition:fade class="absolute inset-0 flex w-full items-center justify-center gap-2 border-t bg-secondary/50 p-2 pt-4 text-xs md:flex-row md:items-center md:gap-3 lg:w-full">
 							<LoaderCircle class="h-4 w-4 animate-spin" />
 							<p>Loading...</p>
 						</div>
 					{:else}
 						{#each borrowedItems as item}
-							<div class="flex w-full flex-col border-t p-2 pt-4 text-xs md:flex-row md:items-center md:gap-3 lg:w-full">
-								<p class="w-full flex-1">Mat. Code : {item.material.code}</p>
-								<p class="w-full flex-1 truncate">Mat. Description : {item.material.description}</p>
-								<p class="w-full flex-1 max-sm:hidden">Batch : {item.stock.batch_number}</p>
-								<p class="w-full flex-1">Purchase Order : {item.stock.purchase_order}</p>
-								<p class="w-full max-w-32 truncate">Out Quantity : {item.quantity_out} {item.unit || 'EA'}</p>
-								<p class="mb-3 w-full max-w-32 truncate md:mb-0">Return Quantity : {item.quantity_return}</p>
+							<div class="flex items-center justify-between">
+								<div class="flex w-full flex-col border-t p-2 pt-4 text-xs lg:w-full">
+									<p class="w-full font-semibold">Label : <span class="text-primary">{item.expand?.stock_item_id.label}</span></p>
+									<p class="w-full">Code : {item.expand?.stock_item_id.expand.stock_master_id.expand.material_master_id.code}</p>
+									<p class="w-full">Part Number : {item.expand?.stock_item_id.expand.stock_master_id.expand.material_master_id.part_number}</p>
+									<p class="w-full truncate">Description : {item.expand?.stock_item_id.expand.stock_master_id.expand.material_master_id.description}</p>
+									<p class="w-full">Batch Number : {item.expand?.stock_item_id.expand.stock_master_id.batch_number}</p>
+									<p class="w-full">Purchase Order : {item.expand?.stock_item_id.expand.stock_master_id.purchase_order}</p>
+									<p class="w-full">Size : {item.quantity_out} {item.expand?.stock_item_id.expand.stock_master_id.expand.material_master_id.expand.material_unit_id.unit || 'EA'}</p>
+								</div>
+								<img class="size-28 max-md:hidden" src="https://picsum.photos/seed/picsum/400/400" alt="material_image" />
 							</div>
 						{/each}
 					{/if}
 				</div>
 			</ScrollArea>
 		</div>
-		<Drawer.Footer class="flex w-full items-center justify-center space-y-2">
-			<Drawer.Close>Close</Drawer.Close>
-		</Drawer.Footer>
-	</Drawer.Content>
-</Drawer.Root>
+		<Sheet.Footer>
+			<Sheet.Close>Close</Sheet.Close>
+		</Sheet.Footer>
+	</Sheet.Content>
+</Sheet.Root>
 
 <div>
 	<Button href="/" variant="outline" class="inline-flex items-center gap-2 text-sm/6">

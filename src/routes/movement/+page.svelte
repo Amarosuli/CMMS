@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CancelStockIn, CancelStockOut, getRecentStockIn, getRecentStockOut, type MovementData } from './movement.remote.js';
+	import { cancelStockIn, cancelStockOut, getRecentStockIn, getRecentStockOut, type MovementData } from '$lib/remote-function/movement.remote';
 	import { ChevronLeft, LoaderCircle } from '@lucide/svelte';
 	// import { getLocalTimeZone, today } from '@internationalized/date';
 	import { ConfirmDialog } from '$lib/components/costum';
@@ -69,11 +69,11 @@
 	bind:open
 	onConfirm={async () => {
 		if (movementType === 'IN') {
-			const res = await CancelStockIn(targetId);
+			const res = await cancelStockIn(targetId);
 			if (res.status === 'success') runGetRecentStockIn();
 			toast.info(res.message);
 		} else {
-			const res = await CancelStockOut(targetId);
+			const res = await cancelStockOut(targetId);
 			if (res.status === 'success') runGetRecentStockOut();
 			toast.info(res.message);
 		}

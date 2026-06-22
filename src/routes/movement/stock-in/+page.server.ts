@@ -1,5 +1,5 @@
 import { fail, message, superValidate } from 'sveltekit-superforms';
-import { GetMaterialMasterOption } from '../movement.remote.js';
+import { GetMaterialMasterOption } from '$lib/remote-function/movement.remote';
 import { getPackageNameOption } from '../../config/material-master/material-master.remote.js';
 import { customAlphabet } from 'nanoid';
 import { StockInSchema } from '$lib/valibotSchema.js';

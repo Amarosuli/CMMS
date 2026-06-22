@@ -1,12 +1,13 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
+	import { editBorrowMovement } from '$lib/remote-function/borrow.remote';
 	import { invalidateAll } from '$app/navigation';
 	import { LoaderCircle } from '@lucide/svelte';
+	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { toast } from 'svelte-sonner';
-	import { pb } from '$lib/pocketbaseClient';
 
 	import type { BorrowMovement } from '$lib/CostumTypes';
 
@@ -18,25 +19,29 @@
 	let { open = $bindable(false), borrowData }: Props = $props();
 
 	let isUpdating: boolean = $state(false);
-	let formData: BorrowMovement = $state({} as BorrowMovement);
+	let borrowMovement: BorrowMovement = $state({} as BorrowMovement);
 
-	formData.esn = borrowData?.esn;
-	formData.order_number = borrowData?.order_number;
-	formData.user_id = borrowData?.user_id;
-	formData.status = borrowData?.status;
+	onMount(() => {
+		borrowMovement = borrowData;
+	});
 
 	function updateBorrowData() {
 		isUpdating = true;
-		pb.collection('borrow_movement')
-			.update(borrowData.id, formData)
-			.then(() => {
-				toast.success('Update borrow data successfully!');
-				invalidateAll();
-				isUpdating = false;
-				open = false;
+		editBorrowMovement({ borrowMovementId: borrowData.id, borrowMovement })
+			.then((result) => {
+				if (result.status === 'success') {
+					toast.success(result.message);
+				} else {
+					toast.error(result.message);
+				}
 			})
 			.catch((error) => {
 				toast.error(error.message);
+			})
+			.finally(() => {
+				invalidateAll();
+				isUpdating = false;
+				open = false;
 			});
 	}
 </script>
@@ -51,22 +56,22 @@
 			<form class="mt-3 flex w-full max-w-80 flex-col text-base/6 sm:text-sm/6" method="post" onsubmit={(e) => e.preventDefault()}>
 				<div class="mb-2 flex flex-col gap-2">
 					<Label for="order_number">Order Number</Label>
-					<Input id="order_number" bind:value={formData.order_number} type="text" placeholder="Order Number" disabled={borrowData.borrowingId} />
+					<Input id="order_number" bind:value={borrowMovement.order_number} type="text" placeholder="Order Number" disabled={borrowData.borrowingId} />
 				</div>
 
 				<div class="mb-2 flex flex-col gap-2">
 					<Label for="esn">ESN</Label>
-					<Input id="esn" bind:value={formData.esn} type="text" placeholder="ESN" disabled={borrowData.borrowingId} />
+					<Input id="esn" bind:value={borrowMovement.esn} type="text" placeholder="ESN" disabled={borrowData.borrowingId} />
 				</div>
 
 				<div class="mb-2 hidden flex-col gap-2">
 					<Label for="status">Status</Label>
-					<Input id="status" bind:value={formData.status} type="text" placeholder="Status" />
+					<Input id="status" bind:value={borrowMovement.status} type="text" placeholder="Status" />
 				</div>
 
 				<div class="mb-2 hidden flex-col gap-2">
 					<Label for="user">User</Label>
-					<Input id="user" bind:value={formData.user_id} type="text" placeholder="User Id" />
+					<Input id="user" bind:value={borrowMovement.user_id} type="text" placeholder="User Id" />
 				</div>
 				<Button type="submit" class="mt-4" onclick={updateBorrowData}>
 					{#if isUpdating}

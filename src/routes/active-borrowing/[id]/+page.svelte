@@ -1,27 +1,96 @@
 <script lang="ts">
-	import { BorrowDataView, BorrowItemView, BorrowDataDelete, BorrowDataEdit, BorrowItemAdd } from '$lib/components/costum';
-	import { ChevronLeft, CalendarPlus, Plus, Pencil, Trash, LoaderCircle, Info } from '@lucide/svelte';
+	import { BorrowDataView, BorrowItemView, BorrowDataDelete, BorrowDataEdit, BorrowItemViewTemporary } from '$lib/components/costum';
+	import { ChevronLeft, Pencil, Trash, LoaderCircle, Info, ScanBarcode, Save } from '@lucide/svelte';
+	import { getStockItemByLabel, getStockItemById, addBorrowItem } from '$lib/remote-function/borrow.remote';
+	import { StockItemStatus } from '$lib/CostumTypes.js';
+	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
 	import { Button } from '$lib/components/ui/button';
-	import { clock } from '$lib/clock.svelte.js';
+	import { Label } from '$lib/components/ui/label';
+	import { Input } from '$lib/components/ui/input';
+	import { toast } from 'svelte-sonner';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 
 	let { data } = $props();
 
 	let isDeleteDataOpen: boolean = $state(false);
 	let isEditDataOpen: boolean = $state(false);
-	let isAddItemOpen: boolean = $state(false);
 	let isLoading: boolean = $state(false);
+	let stockLabel = $state('');
+	let isQuering = $state(false);
+	let items = $state([] as { label: string; stock_item_id: string; quantity_out: number }[]);
+	let stockIds: { stock_item_id: string }[] = $state([]);
 
-	function stateHandler(e: boolean) {
-		isLoading = e;
-	}
-
-	let stockIds: { stock_id: string }[] = $state([]);
 	$effect(() => {
 		stockIds = data.borrowItems.map((item) => {
-			return { stock_id: item.stock_id };
+			return { stock_item_id: item.stock_item_id };
 		});
 	});
+	async function addToTray(stockLabel: string) {
+		try {
+			isQuering = true;
+
+			let result = await getStockItemByLabel(stockLabel); // check availability in system
+
+			if (!result.data) {
+				toast.info('Item not found');
+				isQuering = false;
+				return;
+			}
+
+			if (result.data.status === StockItemStatus.DISPOSED) {
+				toast.info('Item already disposed.');
+				isQuering = false;
+				return;
+			}
+
+			const existingBorrowItem = data.borrowItems.find((item) => item.stock_item_id === result.data.id);
+			const existingItem = items.find((stock) => stock.label === result.data.label);
+
+			if (existingBorrowItem) {
+				toast.info('Item already in tray');
+				isQuering = false;
+				return;
+			}
+
+			if (result.data.isBorrowed) {
+				toast.info('Item already borrowed by other user');
+				isQuering = false;
+				return;
+			}
+
+			if (existingItem) {
+				toast.info('Item already in tray');
+				isQuering = false;
+				return;
+			} else {
+				toast.success('Item added');
+				items.push({ label: result.data.label, stock_item_id: result.data.id, quantity_out: result.data.size });
+			}
+		} catch (err) {
+			console.error(err);
+			toast.error('An unexpected error occurred');
+		} finally {
+			isQuering = false;
+		}
+	}
+	async function save() {
+		if (items.length === 0) return;
+		isLoading = true;
+
+		await addBorrowItem({ items, borrowMovementId: data.borrowData.id })
+			.then((result) => {
+				toast.success(result.message);
+			})
+			.catch((err) => {
+				console.error(err);
+				toast.error('An unexpected error occurred');
+			})
+			.finally(() => {
+				isLoading = false;
+				goto(page.url.searchParams.get('fromUrl') || '/');
+			});
+	}
 </script>
 
 <svelte:head>
@@ -51,7 +120,6 @@
 
 <BorrowDataDelete bind:open={isDeleteDataOpen} borrowItems={data.borrowItems} borrowData={data.borrowData} />
 <BorrowDataEdit bind:open={isEditDataOpen} borrowData={data.borrowData} />
-<BorrowItemAdd bind:open={isAddItemOpen} borrowData={data.borrowData} bind:stockIds onState={(e: boolean) => stateHandler(e)} />
 
 <div class="relative mt-12">
 	<h2 class="flex-1 text-base/7 font-semibold text-foreground sm:text-sm/6">Borrowing Data</h2>
@@ -74,13 +142,48 @@
 		{#each data.borrowItems as item}
 			<BorrowItemView {item} bind:stockIds />
 		{/each}
+		<h2 class="mt-6 text-base/7 font-semibold text-foreground sm:text-sm/6">New Items</h2>
+		<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
+		{#each items as item (item.stock_item_id)}
+			<div class="">
+				{#await getStockItemById(item.stock_item_id)}
+					<div class="flex gap-3">
+						<Skeleton class="h-9 w-75" />
+						<Skeleton class="h-9 w-32" />
+					</div>
+				{:then result}
+					{#if result.status === 'success'}
+						<BorrowItemViewTemporary stockItem={result.data} bind:items />
+					{/if}
+				{/await}
+			</div>
+		{/each}
 	</div>
-	<Button variant="outline" disabled={isLoading} class="mt-4 flex w-fit gap-2 bg-lime-400 hover:bg-lime-300 dark:bg-lime-600 dark:hover:bg-lime-500" onclick={() => (isAddItemOpen = !isAddItemOpen)}>
+
+	<div class="mt-6 mb-3 flex w-fit justify-start">
+		<Label for="label" class="w-full">Add New Item <ScanBarcode class="size-5" /></Label>
+		<Input
+			id="label"
+			name="label"
+			type="text"
+			placeholder="Input Label"
+			bind:value={stockLabel}
+			onkeypress={(e: KeyboardEvent) => {
+				if (e.key === 'Enter') {
+					addToTray(stockLabel);
+					stockLabel = '';
+				}
+			}} />
+		{#if isQuering}
+			<LoaderCircle class="h-4 w-4 animate-spin" />
+		{/if}
+	</div>
+	<Button variant="outline" disabled={items.length === 0} class="mt-4 flex w-fit cursor-pointer gap-2 bg-lime-400 hover:bg-lime-300 dark:bg-lime-600 dark:hover:bg-lime-500" onclick={save}>
 		{#if isLoading}
 			<LoaderCircle class="h-4 w-4 animate-spin" />
 		{:else}
-			<Plus class="h-4 w-4" />
+			<Save class="h-4 w-4" />
 		{/if}
-		Add Item
+		Save
 	</Button>
 </div>
