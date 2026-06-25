@@ -4,6 +4,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { time } from '$lib/helpers.js';
 	import { page } from '$app/state';
+	import AddBorrowItem from './AddBorrowItem.svelte';
 
 	let { data } = $props();
 
@@ -51,7 +52,7 @@
 
 <BorrowDataDelete bind:open={isDeleteDataOpen} borrowItems={data.borrowItems} borrowData={data.borrowData} />
 <BorrowDataEdit bind:open={isEditDataOpen} borrowData={data.borrowData} />
-<BorrowItemAdd bind:open={isAddItemOpen} borrowData={data.borrowData} bind:stockIds onState={(e: boolean) => stateHandler(e)} />
+<AddBorrowItem bind:open={isAddItemOpen} borrowData={data.borrowData} bind:stockIds onState={(e: boolean) => stateHandler(e)} />
 
 <div class="relative mt-12">
 	<h2 class="flex-1 text-base/7 font-semibold text-foreground sm:text-sm/6">Borrowing Data</h2>
