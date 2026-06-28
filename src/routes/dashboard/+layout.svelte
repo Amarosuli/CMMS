@@ -1,15 +1,13 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
 	import { LayoutDashboard, List, Plus } from '@lucide/svelte';
+	import { Button } from '$lib/components/ui/button';
 	import { page } from '$app/state';
 
 	interface Props {
-		data: any;
 		children?: import('svelte').Snippet;
 	}
 
-	let { data, children }: Props = $props();
-
+	let { children }: Props = $props();
 	let currentPath = $derived(page.url.pathname);
 </script>
 

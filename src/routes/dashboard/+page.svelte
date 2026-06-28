@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { CalendarPlus, LoaderCircle } from '@lucide/svelte';
-	import { getTotalBorrowedToday } from './dashboard.remote';
+	import { getTotalBorrowingToday } from '$lib/remote-function/dashboard.remote';
+	import { BorrowMovementStatus } from '$lib/CostumTypes';
 	import { clock } from '$lib/clock.svelte';
 	import { fade } from 'svelte/transition';
 
 	let isLoading = $state(false);
-
-	const totalClosedBorrowings = $derived(await getTotalBorrowedToday());
-	const totalOpenBorrowings = $derived(await getTotalBorrowedToday('OPEN'));
+	const totalBorrowingToday = $derived(await getTotalBorrowingToday());
 </script>
 
 <svelte:head>
@@ -37,10 +36,10 @@
 	<hr role="presentation" class="mt-4 w-full border-t border-foreground/10" />
 	<dl class="grid grid-cols-1 text-base/6 sm:grid-cols-[min(50%,--spacing(80))_auto] sm:text-sm/6">
 		<dt class="col-start-1 border-t border-foreground/5 pt-3 text-foreground/50 first:border-none sm:py-3">Total Borrowings (Today)</dt>
-		<dd class="pt-1 pb-3 text-foreground sm:border-t sm:border-foreground/5 sm:py-3 sm:nth-2:border-none">{totalOpenBorrowings}</dd>
+		<dd class="pt-1 pb-3 text-foreground sm:border-t sm:border-foreground/5 sm:py-3 sm:nth-2:border-none">{totalBorrowingToday.data.totalItems}</dd>
 		<dt class="col-start-1 border-t border-foreground/5 pt-3 text-foreground/50 first:border-none sm:py-3">Total Open Borrowings (Today)</dt>
-		<dd class="pt-1 pb-3 text-foreground sm:border-t sm:border-foreground/5 sm:py-3 sm:nth-2:border-none">{totalOpenBorrowings}</dd>
+		<dd class="pt-1 pb-3 text-foreground sm:border-t sm:border-foreground/5 sm:py-3 sm:nth-2:border-none">{totalBorrowingToday.data.items.filter((item) => item.status === BorrowMovementStatus.OPEN || item.status === BorrowMovementStatus.PENDING).length}</dd>
 		<dt class="col-start-1 border-t border-foreground/5 pt-3 text-foreground/50 first:border-none sm:py-3">Total Closed Borrowings (Today)</dt>
-		<dd class="pt-1 pb-3 text-foreground sm:border-t sm:border-foreground/5 sm:py-3 sm:nth-2:border-none">{totalClosedBorrowings}</dd>
+		<dd class="pt-1 pb-3 text-foreground sm:border-t sm:border-foreground/5 sm:py-3 sm:nth-2:border-none">{totalBorrowingToday.data.items.filter((item) => item.status === BorrowMovementStatus.CLOSED).length}</dd>
 	</dl>
 </div>
