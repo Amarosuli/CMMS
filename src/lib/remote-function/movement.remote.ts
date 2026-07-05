@@ -1,4 +1,3 @@
-import { StockItemStatus, StockMasterStatus } from '$lib/CostumTypes';
 import { getRequestEvent, query } from '$app/server';
 import { optional, string } from 'valibot';
 import { tryCatch } from '$lib/TryCatch';
@@ -129,80 +128,4 @@ export const GetStockOption = query(optional(string()), async (filter) => {
 			}
 		};
 	});
-});
-
-export const cancelStockIn = query(string(), async (stockInId) => {
-	const { locals } = getRequestEvent();
-
-	const stockMaster = await tryCatch(locals.pb.collection('stock_master').getFirstListItem(`stock_in_id="${stockInId}"`));
-
-	if (stockMaster.status === 'failed') {
-		const deleteStockIn = await tryCatch(locals.pb.collection('stock_in').delete(stockInId));
-		return { status: 'success', message: `No stock master found, ${deleteStockIn.status === 'success' ? 'Stock in deleted successfully' : 'Failed to delete stock in'}` };
-	}
-
-	const isAlreadyUsed = await tryCatch(locals.pb.collection('borrow_item').getFirstListItem(`stock_item_id.stock_master_id = "${stockMaster.data.id}"`));
-	const isAlreadyOut = await tryCatch(locals.pb.collection('stock_out').getFirstListItem(`stock_item_id.stock_master_id = "${stockMaster.data.id}"`));
-
-	if (isAlreadyUsed.data) {
-		return { status: 'failed', message: 'Cannot cancel stock in, stock exist in borrowing history. Refference id ' + isAlreadyUsed.data.borrow_movement_id };
-	}
-
-	if (isAlreadyOut.data) {
-		return { status: 'failed', message: 'Cannot cancel stock in, stock exist in stock out history. Refference id ' + isAlreadyOut.data.id };
-	}
-
-	const deleteStockIn = await tryCatch(locals.pb.collection('stock_in').delete(stockInId));
-	const deleteStockMaster = await tryCatch(locals.pb.collection('stock_master').delete(stockMaster.data.id));
-
-	if (deleteStockIn.status === 'failed' || deleteStockMaster.status === 'failed') {
-		return { status: 'failed', message: 'Failed to cancel stock in' };
-	}
-
-	return { status: 'success', message: 'Stock in cancelled successfully' };
-});
-
-export const cancelStockOut = query(string(), async (stockOutId) => {
-	const { locals } = getRequestEvent();
-
-	const stockOut = await tryCatch(locals.pb.collection('stock_out').getOne(stockOutId, { expand: 'stock_item_id.stock_master_id' }));
-
-	if (stockOut.status === 'failed') {
-		return { status: 'failed', message: 'Stock out not found.' };
-	}
-
-	// ambil stock_item_id, stock_master_id dan borrow_item_id dari stock out
-	const borrowId = stockOut.data.borrow_item_id;
-	const stockItemId = stockOut.data.stock_item_id;
-	const stockMasterId = stockOut.data.expand?.stock_item_id.expand.stock_master_id.id;
-	const stockMasterQtyAvailableBefore = stockOut.data.expand?.stock_item_id.expand.stock_master_id.quantity_available;
-
-	const batch = locals.pb.createBatch();
-
-	// update borrow_item.quantity_return = borrow_item.quantity_out
-	if (borrowId) {
-		batch.collection('borrow_item').update(borrowId, { quantity_return: stockOut.data.quantity });
-		// update stock_item to USED
-		batch.collection('stock_item').update(stockItemId, { status: StockItemStatus.USED });
-	} else {
-		// update stock_item to NEW
-		batch.collection('stock_item').update(stockItemId, { status: StockItemStatus.NEW });
-	}
-	// update stock master quantity_available = quantity_available + stock_item.size and status to ACTIVE
-	batch.collection('stock_master').update(stockMasterId, { quantity_available: stockMasterQtyAvailableBefore + stockOut.data.quantity, status: StockMasterStatus.ACTIVE });
-	// NOTE: TODO, which better delete or update stock out remark to 'Canceled'
-	// batch.collection('stock_out').update(stockOut.data.id, { remark: 'Cancelled' });
-
-	// delete stock out
-	batch.collection('stock_out').delete(stockOut.data.id);
-
-	const { status, data, error } = await tryCatch(batch.send());
-
-	if (error) {
-		// logger here
-		console.error(error);
-		return { status, message: 'Error after batch send', data };
-	} else {
-		return { status, message: 'Stock out cancelled successfully', data };
-	}
 });

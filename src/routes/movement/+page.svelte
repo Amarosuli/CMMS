@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { cancelStockIn, cancelStockOut, getRecentStockIn, getRecentStockOut, type MovementData } from '$lib/remote-function/movement.remote';
+	import { getRecentStockIn, getRecentStockOut, type MovementData } from '$lib/remote-function/movement.remote';
+	import { cancelStockOut, cancelStockIn } from '$lib/remote-function/stock.remote';
 	import { ChevronLeft, LoaderCircle } from '@lucide/svelte';
 	// import { getLocalTimeZone, today } from '@internationalized/date';
 	import { ConfirmDialog } from '$lib/components/costum';
@@ -103,15 +104,15 @@
 </div>
 
 <div class="mt-4 flex gap-4">
-	<Button variant="outline" class={movementType === 'OUT' ? 'bg-primary hover:bg-primary dark:bg-primary/50 dark:hover:bg-primary/70' : ''} onclick={runGetRecentStockOut}>Stock Out</Button>
-	<Button variant="outline" class={movementType === 'IN' ? 'bg-primary hover:bg-primary dark:bg-primary/50 dark:hover:bg-primary/70' : ''} onclick={runGetRecentStockIn}>Stock In</Button>
+	<Button variant="outline" class={`cursor-pointer ${movementType === 'OUT' ? 'bg-primary hover:bg-primary dark:bg-primary/50 dark:hover:bg-primary/70' : ''}`} onclick={runGetRecentStockOut}>Stock Out</Button>
+	<Button variant="outline" class={`cursor-pointer ${movementType === 'IN' ? 'bg-primary hover:bg-primary dark:bg-primary/50 dark:hover:bg-primary/70' : ''}`} onclick={runGetRecentStockIn}>Stock In</Button>
 </div>
 
 <div class="mt-12">
 	<ul role="list" class="">
 		<ol class="relative border-s border-primary/50">
 			{#each movementData as stockMovement (stockMovement.id)}
-				<li class="ms-4 mb-7" in:fade>
+				<li class="ms-4 mb-7">
 					<div class="absolute -inset-s-1.5 mt-1.5 h-3 w-3 rounded-full border border-primary bg-primary"></div>
 					<time class="mb-1 text-sm leading-none font-normal">{time(stockMovement.created)}</time>
 					<h3 class="text-md font-bold capitalize">Stock {movementType.toLowerCase()}</h3>

@@ -1,13 +1,12 @@
 import { fail, message, superValidate } from 'sveltekit-superforms';
 import { GetMaterialMasterOption } from '$lib/remote-function/movement.remote';
 import { getPackageNameOption } from '../../config/material-master/material-master.remote.js';
-import { customAlphabet } from 'nanoid';
+import { createStockIn } from '$lib/remote-function/stock.remote.js';
 import { StockInSchema } from '$lib/valibotSchema.js';
-import { tryCatch } from '$lib/TryCatch.js';
 import { redirect } from '@sveltejs/kit';
 import { valibot } from 'sveltekit-superforms/adapters';
 
-import { StockMasterStatus, type StockIn } from '$lib/CostumTypes.js';
+import { type StockIn } from '$lib/CostumTypes.js';
 
 export const load = async ({ locals }) => {
 	if (!locals.user) throw redirect(302, '/'); // Prevent guest users from accessing this page directly.
@@ -19,38 +18,16 @@ export const load = async ({ locals }) => {
 	};
 };
 export const actions = {
-	save: async ({ locals, request }) => {
+	save: async ({ request }) => {
 		const form = await superValidate(request, valibot(StockInSchema));
 
 		if (!form.valid) return fail(400, { form });
 
-		const batch_number = form.data.batch_number;
+		const { status, message: errorMessage, data } = await createStockIn(form.data);
 
-		const isBatchNumberExist = await tryCatch(locals.pb.collection('stock_master').getFirstListItem(`batch_number = "${batch_number}"`));
-
-		if (isBatchNumberExist.data) {
-			return fail(400, { form: { ...form, valid: false, errors: { batch_number: ['Batch Number already exists'] } } });
-		}
-
-		// generate id
-		const stockInId = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 15)();
-
-		const batch = locals.pb.createBatch();
-
-		batch.collection('stock_in').create({ ...form.data, id: stockInId });
-		batch.collection('stock_master').create({
-			...form.data,
-			status: StockMasterStatus.ACTIVE,
-			stock_in_id: stockInId,
-			quantity_available: form.data.quantity
-		});
-
-		const { data, error } = await tryCatch(batch.send());
-
-		if (error) {
+		if (status === 'failed') {
 			// logger error?.response?.data
-			const errorMessage = `${error?.message} | PocketBase error (Stock In)`;
-			return message(form, errorMessage, { status: 500 });
+			return message(form, `${errorMessage} | PocketBase error (Stock In)`, { status: 500 });
 		}
 
 		// NOTE: The process of creating stock item handled by PocketBase hook, so no need to create them here.
